@@ -273,10 +273,12 @@ class Environment:
 def deepseek_style_mutate(brain):
     nb = ImprovedCTRNN(brain.size)
     
-    # SPARSE WEIGHT MUTATION: Only change 5% of synapses to keep complex logic intact
-    mask = np.random.rand(*brain.weights.shape) < 0.05
+    # Occasionally do a "Heavy Mutation" to jump out of local minimums
+    mutation_rate = 0.2 if np.random.rand() < 0.05 else 0.05
+    mask = np.random.rand(*brain.weights.shape) < mutation_rate
+    
     nb.weights = np.clip(
-        brain.weights * 0.998 + np.random.normal(0, 0.1, brain.weights.shape) * mask,
+        brain.weights * 0.995 + np.random.normal(0, 0.15, brain.weights.shape) * mask,
         -3.0, 3.0
     )
     
@@ -407,19 +409,32 @@ def main():
             motor_to_use = getattr(brains[i], '_prev_motor', brains[i]._last_outputs[-2:])
             alive, _ = envs[i].update(motor_to_use, brain=brains[i])
             if not alive:
+                # 1. Calculate the score
                 score = (envs[i].ticks * 0.1) + (envs[i].food_count * 5000) - (envs[i].wall_contact_count * 100)
                 
-                # Check if this agent actually moved or just sat in a corner
-                if envs[i].food_count == 0 and envs[i].ticks > 200:
-                    score = 1 # Disqualify corner-campers who never found food
+                # Disqualify agents that didn't eat
+                if envs[i].food_count == 0:
+                    score = min(score, 10) 
                 
+                # 2. SUCCESS: New King found
                 if score > k_score:
                     k_score, k_gen, k_food = score, k_gen + 1, envs[i].food_count
                     k_max_health = min(500, k_max_health + 3)
                     brains[0] = brains[i]
                     cycles_this_run += 1
-                brains[i] = deepseek_style_mutate(brains[0])
-                envs[i]   = Environment(k_gen, k_max_health)
+                else:
+                    # 3. DECAY: If no one beats the king, lower the king's score 
+                    # by a tiny bit (0.01%) so a "Lucky Coward" doesn't block progress forever.
+                    k_score *= 0.9999
+                
+                # 4. DIVERSITY: 90% are mutations of the king, 10% are totally fresh random brains
+                # This prevents the "Family Tree" from getting stuck in a dead end.
+                if i < (NUM_AGENTS * 0.9):
+                    brains[i] = deepseek_style_mutate(brains[0])
+                else:
+                    brains[i] = ImprovedCTRNN(BRAIN_SIZE) # Fresh random immigrant
+                
+                envs[i] = Environment(k_gen, k_max_health)
 
         steps_total += 1
 
