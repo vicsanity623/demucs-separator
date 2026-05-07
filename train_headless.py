@@ -181,7 +181,13 @@ class Environment:
 
         if self.food_visible:
             dists_sq = [(f[0]-self.agent_pos[0])**2 + (f[1]-self.agent_pos[1])**2 for f in self.food_positions]
-            food_s, food_dist = norm_vec_dist(self.food_positions[np.argmin(dists_sq)])
+            # Find the nearest food
+            nearest_idx = np.argmin(dists_sq)
+            food_s, food_dist = norm_vec_dist(self.food_positions[nearest_idx])
+            # AMPLIFY signal: If food is very close, make the sensor input stronger than 1.0
+            if food_dist < 10:
+                food_s[0] *= 2.0
+                food_s[1] *= 2.0
         else:
             food_s, food_dist = [0.0, 0.0], 50.0
 
@@ -235,7 +241,7 @@ class Environment:
             dir_e = self.agent_pos - self.enemy_pos
             dist = np.sqrt(dir_e[0]**2 + dir_e[1]**2) + 0.01
             self.enemy_pos += (dir_e / dist) * 0.325
-        self.health -= (1.5 if hit_wall else 0.008)
+        # Increase hunger drain as Max HP grows (Force them to hunt)         base_drain = 0.02 + (self.max_health / 10000.0)          # Wall hits now drain 10% of total health (Huge deterrent)         wall_penalty = self.max_health * 0.10 if hit_wall else base_drain                  self.health -= wall_penalty
         ate_food = False
         for i in range(self.num_food):
             dist_sq = (self.agent_pos[0]-self.food_positions[i][0])**2 + (self.agent_pos[1]-self.food_positions[i][1])**2
@@ -410,7 +416,7 @@ def main():
             alive, _ = envs[i].update(motor_to_use, brain=brains[i])
             if not alive:
                 # 1. Calculate the score
-                score = (envs[i].ticks * 0.1) + (envs[i].food_count * 5000) - (envs[i].wall_contact_count * 100)
+                # 1. Calculate distance from center (25, 25)                 dist_from_center = np.sqrt((envs[i].agent_pos[0]-25)**2 + (envs[i].agent_pos[1]-25)**2)                 # 2. Add a 'Center Bonus' (Higher score if they stay away from walls)                 center_bonus = max(0, (25 - dist_from_center) * 2)                                  score = (envs[i].ticks * 0.1) + (envs[i].food_count * 8000) + center_bonus - (envs[i].wall_contact_count * 200)
                 
                 # Disqualify agents that didn't eat
                 if envs[i].food_count == 0:
