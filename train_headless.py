@@ -362,13 +362,14 @@ def save_and_export(council, gen, max_health):
     print(f"[+] Saved {SAVE_FILE} (Council Size: {len(council)})")
 
     # Export JSON of ONLY the absolute best agent for browser viewer
+    # FIX: Wrapped gen, best_food, and max_health in int() to strip numpy datatypes
     data = {
         "meta": {
             "score": int(best_score),
-            "generation": gen,
-            "food": best_food,
-            "max_health": max_health,
-            "brain_size": best_brain.size,
+            "generation": int(gen),
+            "food": int(best_food),
+            "max_health": int(max_health),
+            "brain_size": int(best_brain.size),
             "exported_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         },
         "weights": best_brain.weights.tolist(),
