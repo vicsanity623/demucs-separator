@@ -84,6 +84,7 @@ footer a{color:var(--accent);text-decoration:none}
     <div class="stat"><span class="stat-label">Brain Size</span><span class="stat-val" id="sBrainSz">—</span></div>
     <div class="stat"><span class="stat-label">Health</span><span class="stat-val" id="sHealth">—</span></div>
     <div class="stat"><span class="stat-label">Food Eaten</span><span class="stat-val" id="sEaten">—</span></div>
+    <div class="stat"><span class="stat-label">Births</span><span class="stat-val" id="sBirths">—</span></div>
     <div class="stat"><span class="stat-label">Senses</span><span class="stat-val" id="sSenses">—</span></div>
     <br/>
     <span class="badge loading" id="statusBadge">Loading…</span>
@@ -107,7 +108,7 @@ footer a{color:var(--accent);text-decoration:none}
 
 <footer>
   <a href="https://github.com/vicsanity623/brainSim" target="_blank">github.com/vicsanity623/brainSim</a>
-  &nbsp;·&nbsp; Evolved continuously on GitHub Actions &nbsp;·&nbsp; Async WebWorker + Fixed Timestep
+  &nbsp;·&nbsp; Evolved continuously on GitHub Actions &nbsp;·&nbsp; Self-Writing DNA (Mitosis) Enabled
 </footer>
 
 <script>
@@ -141,6 +142,15 @@ class CTRNN {
     this.adaptation = new Float64Array(this.size);
     this.ltmTrace = new Float64Array(data.ltm_trace);
     this.compMem = new Float64Array(data.compressed_memory);
+    this.voltHistory = [];
+    this.thinkingMode = 0;
+  }
+
+  // Clear short-term memory upon respawn
+  resetState() {
+    this.voltages.fill(0);
+    this.adaptation.fill(0);
+    this.compMem.fill(0);
     this.voltHistory = [];
     this.thinkingMode = 0;
   }
@@ -206,7 +216,11 @@ class CTRNN {
     this.voltHistory.push(Float64Array.from(this.voltages));
     if(this.voltHistory.length>ATTENTION_WIN) this.voltHistory.shift();
     
-    return [outputs[this.size-2], outputs[this.size-1]];
+    // Return Motor AND Spawn Trigger (Neuron -3)
+    return {
+      motor: [outputs[this.size-2], outputs[this.size-1]],
+      spawnTrigger: outputs[this.size-3]
+    };
   }
 }
 
@@ -217,8 +231,16 @@ self.onmessage = function(e) {
     self.postMessage({ type: 'ready' });
   } else if(e.data.type === 'tick') {
     if(!brain) return;
-    const motor = brain.tick(0.1, e.data.sensors, e.data.uncertainty);
-    self.postMessage({ type: 'out', motor: motor, thinkingMode: brain.thinkingMode });
+    const result = brain.tick(0.1, e.data.sensors, e.data.uncertainty);
+    self.postMessage({ 
+      type: 'out', 
+      motor: result.motor, 
+      spawnTrigger: result.spawnTrigger,
+      thinkingMode: brain.thinkingMode 
+    });
+  } else if(e.data.type === 'reset') {
+    // Wipe internal memory so it doesn't wake up seizing
+    if(brain) brain.resetState();
   }
 };
 `;
@@ -229,12 +251,15 @@ const worker = new Worker(URL.createObjectURL(blob));
 
 let workerReady = false;
 let currentMotor = [0.5, 0.5];
+let currentSpawnTrigger = 0;
 let currentThinkingMode = 0;
+let liveBabies = []; // For the visual mitosis effect
 
 worker.onmessage = (e) => {
   if(e.data.type === 'ready') workerReady = true;
   if(e.data.type === 'out') {
     currentMotor = e.data.motor;
+    currentSpawnTrigger = e.data.spawnTrigger;
     currentThinkingMode = e.data.thinkingMode;
   }
 };
@@ -249,6 +274,7 @@ class Env {
     this.poisonVels=Array.from({length:3},()=>[randS(.15),randS(.15)]);
     this.enemyPos=[2.5,2.5];
     this.health=maxHealth; this.foodCount=0; this.ticks=0;
+    this.births=0;
     this.wallContacts=0; this.foodVisible=true;
     this.predatorActive=(gen>=500);
     this.lastFoodTime=0;
@@ -285,7 +311,7 @@ class Env {
     return[foodS[0],foodS[1],poisS[0],poisS[1],wL,wR,wT,wB,hunger,osc,enemS[0],enemS[1],pain,fProx,pProx,centerS[0],centerS[1],cProx,eProx];
   }
 
-  update(motor){
+  update(motor, spawnTrigger){
     this.ticks++;
     let dx=(motor[0]-.5)*1.4, dy=(motor[1]-.5)*1.4;
     let nx=this.agentPos[0]+dx, ny=this.agentPos[1]+dy;
@@ -312,9 +338,17 @@ class Env {
     const wallPenalty = hitWall ? (this.maxHealth * 0.10) : baseDrain;
     this.health -= wallPenalty;
 
+    // --- MITOSIS (Self-Writing Child Spawning) ---
+    let spawnedChild = false;
+    if (spawnTrigger > 0.85 && this.health > 90.0) {
+      this.health -= 50.0; // The biological cost of childbirth
+      this.births++;
+      spawnedChild = true;
+    }
+
     this.foodPos.forEach(([fx,fy],i)=>{
       if((fx-this.agentPos[0])**2+(fy-this.agentPos[1])**2<6.25){
-        this.health=Math.min(100,this.health+45); this.foodCount++; this.lastFoodTime=this.ticks;
+        this.health=Math.min(this.maxHealth, this.health+45); this.foodCount++; this.lastFoodTime=this.ticks;
         this.foodPos[i]=[rand(7.5,42.5),rand(7.5,42.5)];
       }
     });
@@ -329,7 +363,7 @@ class Env {
     });
 
     const predDead=this.predatorActive&&(this.enemyPos[0]-this.agentPos[0])**2+(this.enemyPos[1]-this.agentPos[1])**2<4;
-    return this.health>0&&!predDead;
+    return { alive: this.health > 0 && !predDead, spawned: spawnedChild };
   }
 }
 
@@ -373,6 +407,11 @@ function resetEnv(){
   simTick=0;
   window._smoothM = [0.5, 0.5];
   currentMotor = [0.5, 0.5];
+  currentSpawnTrigger = 0;
+  liveBabies = []; // Clear old children
+  
+  // Tell the worker to wipe the brain's electrical state
+  worker.postMessage({ type: 'reset' });
 }
 
 // Auto-refresh brain every 60s
@@ -456,8 +495,14 @@ function stepSimulation() {
     0.7 * window._smoothM[1] + 0.3 * currentMotor[1]
   ];
   
-  const alive = env.update(window._smoothM);
-  if(!alive) resetEnv();
+  const result = env.update(window._smoothM, currentSpawnTrigger);
+  
+  // Handle Mitosis Visualization
+  if(result.spawned) {
+      liveBabies.push({ x: env.agentPos[0] + rand(-1, 1), y: env.agentPos[1] + rand(-1, 1), life: 1.0 });
+  }
+
+  if(!result.alive) resetEnv();
   simTick++;
 }
 
@@ -476,6 +521,18 @@ function renderWorld() {
   const[ax,ay]=env.agentPos;
   if(ax<=2||ax>=48||ay<=2||ay>=48){
     ctx.fillStyle='rgba(255,0,0,0.06)';ctx.fillRect(0,0,W,H);
+  }
+
+  // Render Mitosis Children (Fading ghosts)
+  for(let i = liveBabies.length - 1; i >= 0; i--) {
+      let b = liveBabies[i];
+      b.life -= 0.003; // Fade out slowly
+      if (b.life <= 0) { liveBabies.splice(i, 1); continue; }
+      const [bx, by] = toP(b.x, b.y, W, H);
+      ctx.fillStyle = `rgba(0, 229, 255, ${b.life * 0.7})`;
+      ctx.beginPath(); ctx.arc(bx, by, 5, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = `rgba(0, 229, 255, ${b.life})`;
+      ctx.beginPath(); ctx.arc(bx, by, 8, 0, Math.PI*2); ctx.stroke();
   }
 
   // Food
@@ -534,6 +591,7 @@ function renderWorld() {
   const hp=env.health, maxHp=env.maxHealth, pct=Math.max(0,hp/maxHp);
   document.getElementById('sHealth').textContent=Math.max(0,Math.floor(hp))+'/'+maxHp;
   document.getElementById('sEaten').textContent=env.foodCount;
+  document.getElementById('sBirths').textContent=env.births;
   document.getElementById('sSenses').textContent=env.foodVisible?'Active':'Blind';
   document.getElementById('cTick').textContent=simTick.toLocaleString();
   document.getElementById('cMode').textContent=currentThinkingMode?'Slow':'Fast';
