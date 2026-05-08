@@ -41,6 +41,14 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 1. Fetch the absolute latest state of the repo
+          git fetch origin main
+          
+          # 2. Reset the bot's "Head" to the newest commit (bypasses all merge conflicts)
+          git reset origin/main
+          
+          # 3. Add ONLY the newly generated brain files
           git add evolved_core_brain.pkl brain.json
           
           if git diff --staged --quiet; then
@@ -48,7 +56,8 @@ jobs:
           else
             GEN=$(python -c "import json; d=json.load(open('brain.json')); print(d['meta']['generation'])")
             SCORE=$(python -c "import json; d=json.load(open('brain.json')); print(d['meta']['score'])")
+            
+            # 4. Commit and Force Push cleanly
             git commit -m "🧠 gen=${GEN} score=${SCORE} [$(date -u '+%Y-%m-%d %H:%M UTC')]"
-            git pull --rebase origin main
-            git push
+            git push origin main
           fi
