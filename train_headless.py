@@ -239,9 +239,21 @@ class Environment:
             self.agent_pos = np.array([25.0, 25.0])
         if self.predator_active:
             dir_e = self.agent_pos - self.enemy_pos
-            dist = np.sqrt(dir_e[0]**2 + dir_e[1]**2) + 0.01
+            dist = np.sqrt(dir_e[0]**2 + dy_e[0]**2) + 0.01 # Fixed typo
             self.enemy_pos += (dir_e / dist) * 0.325
-        # Increase hunger drain as Max HP grows (Force them to hunt)         base_drain = 0.02 + (self.max_health / 10000.0)          # Wall hits now drain 10% of total health (Huge deterrent)         wall_penalty = self.max_health * 0.10 if hit_wall else base_drain                  self.health -= wall_penalty
+
+        # 1. Calculate how much health they lose just by being alive
+        base_drain = 0.02 + (self.max_health / 10000.0) 
+        
+        # 2. Wall hits now drain 10% of total health (Huge deterrent)
+        if hit_wall:
+            wall_penalty = self.max_health * 0.10
+        else:
+            wall_penalty = base_drain
+            
+        # 3. Apply the health reduction
+        self.health -= wall_penalty
+
         ate_food = False
         for i in range(self.num_food):
             dist_sq = (self.agent_pos[0]-self.food_positions[i][0])**2 + (self.agent_pos[1]-self.food_positions[i][1])**2
@@ -404,41 +416,46 @@ def main():
         # Reset planning budget each step
         _plan_budget[0] = MAX_PLANNERS_PER_TICK
 
-        # Batch weight matmul across all agents
+        # 1. High-speed Batch Math (Calculates all 100 brains at once on the CPU)
         all_w = np.array([b.weights for b in brains])
         all_o = np.array([b._last_outputs for b in brains])
         all_net_in = np.matmul(all_w, all_o[..., np.newaxis]).squeeze(-1)
-        for i in range(NUM_AGENTS):
-            brains[i]._batched_net_in = all_net_in[i]
 
+        # 2. Combined Agent Loop (Logic and Physics)
         for i in range(NUM_AGENTS):
+            # Pass the batch math result to this specific brain
+            brains[i]._batched_net_in = all_net_in[i]
+            
+            # Use smoothed motor for movement
             motor_to_use = getattr(brains[i], '_prev_motor', brains[i]._last_outputs[-2:])
             alive, _ = envs[i].update(motor_to_use, brain=brains[i])
+            
             if not alive:
-                # 1. Calculate the score
-                # 1. Calculate distance from center (25, 25)                 dist_from_center = np.sqrt((envs[i].agent_pos[0]-25)**2 + (envs[i].agent_pos[1]-25)**2)                 # 2. Add a 'Center Bonus' (Higher score if they stay away from walls)                 center_bonus = max(0, (25 - dist_from_center) * 2)                                  score = (envs[i].ticks * 0.1) + (envs[i].food_count * 8000) + center_bonus - (envs[i].wall_contact_count * 200)
+                # --- Scoring Logic ---
+                dx_c = envs[i].agent_pos[0] - 25.0
+                dy_c = envs[i].agent_pos[1] - 25.0
+                dist_from_center = np.sqrt(dx_c**2 + dy_c**2)
+                center_bonus = max(0, (25.0 - dist_from_center) * 2.0)
                 
-                # Disqualify agents that didn't eat
+                score = (envs[i].ticks * 0.1) + (envs[i].food_count * 8000) + center_bonus - (envs[i].wall_contact_count * 200)
+                
                 if envs[i].food_count == 0:
                     score = min(score, 10) 
                 
-                # 2. SUCCESS: New King found
+                # --- Success or Decay ---
                 if score > k_score:
                     k_score, k_gen, k_food = score, k_gen + 1, envs[i].food_count
                     k_max_health = min(500, k_max_health + 3)
                     brains[0] = brains[i]
                     cycles_this_run += 1
                 else:
-                    # 3. DECAY: If no one beats the king, lower the king's score 
-                    # by a tiny bit (0.01%) so a "Lucky Coward" doesn't block progress forever.
                     k_score *= 0.9999
                 
-                # 4. DIVERSITY: 90% are mutations of the king, 10% are totally fresh random brains
-                # This prevents the "Family Tree" from getting stuck in a dead end.
+                # --- Respawn / Diversity ---
                 if i < (NUM_AGENTS * 0.9):
                     brains[i] = deepseek_style_mutate(brains[0])
                 else:
-                    brains[i] = ImprovedCTRNN(BRAIN_SIZE) # Fresh random immigrant
+                    brains[i] = ImprovedCTRNN(BRAIN_SIZE) 
                 
                 envs[i] = Environment(k_gen, k_max_health)
 
