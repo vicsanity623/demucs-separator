@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>BrainSim — Live Evolved Agent</title>
-<meta name="description" content="Live visualization of an evolutionarily trained CTRNN neural network agent navigating a 2D world."/>
+<title>BrainSim — Open World Ecosystem</title>
+<meta name="description" content="Live visualization of an evolutionary ecosystem."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
 <style>
@@ -15,7 +15,6 @@
   --text:#e2e8f0;--muted:#64748b;
 }
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
-/* animated bg */
 body::before{content:'';position:fixed;inset:0;
   background:radial-gradient(ellipse 80% 60% at 20% 20%,rgba(0,229,255,0.06) 0%,transparent 60%),
              radial-gradient(ellipse 60% 80% at 80% 80%,rgba(192,132,252,0.06) 0%,transparent 60%);
@@ -30,7 +29,6 @@ header p{color:var(--muted);font-size:.85rem;margin-top:4px}
 .main{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:16px;
   padding:0 16px 24px;max-width:1100px;margin:0 auto;align-items:flex-start}
 
-/* stat panel */
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;
   padding:16px;backdrop-filter:blur(12px);flex:0 0 220px}
 .panel h2{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
@@ -43,16 +41,13 @@ header p{color:var(--muted);font-size:.85rem;margin-top:4px}
 .badge.live{background:rgba(0,255,136,.15);color:var(--green);border:1px solid rgba(0,255,136,.3)}
 .badge.loading{background:rgba(255,179,0,.15);color:var(--amber);border:1px solid rgba(255,179,0,.3)}
 
-/* canvas wrapper */
 .canvas-wrap{flex:1;min-width:300px}
 #world{display:block;width:100%;border-radius:14px;border:1px solid var(--border);
   background:#080810;image-rendering:pixelated}
 
-/* health bar */
 .hbar-wrap{margin-top:10px;background:rgba(255,255,255,.06);border-radius:6px;height:8px;overflow:hidden}
 .hbar{height:100%;border-radius:6px;transition:width .3s,background .3s}
 
-/* bottom row */
 .info-row{position:relative;z-index:1;display:flex;flex-wrap:wrap;gap:10px;
   padding:0 16px 32px;max-width:1100px;margin:0 auto}
 .chip{background:var(--surface);border:1px solid var(--border);border-radius:8px;
@@ -70,21 +65,21 @@ footer a{color:var(--accent);text-decoration:none}
 </head>
 <body>
 <header>
-  <h1>🧠 BRAINSIM — LIVE EVOLVED AGENT</h1>
-  <p>Continuous CTRNN neural network, evolved via GitHub Actions · Auto-refreshes every 60 s</p>
+  <h1>🧠 BRAINSIM — OPEN WORLD ECOSYSTEM</h1>
+  <p>Continuous CTRNN neural network with In-Life Reproduction · Auto-refreshes every 60 s</p>
 </header>
 
 <div class="main">
   <div class="panel">
-    <h2>Brain Stats</h2>
+    <h2>Ecosystem Stats</h2>
     <div class="stat"><span class="stat-label">Generation</span><span class="stat-val" id="sGen">—</span></div>
     <div class="stat"><span class="stat-label">Best Score</span><span class="stat-val" id="sScore">—</span></div>
     <div class="stat"><span class="stat-label">Top Food</span><span class="stat-val" id="sFood">—</span></div>
+    <div class="stat"><span class="stat-label">Top Kids</span><span class="stat-val" id="sKids">—</span></div>
     <div class="stat"><span class="stat-label">Max HP</span><span class="stat-val" id="sHP">—</span></div>
-    <div class="stat"><span class="stat-label">Brain Size</span><span class="stat-val" id="sBrainSz">—</span></div>
-    <div class="stat"><span class="stat-label">Health</span><span class="stat-val" id="sHealth">—</span></div>
-    <div class="stat"><span class="stat-label">Food Eaten</span><span class="stat-val" id="sEaten">—</span></div>
-    <div class="stat"><span class="stat-label">Senses</span><span class="stat-val" id="sSenses">—</span></div>
+    <div class="stat"><span class="stat-label">Population</span><span class="stat-val" id="sPop">—</span></div>
+    <div class="stat"><span class="stat-label">Global Food</span><span class="stat-val" id="sEaten">—</span></div>
+    <div class="stat"><span class="stat-label">World Size</span><span class="stat-val" id="sWorldSz">—</span></div>
     <br/>
     <span class="badge loading" id="statusBadge">Loading…</span>
     <br/><br/>
@@ -93,37 +88,36 @@ footer a{color:var(--accent);text-decoration:none}
 
   <div class="canvas-wrap">
     <canvas id="world" width="600" height="600"></canvas>
-    <div class="hbar-wrap"><div class="hbar" id="hbar" style="width:100%;background:var(--green)"></div></div>
+    <div class="hbar-wrap" title="Average Population Health"><div class="hbar" id="hbar" style="width:100%;background:var(--green)"></div></div>
   </div>
 </div>
 
 <div class="info-row">
   <div class="chip">Tick <span id="cTick">0</span></div>
   <div class="chip">FPS <span id="cFps">—</span></div>
-  <div class="chip">Mode <span id="cMode">Fast</span></div>
   <div class="chip">Predator <span id="cPred">—</span></div>
-  <button id="resetBtn">↺ Reset Agent</button>
+  <button id="resetBtn">↺ Cataclysm (Reset)</button>
 </div>
 
 <footer>
   <a href="https://github.com/vicsanity623/brainSim" target="_blank">github.com/vicsanity623/brainSim</a>
-  &nbsp;·&nbsp; Evolved continuously on GitHub Actions &nbsp;·&nbsp; Async WebWorker + Fixed Timestep
+  &nbsp;·&nbsp; Async WebWorker Array + Fixed Timestep
 </footer>
 
 <script>
-// ─── Constants (must match Python) ───────────────────────────────────────────
+// ─── Constants ───────────────────────────────────────────────────────────────
 const BRAIN_SIZE      = 256;
 const MEMORY_SIZE     = 64;
 const ATTENTION_WIN   = 32;
 const BRAIN_TICK_EVERY= 2;
-const WORLD_SIZE      = 50;
 const PHYSICS_HZ      = 60;
 const TIME_STEP       = 1000 / PHYSICS_HZ;
+let WORLD_SIZE        = 250; // Dynamic based on json
 
 function rand(a,b){return a+Math.random()*(b-a)}
 function randS(m){return (Math.random()-.5)*2*m}
 
-// ─── Web Worker Code (Stringified to run in background thread) ──────────────
+// ─── Web Worker Code (Handles infinite array of brains) ─────────────────────
 const workerCode = `
 const BRAIN_SIZE = ${BRAIN_SIZE};
 const MEMORY_SIZE = ${MEMORY_SIZE};
@@ -139,19 +133,31 @@ class CTRNN {
     this.attnW = data.attention_weights;
     this.voltages = new Float64Array(this.size);
     this.adaptation = new Float64Array(this.size);
-    this.ltmTrace = new Float64Array(data.ltm_trace);
-    this.compMem = new Float64Array(data.compressed_memory);
+    this.ltmTrace = new Float64Array(data.ltm_trace || this.size);
+    this.compMem = new Float64Array(data.compressed_memory || MEMORY_SIZE);
     this.voltHistory = [];
     this.thinkingMode = 0;
   }
 
-  // WIPE THE BRAIN'S RECURRENT MEMORY SO IT DOESN'T GHOST-STATE AFTER DEATH
-  resetState() {
-    this.voltages.fill(0);
-    this.adaptation.fill(0);
-    this.compMem.fill(0);
-    this.voltHistory = [];
-    this.thinkingMode = 0;
+  // Mutation function for in-life reproduction
+  cloneAndMutate() {
+    let w = [];
+    for(let r=0; r<this.size; r++) {
+      let row = [];
+      for(let c=0; c<this.size; c++) row.push(this.weights[r][c] + (Math.random()-0.5)*0.05);
+      w.push(row);
+    }
+    let b = [];
+    for(let i=0; i<this.size; i++) b.push(this.biases[i] + (Math.random()-0.5)*0.05);
+    
+    return new CTRNN({
+      size: this.size,
+      weights: w,
+      biases: b,
+      time_constants: this.tauArr.slice(),
+      compress_weights: this.compressW.map(r => r.slice()),
+      attention_weights: this.attnW.map(r => r.slice())
+    });
   }
 
   sigmoid(x){ return 1/(1+Math.exp(-Math.max(-50,Math.min(50,x)))) }
@@ -162,7 +168,6 @@ class CTRNN {
     for(let n=0;n<this.size;n++){
       const v = Math.max(-50,Math.min(50, this.voltages[n]-this.adaptation[n]*1.5));
       if(this.thinkingMode === 1) {
-        // Sparse Attention implementation for Worker
         let attnSum = v;
         if(this.voltHistory.length > 1) {
           let score = 0;
@@ -205,7 +210,7 @@ class CTRNN {
 
     for(let n=0;n<this.size;n++){
       let total = netIn[n]+this.biases[n];
-      if(n<MEMORY_SIZE) total += compressed[n] * 50.0; // Sensor Gain match Python
+      if(n<MEMORY_SIZE) total += compressed[n] * 50.0;
       if(n<19)          total += sensors[n] * 50.0;
       const deriv = (-this.voltages[n]+total)/this.tauArr[n];
       this.voltages[n] = Math.max(-100,Math.min(100, this.voltages[n]+deriv*dt));
@@ -219,140 +224,190 @@ class CTRNN {
   }
 }
 
-let brain = null;
+let brains = [];
 self.onmessage = function(e) {
   if(e.data.type === 'init') {
-    brain = new CTRNN(e.data.brainData);
+    brains = [new CTRNN(e.data.brainData)];
     self.postMessage({ type: 'ready' });
-  } else if(e.data.type === 'tick') {
-    if(!brain) return;
-    const motor = brain.tick(0.1, e.data.sensors, e.data.uncertainty);
-    self.postMessage({ type: 'out', motor: motor, thinkingMode: brain.thinkingMode });
-  } else if(e.data.type === 'reset') {
-    if(brain) brain.resetState();
+  } else if (e.data.type === 'spawn') {
+    let parent = brains[e.data.parentId];
+    brains.push(parent.cloneAndMutate());
+  } else if (e.data.type === 'kill') {
+    brains[e.data.id] = null; // Free memory
+  } else if (e.data.type === 'tick') {
+    let outMotors = [];
+    let outModes = [];
+    for(let i=0; i<brains.length; i++) {
+      if(!brains[i] || e.data.agents[i].dead) {
+        outMotors.push([0.5,0.5]); outModes.push(0);
+        continue;
+      }
+      let m = brains[i].tick(0.1, e.data.agents[i].sensors, e.data.agents[i].unc);
+      outMotors.push(m);
+      outModes.push(brains[i].thinkingMode);
+    }
+    self.postMessage({ type: 'out', motors: outMotors, modes: outModes });
   }
 };
 `;
 
-// Initialize Web Worker
 const blob = new Blob([workerCode], {type: 'application/javascript'});
 const worker = new Worker(URL.createObjectURL(blob));
-
 let workerReady = false;
-let currentMotor = [0.5, 0.5];
-let currentThinkingMode = 0;
+
+// ─── Environment (The Village) ───────────────────────────────────────────────
+class Village {
+  constructor(gen, maxHealth){
+    this.gen=gen; this.maxHealth=maxHealth;
+    this.foodPos=Array.from({length:40},()=>[rand(10,WORLD_SIZE-10),rand(10,WORLD_SIZE-10)]);
+    this.poisonPos=Array.from({length:10},()=>[rand(10,WORLD_SIZE-10),rand(10,WORLD_SIZE-10)]);
+    this.poisonVels=Array.from({length:10},()=>[randS(.15),randS(.15)]);
+    this.enemyPos=[20,20];
+    this.globalFoodEaten = 0;
+    this.ticks=0;
+    this.predatorActive=(gen>=500);
+    
+    // Array of active agents
+    this.agents = [{
+      id: 0,
+      pos: [WORLD_SIZE/2, WORLD_SIZE/2],
+      health: maxHealth,
+      wallHits: 0,
+      lastFoodTime: 0,
+      smoothM: [0.5, 0.5],
+      mode: 0,
+      dead: false
+    }];
+  }
+
+  getSensorsFor(a){
+    const foodVisible=(this.ticks%300)<240;
+    const nd=(t)=>{const dx=t[0]-a.pos[0],dy=t[1]-a.pos[1],d=Math.sqrt(dx*dx+dy*dy)+.001;return[[dx/d,dy/d],d]};
+    let foodS,foodD;
+    
+    if(foodVisible){
+      let best=Infinity,bi=0;
+      this.foodPos.forEach(([fx,fy],i)=>{const d=(fx-a.pos[0])**2+(fy-a.pos[1])**2;if(d<best){best=d;bi=i}});
+      [foodS,foodD]=nd(this.foodPos[bi]);
+      if (foodD < 25) { foodS[0]*=2; foodS[1]*=2; }
+    } else { foodS=[0,0]; foodD=WORLD_SIZE; }
+
+    let pBest=Infinity,pi2=0;
+    this.poisonPos.forEach(([px,py],i)=>{const d=(px-a.pos[0])**2+(py-a.pos[1])**2;if(d<pBest){pBest=d;pi2=i}});
+    const[poisS,poisD]=nd(this.poisonPos[pi2]);
+    const[centerS,centerD]=nd([WORLD_SIZE/2,WORLD_SIZE/2]);
+    
+    const fProx=Math.max(0,1-foodD/WORLD_SIZE), pProx=Math.max(0,1-poisD/WORLD_SIZE), cProx=Math.max(0,1-centerD/WORLD_SIZE);
+    const[ax,ay]=a.pos;
+    const wL=Math.max(0,(50-ax)/50), wR=Math.max(0,(ax-(WORLD_SIZE-50))/50);
+    const wT=Math.max(0,(50-ay)/50), wB=Math.max(0,(ay-(WORLD_SIZE-50))/50);
+    const pain=(ax<=1||ax>=WORLD_SIZE-1||ay<=1||ay>=WORLD_SIZE-1)?1:0;
+    const hunger=(100-a.health)/100;
+    const osc=Math.sin(this.ticks*.2);
+    let enemS=[0,0],eProx=0;
+    
+    if(this.predatorActive){const[es,ed]=nd(this.enemyPos);enemS=es;eProx=Math.max(0,1-ed/WORLD_SIZE)}
+    return[foodS[0],foodS[1],poisS[0],poisS[1],wL,wR,wT,wB,hunger,osc,enemS[0],enemS[1],pain,fProx,pProx,centerS[0],centerS[1],cProx,eProx];
+  }
+
+  updatePhysics(motors, modes){
+    this.ticks++;
+    let anyAlive = false;
+
+    // Predator Logic (Targets closest alive agent within radius)
+    if(this.predatorActive){
+        let closest = Infinity, target = null;
+        for(let a of this.agents) {
+            if(a.dead) continue;
+            let d = (a.pos[0]-this.enemyPos[0])**2 + (a.pos[1]-this.enemyPos[1])**2;
+            if(d < closest) { closest = d; target = a; }
+        }
+        if(target && Math.sqrt(closest) < 80.0) {
+            const dx = target.pos[0]-this.enemyPos[0], dy = target.pos[1]-this.enemyPos[1];
+            const d = Math.sqrt(dx*dx+dy*dy)+.01;
+            this.enemyPos[0] += (dx/d)*1.8; this.enemyPos[1] += (dy/d)*1.8;
+        } else {
+            this.enemyPos[0] += randS(1); this.enemyPos[1] += randS(1);
+        }
+        this.enemyPos = [Math.max(5,Math.min(WORLD_SIZE-5,this.enemyPos[0])), Math.max(5,Math.min(WORLD_SIZE-5,this.enemyPos[1]))];
+    }
+
+    // Poison Movement
+    this.poisonPos.forEach(([px,py],i)=>{
+      this.poisonPos[i][0]+=this.poisonVels[i][0]; this.poisonPos[i][1]+=this.poisonVels[i][1];
+      if(this.poisonPos[i][0]<0||this.poisonPos[i][0]>WORLD_SIZE) this.poisonVels[i][0]*=-1;
+      if(this.poisonPos[i][1]<0||this.poisonPos[i][1]>WORLD_SIZE) this.poisonVels[i][1]*=-1;
+    });
+
+    for(let i=0; i<this.agents.length; i++) {
+        let a = this.agents[i];
+        if(a.dead) continue;
+        anyAlive = true;
+        
+        a.smoothM = [ 0.7*a.smoothM[0] + 0.3*motors[i][0], 0.7*a.smoothM[1] + 0.3*motors[i][1] ];
+        a.mode = modes[i];
+        
+        let dx=(a.smoothM[0]-.5)*3.0, dy=(a.smoothM[1]-.5)*3.0;
+        let nx=a.pos[0]+dx, ny=a.pos[1]+dy;
+        
+        const hitWall=(nx<=1||nx>=WORLD_SIZE-1||ny<=1||ny>=WORLD_SIZE-1);
+        if(hitWall){
+          a.wallHits++; dx *= -0.5; dy *= -0.5; a.health -= 2.0;
+        }
+        a.pos = [ Math.max(1.0,Math.min(WORLD_SIZE-1.0, a.pos[0]+dx)), Math.max(1.0,Math.min(WORLD_SIZE-1.0, a.pos[1]+dy)) ];
+        
+        const baseDrain = 0.02 + (this.maxHealth / 10000.0);
+        a.health -= baseDrain;
+
+        // In-Life Reproduction (Survive 1800 ticks)
+        if(a.ticks > 0 && a.ticks % 1800 === 0) {
+            a.health = Math.min(this.maxHealth, a.health + 100);
+            worker.postMessage({ type: 'spawn', parentId: i });
+            this.agents.push({
+                id: this.agents.length,
+                pos: [a.pos[0]+randS(10), a.pos[1]+randS(10)],
+                health: this.maxHealth,
+                wallHits: 0, lastFoodTime: this.ticks, smoothM: [0.5,0.5], mode: 0, dead: false, ticks: 0
+            });
+        }
+        a.ticks++;
+
+        // Food & Poison Collisions
+        this.foodPos.forEach(([fx,fy],fi)=>{
+          if((fx-a.pos[0])**2+(fy-a.pos[1])**2<16){
+            a.health=Math.min(100,a.health+45); this.globalFoodEaten++; a.lastFoodTime=this.ticks;
+            this.foodPos[fi]=[rand(10,WORLD_SIZE-10),rand(10,WORLD_SIZE-10)];
+          }
+        });
+
+        this.poisonPos.forEach(([px,py],pi)=>{
+          if((px-a.pos[0])**2+(py-a.pos[1])**2<16){
+            a.health-=70; this.poisonPos[pi]=[rand(10,WORLD_SIZE-10),rand(10,WORLD_SIZE-10)];
+          }
+        });
+
+        const predDistSq = (a.pos[0]-this.enemyPos[0])**2+(a.pos[1]-this.enemyPos[1])**2;
+        if(a.health <= 0 || (this.predatorActive && predDistSq < 16)){
+            a.dead = true;
+            worker.postMessage({ type: 'kill', id: i });
+        }
+    }
+    return anyAlive;
+  }
+}
+
+// ─── Simulation Initialization ───────────────────────────────────────────────
+let village=null, meta=null;
+let simTick=0, lastFrameTime=performance.now(), fps=0, frameCount=0, fpsTimer=0;
+let accumulator = 0; 
 
 worker.onmessage = (e) => {
   if(e.data.type === 'ready') workerReady = true;
   if(e.data.type === 'out') {
-    currentMotor = e.data.motor;
-    currentThinkingMode = e.data.thinkingMode;
+    const alive = village.updatePhysics(e.data.motors, e.data.modes);
+    if(!alive) resetEnv(); // Cataclysm if everyone dies
   }
 };
-
-// ─── Environment ─────────────────────────────────────────────────────────────
-class Env {
-  constructor(gen, maxHealth){
-    this.gen=gen; this.maxHealth=maxHealth;
-    this.agentPos=[25,25];
-    this.foodPos=Array.from({length:10},()=>[rand(7.5,42.5),rand(7.5,42.5)]);
-    this.poisonPos=Array.from({length:3},()=>[rand(7.5,42.5),rand(7.5,42.5)]);
-    this.poisonVels=Array.from({length:3},()=>[randS(.15),randS(.15)]);
-    this.enemyPos=[2.5,2.5];
-    this.health=maxHealth; this.foodCount=0; this.ticks=0;
-    this.wallContacts=0; this.foodVisible=true;
-    this.predatorActive=(gen>=500);
-    this.lastFoodTime=0;
-  }
-
-  getSensors(){
-    this.foodVisible=(this.ticks%300)<240;
-    const nd=(t)=>{const dx=t[0]-this.agentPos[0],dy=t[1]-this.agentPos[1],d=Math.sqrt(dx*dx+dy*dy)+.001;return[[dx/d,dy/d],d]};
-    let foodS,foodD;
-    
-    if(this.foodVisible){
-      let best=Infinity,bi=0;
-      this.foodPos.forEach(([fx,fy],i)=>{const d=(fx-this.agentPos[0])**2+(fy-this.agentPos[1])**2;if(d<best){best=d;bi=i}});
-      [foodS,foodD]=nd(this.foodPos[bi]);
-      if (foodD < 10) { foodS[0] *= 2.0; foodS[1] *= 2.0; } // Python Sensor Amplification
-    } else {
-      foodS=[0,0]; foodD=50;
-    }
-
-    let pBest=Infinity,pi2=0;
-    this.poisonPos.forEach(([px,py],i)=>{const d=(px-this.agentPos[0])**2+(py-this.agentPos[1])**2;if(d<pBest){pBest=d;pi2=i}});
-    const[poisS,poisD]=nd(this.poisonPos[pi2]);
-    const[centerS,centerD]=nd([25,25]);
-    
-    const fProx=Math.max(0,1-foodD/50), pProx=Math.max(0,1-poisD/50), cProx=Math.max(0,1-centerD/50);
-    const[ax,ay]=this.agentPos;
-    const wL=ax<10?(10-ax)/10:0, wR=ax>40?(ax-40)/10:0, wT=ay<10?(10-ay)/10:0, wB=ay>40?(ay-40)/10:0;
-    const pain=(ax<=.5||ax>=49.5||ay<=.5||ay>=49.5)?1:0;
-    const hunger=(100-this.health)/100;
-    const osc=Math.sin(this.ticks*.2);
-    let enemS=[0,0],eProx=0;
-    
-    if(this.predatorActive){const[es,ed]=nd(this.enemyPos);enemS=es;eProx=Math.max(0,1-ed/50)}
-    return[foodS[0],foodS[1],poisS[0],poisS[1],wL,wR,wT,wB,hunger,osc,enemS[0],enemS[1],pain,fProx,pProx,centerS[0],centerS[1],cProx,eProx];
-  }
-
-  update(motor){
-    this.ticks++;
-    let dx=(motor[0]-.5)*1.4, dy=(motor[1]-.5)*1.4;
-    let nx=this.agentPos[0]+dx, ny=this.agentPos[1]+dy;
-    
-    const hitWall=(nx<=0.5||nx>=49.5||ny<=0.5||ny>=49.5);
-    if(hitWall){
-      this.wallContacts++;
-      dx=0; dy=0; // Kill velocity on wall hit
-    }
-    
-    this.agentPos=[
-      Math.max(0.1,Math.min(49.9, this.agentPos[0]+dx)),
-      Math.max(0.1,Math.min(49.9, this.agentPos[1]+dy))
-    ];
-    
-    if(this.predatorActive){
-      const[ex,ey]=this.enemyPos,[ax,ay]=this.agentPos;
-      const d=Math.sqrt((ax-ex)**2+(ay-ey)**2)+.01;
-      this.enemyPos=[ex+(ax-ex)/d*.325,ey+(ay-ey)/d*.325];
-    }
-    
-    // Metabolic Physics match Python exactly
-    const baseDrain = 0.02 + (this.maxHealth / 10000.0);
-    const wallPenalty = hitWall ? (this.maxHealth * 0.10) : baseDrain;
-    this.health -= wallPenalty;
-
-    this.foodPos.forEach(([fx,fy],i)=>{
-      if((fx-this.agentPos[0])**2+(fy-this.agentPos[1])**2<6.25){
-        this.health=Math.min(100,this.health+45); this.foodCount++; this.lastFoodTime=this.ticks;
-        this.foodPos[i]=[rand(7.5,42.5),rand(7.5,42.5)];
-      }
-    });
-
-    this.poisonPos.forEach(([px,py],i)=>{
-      this.poisonPos[i][0]+=this.poisonVels[i][0]; this.poisonPos[i][1]+=this.poisonVels[i][1];
-      if(this.poisonPos[i][0]<0||this.poisonPos[i][0]>50) this.poisonVels[i][0]*=-1;
-      if(this.poisonPos[i][1]<0||this.poisonPos[i][1]>50) this.poisonVels[i][1]*=-1;
-      if((this.poisonPos[i][0]-this.agentPos[0])**2+(this.poisonPos[i][1]-this.agentPos[1])**2<4){
-        this.health-=70; this.poisonPos[i]=[rand(7.5,42.5),rand(7.5,42.5)];
-      }
-    });
-
-    const predDead=this.predatorActive&&(this.enemyPos[0]-this.agentPos[0])**2+(this.enemyPos[1]-this.agentPos[1])**2<4;
-    return this.health>0&&!predDead;
-  }
-}
-
-function rand(a,b){return a+Math.random()*(b-a)}
-function randS(m){return (Math.random()-.5)*2*m}
-
-// ─── Simulation state ─────────────────────────────────────────────────────────
-let env=null, meta=null;
-let simTick=0, lastFrameTime=performance.now(), fps=0, frameCount=0, fpsTimer=0;
-let accumulator = 0; // Fixed Timestep Accumulator
-
-window._smoothM = [0.5, 0.5];
 
 async function loadBrain(){
   document.getElementById('statusBadge').textContent='Loading…';
@@ -362,8 +417,8 @@ async function loadBrain(){
     if(!r.ok) throw new Error('brain.json not found');
     const d=await r.json();
     meta=d.meta;
+    if(meta.world_size) WORLD_SIZE = meta.world_size;
     
-    // Send brain data to Worker
     workerReady = false;
     worker.postMessage({ type: 'init', brainData: d });
 
@@ -371,8 +426,10 @@ async function loadBrain(){
     document.getElementById('sGen').textContent=meta.generation.toLocaleString();
     document.getElementById('sScore').textContent=fmtScore(meta.score);
     document.getElementById('sFood').textContent=meta.food;
+    document.getElementById('sKids').textContent=meta.children || 0;
     document.getElementById('sHP').textContent=meta.max_health;
     document.getElementById('sBrainSz').textContent=meta.brain_size+'n';
+    document.getElementById('sWorldSz').textContent=WORLD_SIZE+'x'+WORLD_SIZE;
     document.getElementById('lastTrained').textContent='Trained: '+meta.exported_at.replace('T',' ').replace('Z',' UTC');
     document.getElementById('statusBadge').textContent='● LIVE';
     document.getElementById('statusBadge').className='badge live';
@@ -383,22 +440,14 @@ async function loadBrain(){
 }
 
 function resetEnv(){
-  env=new Env(meta?meta.generation:1, meta?meta.max_health:150);
+  village=new Village(meta?meta.generation:1, meta?meta.max_health:150);
   simTick=0;
-  window._smoothM = [0.5, 0.5];
-  currentMotor = [0.5, 0.5];
-  
-  // WIPE THE GHOST STATE FROM THE BRAIN ON RESPAWN
-  if(workerReady) {
-    worker.postMessage({ type: 'reset' });
-  }
 }
 
-// Auto-refresh brain every 60s
 setInterval(loadBrain,60000);
 document.getElementById('resetBtn').onclick=resetEnv;
 
-// ─── Rendering Optimization: Offscreen Caches ─────────────────────────────────
+// ─── Rendering Optimization ──────────────────────────────────────────────────
 const canvas=document.getElementById('world');
 const ctx=canvas.getContext('2d');
 
@@ -413,19 +462,15 @@ function createOrbCache(r, color){
 }
 
 const CACHE = {
-  food: createOrbCache(5, 'rgba(0,255,136,0.4)'),
-  poison: createOrbCache(5, 'rgba(255,51,102,0.3)'),
-  predator: createOrbCache(8, 'rgba(255,0,100,0.5)'),
-  agent: createOrbCache(10, 'rgba(0,229,255,0.5)'),
-  aura: createOrbCache(16, 'rgba(192,132,252,0.35)') // Attention visualizer
+  food: createOrbCache(6, 'rgba(0,255,136,0.4)'),
+  poison: createOrbCache(6, 'rgba(255,51,102,0.3)'),
+  predator: createOrbCache(10, 'rgba(255,0,100,0.5)'),
+  agent: createOrbCache(8, 'rgba(0,229,255,0.5)'),
+  aura: createOrbCache(18, 'rgba(192,132,252,0.35)')
 };
 
-function drawCached(ctx, cacheObj, x, y){
-  ctx.drawImage(cacheObj.img, x - cacheObj.offset, y - cacheObj.offset);
-}
-
+function drawCached(ctx, cacheObj, x, y){ ctx.drawImage(cacheObj.img, x - cacheObj.offset, y - cacheObj.offset); }
 function toP(x,y,W,H){return[x/WORLD_SIZE*W,y/WORLD_SIZE*H]}
-
 function fmtScore(n){
   if(n>=1e12) return (n/1e12).toFixed(1)+'T';
   if(n>=1e9)  return (n/1e9).toFixed(1)+'B';
@@ -440,123 +485,98 @@ function frame(ts){
   const dt = ts - lastFrameTime;
   lastFrameTime = ts;
   
-  // FPS counter
   frameCount++; fpsTimer+=dt;
   if(fpsTimer>=1000){fps=Math.round(frameCount*1000/fpsTimer);frameCount=0;fpsTimer=0;document.getElementById('cFps').textContent=fps}
 
-  if(!workerReady || !env){
-    ctx.fillStyle='#050508'; ctx.fillRect(0,0,canvas.width,canvas.height);
-    return;
+  if(!workerReady || !village){
+    ctx.fillStyle='#050508'; ctx.fillRect(0,0,canvas.width,canvas.height); return;
   }
 
-  // Fixed Timestep Accumulator (Prevents simulation speedup on 144hz monitors)
   accumulator += dt;
-  if (accumulator > 200) accumulator = 200; // Prevent spiral of death on tab switch
-  
+  if (accumulator > 200) accumulator = 200; 
   while (accumulator >= TIME_STEP) {
-    stepSimulation();
+    if(simTick % BRAIN_TICK_EVERY === 0){
+      let payload = [];
+      for(let a of village.agents) {
+        if(a.dead) { payload.push({dead:true}); continue; }
+        const unc = Math.max(0,(100-a.health)/100)*.4 + Math.min(1,a.wallHits/50)*.3 + ((village.ticks-a.lastFoodTime)>200?.3:0);
+        payload.push({dead:false, sensors: village.getSensorsFor(a), unc: unc});
+      }
+      worker.postMessage({ type: 'tick', agents: payload });
+    }
+    simTick++;
     accumulator -= TIME_STEP;
   }
 
   renderWorld();
 }
 
-function stepSimulation() {
-  // Async Worker Brain Tick
-  if(simTick % BRAIN_TICK_EVERY === 0){
-    const sensors = env.getSensors();
-    const unc = Math.max(0,(100-env.health)/100)*.4 + Math.min(1,env.wallContacts/50)*.3 + ((env.ticks-env.lastFoodTime)>200?.3:0);
-    worker.postMessage({ type: 'tick', sensors: sensors, uncertainty: unc });
-  }
-  
-  // Smooth the motor response
-  window._smoothM = [
-    0.7 * window._smoothM[0] + 0.3 * currentMotor[0],
-    0.7 * window._smoothM[1] + 0.3 * currentMotor[1]
-  ];
-  
-  const alive = env.update(window._smoothM);
-  if(!alive) resetEnv();
-  simTick++;
-}
-
 function renderWorld() {
   const W=canvas.width, H=canvas.height;
   ctx.fillStyle='#080812'; ctx.fillRect(0,0,W,H);
 
-  // Subtle grid
   ctx.strokeStyle='rgba(255,255,255,0.03)'; ctx.lineWidth=1;
   for(let i=0;i<=10;i++){
     const x=i/10*W; ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
     const y=i/10*H; ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
   }
 
-  // Wall danger glow
-  const[ax,ay]=env.agentPos;
-  if(ax<=2||ax>=48||ay<=2||ay>=48){
-    ctx.fillStyle='rgba(255,0,0,0.06)';ctx.fillRect(0,0,W,H);
-  }
-
-  // Food
-  env.foodPos.forEach(([fx,fy])=>{
+  village.foodPos.forEach(([fx,fy])=>{
     const[px,py]=toP(fx,fy,W,H);
-    if(env.foodVisible){
-      drawCached(ctx, CACHE.food, px, py);
-      ctx.fillStyle='#00ff88'; ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2); ctx.fill();
-    } else {
-      ctx.strokeStyle='rgba(0,255,136,0.25)'; ctx.lineWidth=1.5;
-      ctx.beginPath(); ctx.arc(px,py,5,0,Math.PI*2); ctx.stroke();
-    }
+    drawCached(ctx, CACHE.food, px, py);
+    ctx.fillStyle='#00ff88'; ctx.beginPath(); ctx.arc(px,py,4,0,Math.PI*2); ctx.fill();
   });
 
-  // Poison
-  env.poisonPos.forEach(([px2,py2])=>{
+  village.poisonPos.forEach(([px2,py2])=>{
     const[px,py]=toP(px2,py2,W,H);
     drawCached(ctx, CACHE.poison, px, py);
     ctx.fillStyle='#ff3366'; ctx.fillRect(px-4,py-4,8,8);
   });
 
-  // Predator
-  if(env.predatorActive){
-    const[px,py]=toP(env.enemyPos[0],env.enemyPos[1],W,H);
+  if(village.predatorActive){
+    const[px,py]=toP(village.enemyPos[0],village.enemyPos[1],W,H);
+    // Draw Aggro Radius
+    ctx.strokeStyle='rgba(255,0,100,0.15)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.arc(px,py, (80.0/WORLD_SIZE)*W, 0, Math.PI*2); ctx.stroke();
+    
     drawCached(ctx, CACHE.predator, px, py);
     ctx.fillStyle='#ff0066'; ctx.beginPath(); ctx.arc(px,py,8,0,Math.PI*2); ctx.fill();
     ctx.strokeStyle='rgba(255,0,100,0.8)'; ctx.lineWidth=2;
     ctx.beginPath(); ctx.arc(px,py,12,0,Math.PI*2); ctx.stroke();
   }
 
-  // Agent
-  const[apx,apy]=toP(ax,ay,W,H);
-  
-  // Visualizing the "Attention" Aura (System 2 Thinking)
-  if (currentThinkingMode === 1) {
-    const pulse = 1 + 0.15 * Math.sin(performance.now() / 150);
-    ctx.save();
-    ctx.translate(apx, apy); ctx.scale(pulse, pulse);
-    drawCached(ctx, CACHE.aura, 0, 0);
-    ctx.restore();
+  let totalHP = 0, aliveCount = 0;
+  village.agents.forEach(a => {
+    if(a.dead) return;
+    aliveCount++; totalHP += a.health;
+    const[apx,apy]=toP(a.pos[0],a.pos[1],W,H);
+    
+    if (a.mode === 1) {
+      const pulse = 1 + 0.15 * Math.sin(performance.now() / 150);
+      ctx.save(); ctx.translate(apx, apy); ctx.scale(pulse, pulse);
+      drawCached(ctx, CACHE.aura, 0, 0); ctx.restore();
 
-    // Neural Link line to predator when in danger
-    if (env.predatorActive) {
-      const [px, py] = toP(env.enemyPos[0], env.enemyPos[1], W, H);
-      ctx.strokeStyle = 'rgba(192,132,252,0.4)'; ctx.setLineDash([4, 4]);
-      ctx.beginPath(); ctx.moveTo(apx, apy); ctx.lineTo(px, py); ctx.stroke(); ctx.setLineDash([]);
+      if (village.predatorActive) {
+        const [px, py] = toP(village.enemyPos[0], village.enemyPos[1], W, H);
+        ctx.strokeStyle = 'rgba(192,132,252,0.4)'; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(apx, apy); ctx.lineTo(px, py); ctx.stroke(); ctx.setLineDash([]);
+      }
     }
-  }
 
-  drawCached(ctx, CACHE.agent, apx, apy);
-  ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(apx,apy,7,0,Math.PI*2); ctx.fill();
-  ctx.strokeStyle='rgba(0,229,255,0.9)'; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.arc(apx,apy,11,0,Math.PI*2); ctx.stroke();
+    drawCached(ctx, CACHE.agent, apx, apy);
+    ctx.fillStyle='#ffffff'; ctx.beginPath(); ctx.arc(apx,apy,5,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='rgba(0,229,255,0.9)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(apx,apy,9,0,Math.PI*2); ctx.stroke();
+  });
 
-  // Update UI Panels
-  const hp=env.health, maxHp=env.maxHealth, pct=Math.max(0,hp/maxHp);
-  document.getElementById('sHealth').textContent=Math.max(0,Math.floor(hp))+'/'+maxHp;
-  document.getElementById('sEaten').textContent=env.foodCount;
-  document.getElementById('sSenses').textContent=env.foodVisible?'Active':'Blind';
+  const avgHp = aliveCount > 0 ? totalHP/aliveCount : 0;
+  const pct = Math.max(0, avgHp/village.maxHealth);
+  
+  document.getElementById('sPop').textContent=aliveCount;
+  document.getElementById('sEaten').textContent=village.globalFoodEaten;
   document.getElementById('cTick').textContent=simTick.toLocaleString();
-  document.getElementById('cMode').textContent=currentThinkingMode?'Slow':'Fast';
-  document.getElementById('cPred').textContent=env.predatorActive?'Active':'Inactive';
+  document.getElementById('cPred').textContent=village.predatorActive?'Active':'Inactive';
+  
   const hbar=document.getElementById('hbar');
   hbar.style.width=(pct*100)+'%';
   hbar.style.background=pct>.5?'#00ff88':pct>.25?'#ffb300':'#ff3366';
