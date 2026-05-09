@@ -304,7 +304,7 @@ class Village {
     const wL=Math.max(0,(50-ax)/50), wR=Math.max(0,(ax-(WORLD_SIZE-50))/50);
     const wT=Math.max(0,(50-ay)/50), wB=Math.max(0,(ay-(WORLD_SIZE-50))/50);
     const pain=(ax<=1||ax>=WORLD_SIZE-1||ay<=1||ay>=WORLD_SIZE-1)?1:0;
-    const hunger=(100-a.health)/100;
+    const hunger=(this.maxHealth-a.health)/this.maxHealth;
     const osc=Math.sin(this.ticks*.2);
     let enemS=[0,0],eProx=0;
     
@@ -378,7 +378,7 @@ class Village {
         // Food/Poison
         this.foodPos.forEach(([fx,fy],fi)=>{
           if((fx-a.pos[0])**2+(fy-a.pos[1])**2<16){
-            a.health=Math.min(100,a.health+45); this.globalFoodEaten++; a.lastFoodTime=this.ticks;
+            a.health=Math.min(this.maxHealth, a.health+45); this.globalFoodEaten++; a.lastFoodTime=this.ticks;
             this.foodPos[fi]=[rand(10,WORLD_SIZE-10),rand(10,WORLD_SIZE-10)];
           }
         });
@@ -507,7 +507,7 @@ function frame(ts){
       let payload = [];
       for(let a of village.agents) {
         if(a.dead) { payload.push({dead:true}); continue; }
-        const unc = Math.max(0,(100-a.health)/100)*.4 + Math.min(1,a.wallHits/50)*.3 + ((village.ticks-a.lastFoodTime)>200?.3:0);
+        const unc = Math.max(0,(village.maxHealth-a.health)/village.maxHealth)*.4 + Math.min(1,a.wallHits/50)*.3 + ((village.ticks-a.lastFoodTime)>200?.3:0);
         payload.push({dead:false, sensors: village.getSensorsFor(a), unc: unc});
       }
       worker.postMessage({ type: 'tick', agents: payload });
