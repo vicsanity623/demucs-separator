@@ -210,7 +210,8 @@ class CTRNN {
     for(let n=0;n<this.size;n++){
       let total = netIn[n]+this.biases[n];
       if(n<MEMORY_SIZE) total += compressed[n] * 50.0;
-      if(n<19)          total += sensors[n] * 50.0;
+      // BUG FIX: Raw sensor data is already processed into compressed memory.
+      // Adding it again for the first 19 neurons is redundant and distorts input.
       const deriv = (-this.voltages[n]+total)/this.tauArr[n];
       this.voltages[n] = Math.max(-100,Math.min(100, this.voltages[n]+deriv*dt));
       this.adaptation[n]+=(outputs[n]*0.1-this.adaptation[n]*0.05)*dt;
