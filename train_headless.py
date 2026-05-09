@@ -217,7 +217,7 @@ class Environment:
         w_b = max(0.0, (ay - (WORLD_SIZE - 50.0))/50.0)
 
         pain = 1.0 if (ax<=1.0 or ax>=WORLD_SIZE-1.0 or ay<=1.0 or ay>=WORLD_SIZE-1.0) else 0.0
-        hunger = (100.0 - self.health) / 100.0
+        hunger = (self.max_health - self.health) / self.max_health
         osc = np.sin(self.ticks * 0.2)
 
         if self.predator_active:
@@ -271,7 +271,7 @@ class Environment:
         eaten_mask = f_dists_sq < FOOD_RADIUS_SQ
         num_eaten = np.sum(eaten_mask)
         if num_eaten > 0:
-            self.health = min(100, self.health + (45 * num_eaten))
+            self.health = min(self.max_health, self.health + (45 * num_eaten))
             self.food_count += num_eaten
             self.last_food_time = self.ticks
             self.food_positions[eaten_mask] = np.random.uniform(10.0, WORLD_SIZE-10.0, (num_eaten, 2))
@@ -292,7 +292,7 @@ class Environment:
         killed = (self.health <= 0 or (self.predator_active and pred_dist_sq < PREDATOR_KILL_SQ))
         
         if brain is not None and self.ticks % BRAIN_TICK_EVERY == 0:
-            uncertainty = max(0, (100 - self.health) / 100) * 0.4
+            uncertainty = max(0, (self.max_health - self.health) / self.max_health) * 0.4
             uncertainty += min(1.0, self.wall_contact_count / 50) * 0.3
             uncertainty += 0.3 if (self.ticks - self.last_food_time) > 200 else 0.0
             
