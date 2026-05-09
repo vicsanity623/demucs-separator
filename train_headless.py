@@ -113,9 +113,12 @@ class ImprovedCTRNN:
             total_reward = 0
             for step in range(steps):
                 self.voltages = sim_voltages
-                outputs = self.get_outputs()
-                motor = outputs[-2:] + action_variation
+                # Consolidate the assignment to use the slice directly
+                motor = self.get_outputs()[-2:] + action_variation
+                
+                # If you need to use 'motor' for reward calculation, do it here. 
                 total_reward += np.random.randn() * 0.1
+                
                 sim_derivative = (-sim_voltages + self.biases) / self.time_constants
                 sim_voltages = sim_voltages + sim_derivative * 0.1
                 self.voltages = current_state
