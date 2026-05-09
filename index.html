@@ -112,7 +112,7 @@ const ATTENTION_WIN   = 32;
 const BRAIN_TICK_EVERY= 2;
 const PHYSICS_HZ      = 60;
 const TIME_STEP       = 1000 / PHYSICS_HZ;
-let WORLD_SIZE        = 250; // Dynamic based on json
+let WORLD_SIZE        = 250; 
 
 function rand(a,b){return a+Math.random()*(b-a)}
 function randS(m){return (Math.random()-.5)*2*m}
@@ -139,7 +139,6 @@ class CTRNN {
     this.thinkingMode = 0;
   }
 
-  // Mutation function for in-life reproduction
   cloneAndMutate() {
     let w = [];
     for(let r=0; r<this.size; r++) {
@@ -227,17 +226,20 @@ class CTRNN {
 let brains = [];
 self.onmessage = function(e) {
   if(e.data.type === 'init') {
+    // Completely wipe and reset the worker memory when the world resets
     brains = [new CTRNN(e.data.brainData)];
     self.postMessage({ type: 'ready' });
   } else if (e.data.type === 'spawn') {
     let parent = brains[e.data.parentId];
     brains.push(parent.cloneAndMutate());
   } else if (e.data.type === 'kill') {
-    brains[e.data.id] = null; // Free memory
+    brains[e.data.id] = null; 
   } else if (e.data.type === 'tick') {
     let outMotors = [];
     let outModes = [];
-    for(let i=0; i<brains.length; i++) {
+    
+    // SAFETY FIX: Only iterate over the number of agents the Main Thread sent
+    for(let i=0; i<e.data.agents.length; i++) {
       if(!brains[i] || e.data.agents[i].dead) {
         outMotors.push([0.5,0.5]); outModes.push(0);
         continue;
@@ -267,7 +269,6 @@ class Village {
     this.ticks=0;
     this.predatorActive=(gen>=500);
     
-    // Array of active agents
     this.agents = [{
       id: 0,
       pos: [WORLD_SIZE/2, WORLD_SIZE/2],
@@ -276,7 +277,8 @@ class Village {
       lastFoodTime: 0,
       smoothM: [0.5, 0.5],
       mode: 0,
-      dead: false
+      dead: false,
+      ticks: 0
     }];
   }
 
@@ -314,7 +316,7 @@ class Village {
     this.ticks++;
     let anyAlive = false;
 
-    // Predator Logic (Targets closest alive agent within radius)
+    // Predator Logic
     if(this.predatorActive){
         let closest = Infinity, target = null;
         for(let a of this.agents) {
@@ -332,13 +334,14 @@ class Village {
         this.enemyPos = [Math.max(5,Math.min(WORLD_SIZE-5,this.enemyPos[0])), Math.max(5,Math.min(WORLD_SIZE-5,this.enemyPos[1]))];
     }
 
-    // Poison Movement
+    // Poison
     this.poisonPos.forEach(([px,py],i)=>{
       this.poisonPos[i][0]+=this.poisonVels[i][0]; this.poisonPos[i][1]+=this.poisonVels[i][1];
       if(this.poisonPos[i][0]<0||this.poisonPos[i][0]>WORLD_SIZE) this.poisonVels[i][0]*=-1;
       if(this.poisonPos[i][1]<0||this.poisonPos[i][1]>WORLD_SIZE) this.poisonVels[i][1]*=-1;
     });
 
+    // Agent Physics
     for(let i=0; i<this.agents.length; i++) {
         let a = this.agents[i];
         if(a.dead) continue;
@@ -359,7 +362,7 @@ class Village {
         const baseDrain = 0.02 + (this.maxHealth / 10000.0);
         a.health -= baseDrain;
 
-        // In-Life Reproduction (Survive 1800 ticks)
+        // In-Life Reproduction
         if(a.ticks > 0 && a.ticks % 1800 === 0) {
             a.health = Math.min(this.maxHealth, a.health + 100);
             worker.postMessage({ type: 'spawn', parentId: i });
@@ -372,7 +375,7 @@ class Village {
         }
         a.ticks++;
 
-        // Food & Poison Collisions
+        // Food/Poison
         this.foodPos.forEach(([fx,fy],fi)=>{
           if((fx-a.pos[0])**2+(fy-a.pos[1])**2<16){
             a.health=Math.min(100,a.health+45); this.globalFoodEaten++; a.lastFoodTime=this.ticks;
@@ -397,7 +400,7 @@ class Village {
 }
 
 // ─── Simulation Initialization ───────────────────────────────────────────────
-let village=null, meta=null;
+let village=null, meta=null, rawBrainData=null;
 let simTick=0, lastFrameTime=performance.now(), fps=0, frameCount=0, fpsTimer=0;
 let accumulator = 0; 
 
@@ -405,7 +408,7 @@ worker.onmessage = (e) => {
   if(e.data.type === 'ready') workerReady = true;
   if(e.data.type === 'out') {
     const alive = village.updatePhysics(e.data.motors, e.data.modes);
-    if(!alive) resetEnv(); // Cataclysm if everyone dies
+    if(!alive) resetEnv(); 
   }
 };
 
@@ -417,18 +420,20 @@ async function loadBrain(){
     if(!r.ok) throw new Error('brain.json not found');
     const d=await r.json();
     meta=d.meta;
+    rawBrainData = d; // Store for clean resets
     if(meta.world_size) WORLD_SIZE = meta.world_size;
     
     workerReady = false;
-    worker.postMessage({ type: 'init', brainData: d });
+    worker.postMessage({ type: 'init', brainData: rawBrainData });
 
     resetEnv();
+    
+    // UI UPDATES (Fixed null error by removing sBrainSz)
     document.getElementById('sGen').textContent=meta.generation.toLocaleString();
     document.getElementById('sScore').textContent=fmtScore(meta.score);
     document.getElementById('sFood').textContent=meta.food;
     document.getElementById('sKids').textContent=meta.children || 0;
     document.getElementById('sHP').textContent=meta.max_health;
-    document.getElementById('sBrainSz').textContent=meta.brain_size+'n';
     document.getElementById('sWorldSz').textContent=WORLD_SIZE+'x'+WORLD_SIZE;
     document.getElementById('lastTrained').textContent='Trained: '+meta.exported_at.replace('T',' ').replace('Z',' UTC');
     document.getElementById('statusBadge').textContent='● LIVE';
@@ -442,12 +447,16 @@ async function loadBrain(){
 function resetEnv(){
   village=new Village(meta?meta.generation:1, meta?meta.max_health:150);
   simTick=0;
+  // FIX: Wipe the worker's ghost village and start fresh to prevent idle bugs
+  if (workerReady && rawBrainData) {
+    worker.postMessage({ type: 'init', brainData: rawBrainData });
+  }
 }
 
 setInterval(loadBrain,60000);
 document.getElementById('resetBtn').onclick=resetEnv;
 
-// ─── Rendering Optimization ──────────────────────────────────────────────────
+// ─── Rendering ───────────────────────────────────────────────────────────────
 const canvas=document.getElementById('world');
 const ctx=canvas.getContext('2d');
 
@@ -479,7 +488,6 @@ function fmtScore(n){
   return String(Math.floor(n));
 }
 
-// ─── Main Game Loop (Fixed Timestep) ──────────────────────────────────────────
 function frame(ts){
   requestAnimationFrame(frame);
   const dt = ts - lastFrameTime;
@@ -535,7 +543,6 @@ function renderWorld() {
 
   if(village.predatorActive){
     const[px,py]=toP(village.enemyPos[0],village.enemyPos[1],W,H);
-    // Draw Aggro Radius
     ctx.strokeStyle='rgba(255,0,100,0.15)'; ctx.lineWidth=1;
     ctx.beginPath(); ctx.arc(px,py, (80.0/WORLD_SIZE)*W, 0, Math.PI*2); ctx.stroke();
     
