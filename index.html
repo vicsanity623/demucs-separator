@@ -54,10 +54,10 @@ header p{color:var(--muted);font-size:.85rem;margin-top:4px}
   padding:6px 14px;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
 .chip span{color:var(--text)}
 
-button#resetBtn{margin-left:auto;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);
+button{margin-left:auto;background:rgba(0,229,255,.1);border:1px solid rgba(0,229,255,.3);
   color:var(--accent);border-radius:8px;padding:6px 16px;font-size:.8rem;cursor:pointer;
   font-family:'Inter',sans-serif;transition:background .2s}
-button#resetBtn:hover{background:rgba(0,229,255,.2)}
+button:hover{background:rgba(0,229,255,.2)}
 
 footer{text-align:center;padding-bottom:24px;color:var(--muted);font-size:.75rem;position:relative;z-index:1}
 footer a{color:var(--accent);text-decoration:none}
@@ -66,7 +66,7 @@ footer a{color:var(--accent);text-decoration:none}
 <body>
 <header>
   <h1>🧠 BRAINSIM — OPEN WORLD ECOSYSTEM</h1>
-  <p>Continuous CTRNN neural network with In-Life Reproduction · Auto-refreshes every 60 s</p>
+  <p>Continuous CTRNN neural network with In-Life Reproduction</p>
 </header>
 
 <div class="main">
@@ -97,6 +97,7 @@ footer a{color:var(--accent);text-decoration:none}
   <div class="chip">FPS <span id="cFps">—</span></div>
   <div class="chip">Predator <span id="cPred">—</span></div>
   <button id="resetBtn">↺ Cataclysm (Reset)</button>
+  <button id="refreshBrainBtn">⟳ Refresh Brain</button>
 </div>
 
 <footer>
@@ -141,7 +142,6 @@ class CTRNN {
   }
 
   cloneAndMutate() {
-    // Match Python deepseek_style_mutate more closely
     let w = this.weights.map(row => row.map(v => Math.max(-3, Math.min(3, v * 0.995 + (Math.random()-0.5)*0.3))));
     let b = this.biases.map(v => Math.max(-1.5, Math.min(1.5, v * 0.99 + (Math.random()-0.5)*0.1)));
     let tau = this.tauArr.map(t => Math.max(1.0, Math.min(15.0, t + (Math.random()-0.5)*0.4)));
@@ -442,7 +442,9 @@ function resetEnv(){
   }
 }
 
-setInterval(loadBrain,60000);
+// Manual refresh button
+document.getElementById('refreshBrainBtn').onclick = loadBrain;
+
 document.getElementById('resetBtn').onclick=resetEnv;
 
 // ─── Rendering ───────────────────────────────────────────────────────────────
@@ -503,7 +505,7 @@ function frame(ts){
         }
         payload.push({dead:false, sensors: village.getSensorsFor(a), unc: unc});
       }
-      const brainDt = TIME_STEP * BRAIN_TICK_EVERY / 10; // Match Python dt scaling
+      const brainDt = TIME_STEP * BRAIN_TICK_EVERY / 10;
       worker.postMessage({ type: 'tick', agents: payload, dt: brainDt });
     }
     simTick++;
