@@ -69,6 +69,9 @@ class ImprovedCTRNN:
 
         # Cached outputs for throttled ticking
         self._last_outputs = np.full(size, 0.5)
+        self._prev_motor = np.array([0.5, 0.5])
+        self._last_food_score = 0
+        self._last_child_score = 0
 
     def compress_sensors(self, sensors):
         if sensors is None:
@@ -120,17 +123,10 @@ class ImprovedCTRNN:
             for step in range(steps):
                 self.voltages = sim_voltages
                 outputs = self.get_outputs()
-                # The 'motor' variable was assigned but never used in this internal simulation.
-                # The 'action_variation' is applied to the final output in the tick method.
-
-                # THE BOT'S FIX (Perfected): Simulate the ACTUAL brain physics, not just biases
                 sim_derivative = (
                     -sim_voltages + np.dot(self.weights, outputs) + self.biases
                 ) / self.time_constants
                 sim_voltages = sim_voltages + sim_derivative * 0.1
-
-                # Reward the brain for maintaining high internal variance (active thinking)
-                # rather than just rolling a random number
                 total_reward += np.std(outputs)
 
             self.voltages = current_state
@@ -195,8 +191,8 @@ class Environment:
         self.gen = king_gen
         self.max_health = max_health
         self.agent_pos = np.array([WORLD_SIZE / 2, WORLD_SIZE / 2])
-        self.num_food = 40  # More food for open world
-        self.num_poison = 10  # More poison
+        self.num_food = 40
+        self.num_poison = 10
 
         self.food_positions = np.random.uniform(
             10.0, WORLD_SIZE - 10.0, (self.num_food, 2)
@@ -220,7 +216,7 @@ class Environment:
         self.food_count = 0
         self.ticks = 0
         self.wall_contact_count = 0
-        self.children_spawned = 0  # Track in-life reproduction
+        self.children_spawned = 0
         self.food_visible = True
         self.predator_active = self.gen >= 500
         self.last_food_time = 0
@@ -251,7 +247,6 @@ class Environment:
         p_prox = max(0.0, 1.0 - (pois_dist / WORLD_SIZE))
         c_prox = max(0.0, 1.0 - (center_dist / WORLD_SIZE))
 
-        # Wall sensors look 50 units deep
         ax, ay = self.agent_pos
         w_l = max(0.0, (50.0 - ax) / 50.0)
         w_r = max(0.0, (ax - (WORLD_SIZE - 50.0)) / 50.0)
@@ -317,7 +312,6 @@ class Environment:
 
         if hit_wall:
             self.wall_contact_count += 1
-            # NON-LETHAL BOUNCE: Reverses velocity, small penalty to teach avoidance
             dx, dy = -dx * 0.5, -dy * 0.5
             self.health -= 2.0
 
@@ -326,23 +320,20 @@ class Environment:
         if self.predator_active:
             dir_e = self.agent_pos - self.enemy_pos
             dist = np.sqrt(dir_e[0] ** 2 + dir_e[1] ** 2) + 0.01
-
-            # DETECTION RADIUS LOGIC
             if dist < PREDATOR_AGGRO:
-                self.enemy_pos += (dir_e / dist) * 1.8  # Fast chase if spotted
+                self.enemy_pos += (dir_e / dist) * 1.8
             else:
-                self.enemy_pos += np.random.uniform(-1.0, 1.0, 2)  # Roam randomly
+                self.enemy_pos += np.random.uniform(-1.0, 1.0, 2)
             self.enemy_pos = np.clip(self.enemy_pos, 5.0, WORLD_SIZE - 5.0)
 
         base_drain = 0.02 + (self.max_health / 10000.0)
         self.health -= base_drain
 
-        # IN-LIFE REPRODUCTION: Survive 30s (1800 ticks) to spawn an offspring
         if self.ticks > 0 and self.ticks % 1800 == 0:
             self.children_spawned += 1
             self.health = min(
                 self.max_health, self.health + 100
-            )  # Healing reward for reproducing
+            )
 
         ate_food = False
         f_dists_sq = np.sum((self.food_positions - self.agent_pos) ** 2, axis=1)
@@ -383,8 +374,6 @@ class Environment:
             )
             uncertainty += min(1.0, self.wall_contact_count / 50) * 0.3
             uncertainty += 0.3 if (self.ticks - self.last_food_time) > 200 else 0.0
-
-            # Panic if predator is inside aggro radius
             if self.predator_active and np.sqrt(pred_dist_sq) < PREDATOR_AGGRO:
                 uncertainty += 0.5
 
@@ -585,7 +574,6 @@ def main():
                 dist_from_center = np.sqrt(dx_c**2 + dy_c**2)
                 center_bonus = max(0, ((WORLD_SIZE / 2) - dist_from_center) * 2.0)
 
-                # HUGE reward for in-life reproduction (children_spawned)
                 score = (
                     (envs[i].ticks * 0.1)
                     + (envs[i].food_count * 8000)
