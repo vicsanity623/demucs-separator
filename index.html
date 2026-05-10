@@ -355,15 +355,31 @@ class Village {
         const baseDrain = 0.02 + (this.maxHealth / 10000.0);
         a.health -= baseDrain;
 
-        if(a.ticks > 0 && a.ticks % 1800 === 0) {
+        if(a.foodEaten === undefined) a.foodEaten = 0;
+        
+        // Count food eaten by this agent
+        this.foodPos.forEach(([fx,fy],fi)=>{
+          if((fx-a.pos[0])**2+(fy-a.pos[1])**2<16){
+            a.health=Math.min(this.maxHealth, a.health+45); 
+            this.globalFoodEaten++; 
+            a.lastFoodTime=this.ticks;
+            a.foodEaten = (a.foodEaten || 0) + 1;   // Track personal food count
+            this.foodPos[fi]=[rand(10,WORLD_SIZE-10),rand(10,WORLD_SIZE-10)];
+          }
+        });
+
+        if(a.foodEaten >= 5 && !a._alreadyReproduced) {
             a.health = Math.min(this.maxHealth, a.health + 100);
             worker.postMessage({ type: 'spawn', parentId: i });
             this.agents.push({
                 id: this.agents.length,
                 pos: [a.pos[0]+randS(10), a.pos[1]+randS(10)],
                 health: this.maxHealth,
-                wallHits: 0, lastFoodTime: this.ticks, smoothM: [0.5,0.5], mode: 0, dead: false, ticks: 0
+                wallHits: 0, lastFoodTime: this.ticks, 
+                smoothM: [0.5,0.5], mode: 0, dead: false, ticks: 0,
+                foodEaten: 0, _alreadyReproduced: true
             });
+            a._alreadyReproduced = true;  // Prevent multiple spawns from same agent
         }
         a.ticks++;
 
