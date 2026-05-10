@@ -329,11 +329,12 @@ class Environment:
         base_drain = 0.02 + (self.max_health / 10000.0)
         self.health -= base_drain
 
-        if self.ticks > 0 and self.ticks % 1800 == 0:
+        if self.food_count >= 5 and not hasattr(self, '_already_reproduced'):
             self.children_spawned += 1
             self.health = min(
                 self.max_health, self.health + 100
-            )
+            )  # Healing reward for reproducing
+            self._already_reproduced = True
 
         ate_food = False
         f_dists_sq = np.sum((self.food_positions - self.agent_pos) ** 2, axis=1)
