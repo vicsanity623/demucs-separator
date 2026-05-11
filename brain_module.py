@@ -38,9 +38,9 @@ class ImprovedCTRNN:
         if len(history) < 32:
             history = [np.zeros(self.size)] * (32 - len(history)) + history
         history_matrix = np.array(history).T
-        scores = np.dot(self.attention_weights.T, history_matrix)
+        scores = np.dot(history_matrix.T, self.attention_weights)
         scores = np.clip(scores, -10, 10)
-        threshold = np.mean(np.abs(scores), axis=1, keepdims=True) * 1.5
+        threshold = np.mean(np.abs(scores), axis=0, keepdims=True) * 1.5
         scores[np.abs(scores) < threshold] = -20
         exp_scores = np.exp(scores - np.max(scores, axis=1, keepdims=True))
         attention = exp_scores / (np.sum(exp_scores, axis=1, keepdims=True) + 1e-8)
@@ -48,10 +48,10 @@ class ImprovedCTRNN:
 
     def get_outputs(self, uncertainty=None):
         active_voltages = np.clip(self.voltages - (self.adaptation * 1.5), -50, 50)
-        
+
         if uncertainty is not None:
             self.thinking_mode = 1 if uncertainty > self.mode_switch_threshold else 0
-            
+
         if self.thinking_mode == 0:
             # Clip the input to exp to stay between -20 and 20
             # This is plenty for sigmoid (exp(-20) is basically 0, exp(20) is huge)
@@ -60,6 +60,7 @@ class ImprovedCTRNN:
             # Clip the attention output as well to prevent the overflow warning
             attn_values = self.sparse_attention(active_voltages)
             return 1.0 / (1.0 + np.exp(-np.clip(attn_values, -20, 20)))
+
     def tick(
         self,
         dt,
