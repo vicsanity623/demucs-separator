@@ -227,7 +227,7 @@ self.onmessage = function(e) {
     self.postMessage({ type: 'ready' });
   } else if (e.data.type === 'spawn') {
     let parent = brains[e.data.parentId];
-    if(parent) brains.push(parent.cloneAndMutate());
+    if(parent) brains[e.data.newId] = parent.cloneAndMutate();
   } else if (e.data.type === 'kill') {
     if(e.data.id < brains.length) brains[e.data.id] = null; 
   } else if (e.data.type === 'tick') {
@@ -361,7 +361,7 @@ class Village {
 
         if(a.foodEaten >= 5 && !a._alreadyReproduced) {
             a.health = Math.min(this.maxHealth, a.health + 100);
-            worker.postMessage({ type: 'spawn', parentId: i });
+            worker.postMessage({ type: 'spawn', parentId: i, newId: this.agents.length });
             this.agents.push({
                 id: this.agents.length,
                 pos: [a.pos[0]+randS(10), a.pos[1]+randS(10)],
