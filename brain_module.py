@@ -48,13 +48,18 @@ class ImprovedCTRNN:
 
     def get_outputs(self, uncertainty=None):
         active_voltages = np.clip(self.voltages - (self.adaptation * 1.5), -50, 50)
+        
         if uncertainty is not None:
             self.thinking_mode = 1 if uncertainty > self.mode_switch_threshold else 0
+            
         if self.thinking_mode == 0:
-            return 1.0 / (1.0 + np.exp(-active_voltages))
+            # Clip the input to exp to stay between -20 and 20
+            # This is plenty for sigmoid (exp(-20) is basically 0, exp(20) is huge)
+            return 1.0 / (1.0 + np.exp(-np.clip(active_voltages, -20, 20)))
         else:
-            return 1.0 / (1.0 + np.exp(-self.sparse_attention(active_voltages)))
-
+            # Clip the attention output as well to prevent the overflow warning
+            attn_values = self.sparse_attention(active_voltages)
+            return 1.0 / (1.0 + np.exp(-np.clip(attn_values, -20, 20)))
     def tick(
         self,
         dt,
