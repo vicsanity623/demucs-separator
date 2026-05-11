@@ -361,7 +361,6 @@ class Village {
 
         if(a.foodEaten >= 5 && !a._alreadyReproduced) {
             a.health = Math.min(this.maxHealth, a.health + 100);
-            worker.postMessage({ type: 'spawn', parentId: i, newId: this.agents.length });
             this.agents.push({
                 id: this.agents.length,
                 pos: [a.pos[0]+randS(10), a.pos[1]+randS(10)],
