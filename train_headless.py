@@ -70,6 +70,7 @@ class ImprovedCTRNN:
         # Cached outputs for throttled ticking
         self._last_outputs = np.full(size, 0.5)
         self._prev_motor = np.array([0.5, 0.5])
+        self._batched_net_in = None
         self._last_food_score = 0
         self._last_child_score = 0
 
