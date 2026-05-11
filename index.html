@@ -169,7 +169,7 @@ class CTRNN {
       if(this.thinkingMode === 1 && this.voltHistory.length > 1) {
         let score = 0;
         for(let i=0; i<Math.min(this.voltHistory.length, ATTENTION_WIN); i++) {
-          score += this.attnW[n][i % ATTENTION_WIN] * this.voltHistory[i][n];
+          score += (this.attnW[n] ? this.attnW[n][i % ATTENTION_WIN] : 0) * this.voltHistory[i][n];
         }
         val = (v + Math.max(-10, Math.min(10, score))) * 0.5;
       }
