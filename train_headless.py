@@ -394,6 +394,7 @@ def main():
         brain = deepseek_style_mutate(child)
         if not hasattr(brain, "_last_outputs"):
             brain._last_outputs = np.zeros(BRAIN_SIZE)
+        brain._batched_net_in = np.zeros(BRAIN_SIZE)
         brains.append(brain)
 
     envs = [Environment(k_gen, k_max_health) for _ in range(NUM_AGENTS)]
