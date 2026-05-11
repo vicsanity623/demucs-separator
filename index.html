@@ -336,7 +336,7 @@ class Village {
       if(this.poisonPos[i][1]<0||this.poisonPos[i][1]>WORLD_SIZE) this.poisonVels[i][1]*=-1;
     });
 
-    const newAgents = [];
+    const spawned = [];
     for(let i=0; i<this.agents.length; i++) {
         let a = this.agents[i];
         if(a.dead) continue;
@@ -363,8 +363,8 @@ class Village {
         if(a.foodEaten >= 5 && !a._alreadyReproduced) {
             a.health = Math.min(this.maxHealth, a.health + 100);
             worker.postMessage({ type: 'spawn', parentId: i });
-            this.agents.push({
-                id: this.agents.length,
+            spawned.push({
+                id: this.agents.length + spawned.length,
                 pos: [a.pos[0]+randS(10), a.pos[1]+randS(10)],
                 health: this.maxHealth,
                 wallHits: 0, lastFoodTime: this.ticks, 
@@ -374,6 +374,8 @@ class Village {
             a._alreadyReproduced = true;  // Prevent multiple spawns from same agent
         }
         a.ticks++;
+    }
+    this.agents.push(...spawned);
 
         this.foodPos.forEach(([fx,fy],fi)=>{
           if((fx-a.pos[0])**2+(fy-a.pos[1])**2<16){
