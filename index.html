@@ -211,8 +211,8 @@ class CTRNN {
       this.adaptation[n]+=(outputs[n]*0.1-this.adaptation[n]*0.05)*dt;
       this.ltmTrace[n] = this.ltmTrace[n]*0.999 + outputs[n]*0.001;
     }
+    if (this.voltHistory.length >= ATTENTION_WIN * 2) this.voltHistory.shift();
     this.voltHistory.push(Float64Array.from(this.voltages));
-    if(this.voltHistory.length>ATTENTION_WIN*2) this.voltHistory.shift();
     
     const motor = outputs.slice(-2);
     this._prevMotor = [0.7*this._prevMotor[0] + 0.3*motor[0], 0.7*this._prevMotor[1] + 0.3*motor[1]];
