@@ -92,6 +92,10 @@ class ImprovedCTRNN:
         self.voltage_history.append(self.voltages.copy())
         if len(self.voltage_history) > ATTENTION_WINDOW:
             self.voltage_history.pop(0)
+        else:
+            self.voltage_history = [np.zeros(self.size)] * (
+                ATTENTION_WINDOW - len(self.voltage_history)
+            ) + self.voltage_history
         self._last_outputs = outputs
         self._prev_motor = (
             0.7 * getattr(self, "_prev_motor", np.array([0.5, 0.5]))
