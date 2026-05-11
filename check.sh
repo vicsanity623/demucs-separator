@@ -4,14 +4,19 @@ echo "====================================="
 echo "   Starting Idle Pal RPG Check...    "
 echo "====================================="
 
-# Define the required PWA game files
-FILES=("index.html, train_headless.py, brain_module.py")
+# Fix: Added spaces between array elements
+FILES=(
+    "index.html"
+    "train_headless.py"
+    "brain_module.py"
+)
+
 ERRORS=0
 
-# Loop through each file and verify it exists and is not empty
 for file in "${FILES[@]}"; do
+    # -f checks if it is a regular file
     if [ -f "$file" ]; then
-        # -s checks if the file has a size greater than 0
+        # -s checks if file size is greater than 0
         if [ -s "$file" ]; then
             echo "✅ OK: $file found and contains data."
         else
