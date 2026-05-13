@@ -224,10 +224,12 @@ class Environment:
         self.last_food_time = 0
         self._already_reproduced = False
 
-    def get_sensors(self):
+    def get_sensors(self) -> np.ndarray:
         self.food_visible = (self.ticks % 300) < 240
 
-        def norm_vec_dist(target):
+        def norm_vec_dist(
+            target: np.ndarray | list[float],
+        ) -> tuple[list[float], float]:
             dx, dy = target[0] - self.agent_pos[0], target[1] - self.agent_pos[1]
             dist = np.sqrt(dx * dx + dy * dy) + 0.001
             return [dx / dist, dy / dist], dist
@@ -299,7 +301,9 @@ class Environment:
             ]
         )
 
-    def update(self, motor_output, brain=None):
+    def update(
+        self, motor_output: np.ndarray, brain: ImprovedCTRNN | None = None
+    ) -> tuple[bool, bool]:
         self.ticks += 1
         dx, dy = (
             (motor_output[0] - 0.5) * MOTOR_SCALE,
