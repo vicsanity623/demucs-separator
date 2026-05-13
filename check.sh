@@ -8,7 +8,6 @@ echo "====================================="
 FILES=(
     "index.html"
     "train_headless.py"
-    "brain_module.py"
 )
 
 ERRORS=0
