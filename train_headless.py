@@ -394,7 +394,7 @@ class Environment:
 # ==========================================
 # 4. GENETIC REPRODUCTION & MUTATION
 # ==========================================
-def crossover(b1, b2):
+def crossover(b1: ImprovedCTRNN, b2: ImprovedCTRNN) -> ImprovedCTRNN:
     child = ImprovedCTRNN(b1.size)
     w_mask = np.random.rand(*b1.weights.shape) < 0.5
     child.weights = np.where(w_mask, b1.weights, b2.weights)
@@ -516,7 +516,8 @@ def main():
     if os.path.exists(SAVE_FILE):
         import sys
         import __main__
-        sys.modules['brain_module'] = __main__ 
+
+        sys.modules["brain_module"] = __main__
 
         with open(SAVE_FILE, "rb") as f:
             data = pickle.load(f)
@@ -605,9 +606,9 @@ def main():
 
                 r = np.random.rand()
                 if r < 0.70:
-                    b1 = random.choice(council)[1]
-                    b2 = random.choice(council)[1]
-                    child = crossover(b1, b2)
+                    b1_obj = random.choice(council)[1]
+                    b2_obj = random.choice(council)[1]
+                    child = crossover(b1_obj, b2_obj)
                     brains[i] = deepseek_style_mutate(child)
                 elif r < 0.90:
                     brains[i] = deepseek_style_mutate(council[-1][1])
