@@ -302,7 +302,9 @@ class Environment:
         )
 
     def update(
-        self, motor_output: np.ndarray, brain: ImprovedCTRNN | None = None
+        self,
+        motor_output: np.ndarray,
+        brain: ImprovedCTRNN | None = None,
     ) -> tuple[bool, bool]:
         self.ticks += 1
         dx, dy = (
