@@ -514,6 +514,10 @@ def main():
     next_save = time.time() + 1800
 
     if os.path.exists(SAVE_FILE):
+        import sys
+        import __main__
+        sys.modules['brain_module'] = __main__ 
+
         with open(SAVE_FILE, "rb") as f:
             data = pickle.load(f)
         k_gen = data.get("generation", 1)
