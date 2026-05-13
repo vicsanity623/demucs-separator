@@ -397,7 +397,7 @@ class Environment:
 # 4. GENETIC REPRODUCTION & MUTATION
 # ==========================================
 def crossover(b1: ImprovedCTRNN, b2: ImprovedCTRNN) -> ImprovedCTRNN:
-    child = ImprovedCTRNN(b1.size)
+    child: ImprovedCTRNN = ImprovedCTRNN(b1.size)
     w_mask = np.random.rand(*b1.weights.shape) < 0.5
     child.weights = np.where(w_mask, b1.weights, b2.weights)
     b_mask = np.random.rand(*b1.biases.shape) < 0.5
@@ -418,7 +418,7 @@ def crossover(b1: ImprovedCTRNN, b2: ImprovedCTRNN) -> ImprovedCTRNN:
 
 
 def deepseek_style_mutate(brain: ImprovedCTRNN) -> ImprovedCTRNN:
-    nb = ImprovedCTRNN(brain.size)
+    nb: ImprovedCTRNN = ImprovedCTRNN(brain.size)
     mutation_rate = 0.2 if np.random.rand() < 0.05 else 0.05
     mask = np.random.rand(*brain.weights.shape) < mutation_rate
     nb.weights = np.clip(
