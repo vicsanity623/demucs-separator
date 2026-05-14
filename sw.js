@@ -1,10 +1,12 @@
-const CACHE_NAME = 'brain-v0.0.5';
+'use strict';
+
+const CACHE_NAME = 'dashboard-cache-v1';
 const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './vb.py',
-  './brain.json'
+    './',
+    './index.html',
+    './manifest.json',
+    './icon-192x192.png',
+    './icon-512x512.png'
 ];
 
 // Install Event: Cache files
