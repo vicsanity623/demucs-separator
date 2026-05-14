@@ -1,11 +1,11 @@
 import json
 import os
-from typing import List, Dict
+from typing import List, Dict, Any
 
 LEDGER_FILE: str = "ledger.json"
 
 
-def load_ledger() -> List[Dict[str, str]]:
+def load_ledger() -> List[Dict[str, Any]]:
     if os.path.exists(LEDGER_FILE):
         try:
             with open(LEDGER_FILE, "r") as f:
@@ -17,8 +17,8 @@ def load_ledger() -> List[Dict[str, str]]:
     return []
 
 
-def save_ledger(ledger: List[Dict[str, str]]) -> None:
-    optimized_ledger: List[Dict[str, str]] = ledger[:1000]
+def save_ledger(ledger: List[Dict[str, Any]]) -> None:
+    optimized_ledger: List[Dict[str, Any]] = ledger[:1000]
     with open(LEDGER_FILE, "w") as f:
         json.dump(optimized_ledger, f, indent=2)
 
@@ -27,7 +27,7 @@ def flag_block(block_hash: str, status: str) -> bool:
     """
     Interactive Feature: Allows users to flag a block as 'verified' or 'disputed'.
     """
-    ledger: List[Dict[str, str]] = load_ledger()
+    ledger: List[Dict[str, Any]] = load_ledger()
     for block in ledger:
         if block.get("hash") == block_hash:
             block["status"] = status
