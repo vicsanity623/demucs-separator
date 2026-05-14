@@ -1,5 +1,665 @@
 [
   {
+    "timestamp": "2026-05-14T12:45:54.826966+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Tupac Amaru Shakur (  TOO-pahk sh\u0259-KOOR; born Lesane Parish Crooks; June 16, 1971 \u2013 September 13, 1996), also known by his stage names 2Pac and Makaveli, was an American rapper and actor.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "c121153e5c5034a1eb164177d155f5a33ec7d99e32550d72bbb261eab6966784",
+    "hash": "2fc8c128a1ebc252301b92bc9f3360f45d464e3d163972bf3bfe591051d75281"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826960+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "He is among the best-selling music artists, having sold more than 75 million records worldwide.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "15367a3597e8130bee5dd2ef81639334fe6b4d171d012de0eed98a6372b18070",
+    "hash": "c121153e5c5034a1eb164177d155f5a33ec7d99e32550d72bbb261eab6966784"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826955+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Shakur was born in New York City to parents who were Black Panther Party members.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "4433f2ff20abcd2c87928e1a7304d4b680f8c9a54fcfd05ad28c233840b0fbc8",
+    "hash": "15367a3597e8130bee5dd2ef81639334fe6b4d171d012de0eed98a6372b18070"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826950+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "His debut album 2Pacalypse Now (1991) cemented him as a central figure in West Coast hip-hop for his political rap lyrics.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "62882a71051cda55d6df78a7a8fc24521dc03f56db7f2cc76ca5f5f4def507e4",
+    "hash": "4433f2ff20abcd2c87928e1a7304d4b680f8c9a54fcfd05ad28c233840b0fbc8"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826945+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "His Diamond-certified album All Eyez on Me (1996), the first hip-hop double album, abandoned introspective lyrics for volatile gangsta rap.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "65f4241169518f76a778f731c1f4a378b9994bd6a1100814076ed24abdf228eb",
+    "hash": "62882a71051cda55d6df78a7a8fc24521dc03f56db7f2cc76ca5f5f4def507e4"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826940+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "It yielded two Billboard Hot 100-number one singles, \"California Love\" and \"How Do U Want It\".",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "175531cc76e12f2922616f52707d3528791e98b06a92b90392093c9bc9c8dd71",
+    "hash": "65f4241169518f76a778f731c1f4a378b9994bd6a1100814076ed24abdf228eb"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826935+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "During his later career, Shakur was shot five times in the lobby of a New York recording studio and experienced legal troubles, including incarceration.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "dfbc61b8ff86b7b3715af782d6751a977a93a3cfed4f58b3d648cd6e4c32eecb",
+    "hash": "175531cc76e12f2922616f52707d3528791e98b06a92b90392093c9bc9c8dd71"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826930+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "He served eight months in prison on sexual abuse charges, but was released pending appeal in 1995.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "51efa33cb8b749745a53af4ef2ced2ed893811f98e2f8ed56c0cad1114b5a90e",
+    "hash": "dfbc61b8ff86b7b3715af782d6751a977a93a3cfed4f58b3d648cd6e4c32eecb"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826923+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Shakur's double-length posthumous album Greatest Hits (1998) is one of his two releases\u2014and one of only nine hip-hop albums\u2014to have been certified Diamond in the United States.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "f31788300a18dc73316346bb8e5cb0a68c2e56e8c7db4d726764b38ce521492a",
+    "hash": "51efa33cb8b749745a53af4ef2ced2ed893811f98e2f8ed56c0cad1114b5a90e"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826918+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "His influence in music, activism, songwriting, and other areas of culture has been the subject of academic studies.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "e03bd2e68b009e216e017cd17be6ef85fd6bc03cde158fa1f3dae6f8a1c26b5e",
+    "hash": "f31788300a18dc73316346bb8e5cb0a68c2e56e8c7db4d726764b38ce521492a"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826913+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "== Early life ==   === Birth and ancestry === Tupac Amaru Shakur was born on June 16, 1971, in East Harlem, Manhattan, New York City, to Afeni Shakur and Billy Garland.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "5389f43aad2813e5271f472376af98b9bca8ca454fe973951b420ab17c2af826",
+    "hash": "e03bd2e68b009e216e017cd17be6ef85fd6bc03cde158fa1f3dae6f8a1c26b5e"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826906+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "== Music career ==   === 1988\u20131991: Early career === Shakur began recording under the stage name \"MC New York\" in 1988.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "7be64b1c25bf48afb646df4e8f77403b0964e8cc1f406e9ead3af7ab6c6ae515",
+    "hash": "5389f43aad2813e5271f472376af98b9bca8ca454fe973951b420ab17c2af826"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826900+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "At the request of Steinberg, Digital Underground co-founder Jimi \"Chopmaster J\" Dright worked with Shakur, Ray Luv and Dize, a DJ, on their earliest studio recordings.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "e6c9f70bc667839815875accade360d53486a9c825a4114de436e3b1064cd4b1",
+    "hash": "7be64b1c25bf48afb646df4e8f77403b0964e8cc1f406e9ead3af7ab6c6ae515"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826894+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "The recordings were rediscovered in 2000 and released as The Lost Tapes: Circa 1989.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "27d777850d2e74030aa461480c8b8aa137f414019164794dc7ddf8d14eaac29d",
+    "hash": "e6c9f70bc667839815875accade360d53486a9c825a4114de436e3b1064cd4b1"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826886+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Afeni Shakur sued to stop the sale of the recordings but the suit was settled in June 2001 and rereleased as Beginnings: The Lost Tapes 1988\u20131991.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/b/b8/Tupac_Shakur_in_1995.jpg",
+    "source_url": "https://en.wikipedia.org/wiki/Tupac_Shakur",
+    "prev_hash": "5141efe338c771e3a3ee306401f67ebb4ba8cb2963baaf41a2155d1cb87ca2e2",
+    "hash": "27d777850d2e74030aa461480c8b8aa137f414019164794dc7ddf8d14eaac29d"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826851+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "Hip-hop - Rap, DJs, MCs - Britannica",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE5OM0MwblJxM19fTW9oQVBqZUNySnc4azB2dHZid0lMTUNQYUhxcUhLd2lNdzZhRUN6THRta19nU1VZZ090Ny1YVm05RU1ycVFLSkRtNEZBSnJVZG9fN3FWS3Mydw?oc=5",
+    "prev_hash": "c0c5b0efbd5e35856884dab52c7f0dfa16c7da5e29aa99c067a366e0de92f8f1",
+    "hash": "5141efe338c771e3a3ee306401f67ebb4ba8cb2963baaf41a2155d1cb87ca2e2"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826838+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "Gene Simmons Says Hip-Hop Music \u201cDoesn\u2019t Belong\u201d in Rock & Roll Hall of Fame - The Hollywood Reporter",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxQcG5nUGpJZHpxMmt1eG05RWIybk9GVUR0TjlPTnlkVkJZUHROT2hNbjlUdjFOMUNVV3dOZmdUclRvYXdrRk5oSFNwOVZ1aTgxLU1PdWxiTkx4aHJ2YUFLQlAwLVNGcE5VWTZyUXJCcDl3NjBuUFYtWkpnNVFyRVVhUmViaWUzMnVWUFFsQkhpWW5TVGZ4N2FkZWU4YWU2NTRDM2ZsY1M2S3JuT2d6?oc=5",
+    "prev_hash": "4d10ab99e5d0afff2798b185d3bd0df8904ec14188774fc92aa8c65d7a908878",
+    "hash": "c0c5b0efbd5e35856884dab52c7f0dfa16c7da5e29aa99c067a366e0de92f8f1"
+  },
+  {
+    "timestamp": "2026-05-14T12:45:54.826788+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "Prosecutors used hip-hop lyrics to help sentence a man to death: \u2018This only happens to rap music\u2019 | US news - The Guardian",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMiogFBVV95cUxNbHVTWGlhekEyVmcyekVVQUZuTkZYd1RsQWVFWHRfZFprSjlabE92Z3RFdzMtcjBSRWhJblVhdWQydVZOakpLcWdRUGVYMjhNU0MyNERLMGg3QS04eW1OWnIwTlZwYm1YZEdkVEhVQnRISFJPVFRqLW1NZUlMVjJTLXhteXRjbFdhaVhwcEdENkFVUzI2ZmRjanUzcTdFQ2RhVEE?oc=5",
+    "prev_hash": "c9bf91f99a887c1969ad94052a343470eeeb22a290db09c6ddf1e0cbc804f991",
+    "hash": "4d10ab99e5d0afff2798b185d3bd0df8904ec14188774fc92aa8c65d7a908878"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958692+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "The Marshall Mathers LP is the third studio album by the American rapper Eminem, released on May 23, 2000, by Aftermath Entertainment and Interscope Records.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "7f6c16c51dfd67fec3b5c4afa723a2b92e3efc84f0d9e69d9fcc1f150d577cd4",
+    "hash": "c9bf91f99a887c1969ad94052a343470eeeb22a290db09c6ddf1e0cbc804f991"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958688+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Criticism centered on lyrics that were considered violent, homophobic, and misogynistic, as well as references to the Columbine High School massacre in the songs \"The Way I Am\" and \"I'm Back\".",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "93cf0054ab132a7fee1d4f02c397b804c3fea142778208ac0b9a3c3156be74a3",
+    "hash": "7f6c16c51dfd67fec3b5c4afa723a2b92e3efc84f0d9e69d9fcc1f150d577cd4"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958683+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "The album debuted at number 1 on the Billboard 200, staying atop for eight consecutive weeks.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "dc7c7d433df4472c26b46a08fb30c88d2f9ff6df0b8a6d486a295cb2695eb5b9",
+    "hash": "93cf0054ab132a7fee1d4f02c397b804c3fea142778208ac0b9a3c3156be74a3"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958675+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "It has sold 25 million copies worldwide, making it one of the best-selling albums of all time, and is certified 12\u00d7 platinum by the Recording Industry Association of America (RIAA).",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "034cda9d0c62c35985c978b9b62948502780bdfca3b615245134940acd8f3b1b",
+    "hash": "dc7c7d433df4472c26b46a08fb30c88d2f9ff6df0b8a6d486a295cb2695eb5b9"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958669+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "It was nominated for Album of the Year and won Best Rap Album at the 2001 Grammy Awards, while \"The Real Slim Shady\" won Best Rap Solo Performance.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "afd039d13e16f4565f8a22219de0de381ccfed49a3a9e0a6118311d2667851fb",
+    "hash": "034cda9d0c62c35985c978b9b62948502780bdfca3b615245134940acd8f3b1b"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958665+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "The Marshall Mathers LP 2, the album's sequel, was released in 2013.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "4f47041fd46d83f3aa1775fd8c2b010a1ccc1557e92a048a57e43067dc08e5c8",
+    "hash": "afd039d13e16f4565f8a22219de0de381ccfed49a3a9e0a6118311d2667851fb"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958661+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "== Background == Inspired by the disappointment and failure of his debut album, Infinite (1996), Eminem created the alter ego Slim Shady, whom he introduced on the Slim Shady EP (1997).",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "3fe1d89f5ceaf164d4e7bcea1722fcef6e007534354883050fd499c9b55024bb",
+    "hash": "4f47041fd46d83f3aa1775fd8c2b010a1ccc1557e92a048a57e43067dc08e5c8"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958657+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Eminem and Dr. Dre then met and recorded The Slim Shady LP (1999), which was noted for its over-the-top lyrical depictions of drugs and violence.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "15ca5222a1ae7d9fcb7c190f151ef1c8d022a3c9984b217885876260ea5f6f0b",
+    "hash": "3fe1d89f5ceaf164d4e7bcea1722fcef6e007534354883050fd499c9b55024bb"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958653+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "The Slim Shady LP was a critical and commercial success, debuting at number 2 on the Billboard 200 chart and selling 283,000 copies in its first week.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "c67f873495166626da82e72c3d250a76e28aa363850b34edbdc35fec3e711686",
+    "hash": "15ca5222a1ae7d9fcb7c190f151ef1c8d022a3c9984b217885876260ea5f6f0b"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958649+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "At the 42nd Grammy Awards in 2000, the record won Best Rap Album, while the album's lead single \"My Name Is\" won Best Rap Solo Performance.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "bf95e9c651d44d06d29f80ba99401b12e238056084777ba14f19bb71f3cf7338",
+    "hash": "c67f873495166626da82e72c3d250a76e28aa363850b34edbdc35fec3e711686"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958645+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "In June 1999, he married his girlfriend Kimberly Ann \"Kim\" Scott, the mother of Hailie, despite the fact that the song \"'97 Bonnie & Clyde\" from The Slim Shady LP contains references to killing her.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "65cd216e51f58f92268275eebb37d85c97d095b9ab3f5ad950ff0d386e5a2eb2",
+    "hash": "bf95e9c651d44d06d29f80ba99401b12e238056084777ba14f19bb71f3cf7338"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958642+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "He was labeled as \"misogynist, a nihilist and an advocate of domestic violence\", and in an editorial, Billboard editor in chief Timothy White accused Eminem of \"making money by exploiting the world's misery\".",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "2d19dcc43cab73ee7372e84a5f3f14b2ff5d8a499124502b11c1a43dfb3466d3",
+    "hash": "65cd216e51f58f92268275eebb37d85c97d095b9ab3f5ad950ff0d386e5a2eb2"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958637+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "== Recording ==  The Marshall Mathers LP was recorded in a two-month-long \"creative binge\", which often involved 20-hour-long studio sessions.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "fdc6aea9b05dc9e94e868caf74e916fa1f5df3bdf20502ed0f1ce380aa939af0",
+    "hash": "2d19dcc43cab73ee7372e84a5f3f14b2ff5d8a499124502b11c1a43dfb3466d3"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958632+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Eminem hoped to keep publicity down during the recording in order to stay focused on working and figuring out how to \"map out\" each song.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "c7c16b34e61a0ddbc2d827fea328b4b791c42d1c96b9be46279752aa6b74b554",
+    "hash": "fdc6aea9b05dc9e94e868caf74e916fa1f5df3bdf20502ed0f1ce380aa939af0"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958628+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "\"Kill You\" was written when Eminem heard the track playing in the background while talking to Dr. Dre on the phone and developed an interest in using it for a song.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/The_Marshall_Mathers_LP",
+    "prev_hash": "ba0d9c5250a7d7270145bff3b9af219658f454d89d255a9c20f386c4f3eb84d1",
+    "hash": "c7c16b34e61a0ddbc2d827fea328b4b791c42d1c96b9be46279752aa6b74b554"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958617+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "The Billboard 200 is a record chart ranking the 200 most popular music albums and EPs in the United States.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "15b7d552bbb61a8f0aa738e4e4ee2ea958b5e5ab570d0ced51481d7d74a71755",
+    "hash": "ba0d9c5250a7d7270145bff3b9af219658f454d89d255a9c20f386c4f3eb84d1"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958613+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "It is published weekly by Billboard magazine to convey the popularity of an artist or groups of artists.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "90369e9aea31017b72f3703139ba028084145b9ccd8688ec933bd914cda1dde1",
+    "hash": "15b7d552bbb61a8f0aa738e4e4ee2ea958b5e5ab570d0ced51481d7d74a71755"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958609+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "Sometimes, a recording act is remembered for its \"number ones\" that outperformed all other albums during at least one week.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "9f9eecf94fa641da53427becfd4ec3161e7686f72de19e32518b7a26332491d9",
+    "hash": "90369e9aea31017b72f3703139ba028084145b9ccd8688ec933bd914cda1dde1"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958603+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "Its previous names include the Billboard Top LPs (1961\u20131972), Billboard Top LPs & Tapes (1972\u20131984), Billboard Top 200 Albums (1984\u20131985), Billboard Top Pop Albums (1985\u20131991), and Billboard 200 Top Albums (1991\u20131992).",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "634fd71f2752820d743ee6c32a8d57b855fa06e9706f3a41f2263f54f568fb9d",
+    "hash": "9f9eecf94fa641da53427becfd4ec3161e7686f72de19e32518b7a26332491d9"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958598+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "The chart's streaming schedule is also tracked from Friday to Thursday.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "d1f92ae8f50bf0f38cb9cc6598e369d187bcfd00db0321c590e520587929b7ec",
+    "hash": "634fd71f2752820d743ee6c32a8d57b855fa06e9706f3a41f2263f54f568fb9d"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958593+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "Digital downloads of albums are included in Billboard 200 tabulation.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "1fc2a9db4e1dae464dabfe2a2c5d9f2ace8364696bd1362b363b58304f0c08f3",
+    "hash": "d1f92ae8f50bf0f38cb9cc6598e369d187bcfd00db0321c590e520587929b7ec"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958563+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "YouTube removed their streaming data from Billboard's methodology in late 2025.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "57462cc2278b59ab85def10d081e309c17c359f9796232f9bc23deec26dd196c",
+    "hash": "1fc2a9db4e1dae464dabfe2a2c5d9f2ace8364696bd1362b363b58304f0c08f3"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958558+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "== History == Billboard began an album chart in 1945.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "dcca86b210d59449e8815d229c985ef17b4a9840064174345847ecf3a7b6b0c9",
+    "hash": "57462cc2278b59ab85def10d081e309c17c359f9796232f9bc23deec26dd196c"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958552+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "Beginning on May 25, 1959, Billboard split the ranking into two charts: \"Best-Selling Stereophonic LPs\" for stereo albums (30 positions) and \"Best-Selling Monophonic LPs\" for mono albums (50 positions).",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "afa5d81aee62fca50a366dbcf19dfaba68051e782123bb8b193faed1d07fa841",
+    "hash": "dcca86b210d59449e8815d229c985ef17b4a9840064174345847ecf3a7b6b0c9"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958548+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "=== Catalog albums === In 1960, Billboard began concurrently publishing album charts that ranked sales of older or mid-priced titles.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "8302f913c6a2b24f85599ed5e3f970c2f1c671240565e8f7ddd07e158d4ea523",
+    "hash": "afa5d81aee62fca50a366dbcf19dfaba68051e782123bb8b193faed1d07fa841"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958542+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "This list continued to be published until the consolidated \"Top LPs\" chart debuted in 1963.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "fe5214040521ef15548a82d0bce0057b48f22b5179390f99ed2b33cec5111962",
+    "hash": "8302f913c6a2b24f85599ed5e3f970c2f1c671240565e8f7ddd07e158d4ea523"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958537+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "In 1982, Billboard began publishing a \"Midline Albums\" chart (alternatively titled \"Midline LPs\"), which ranked older or mid-priced titles.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "b2b36baa2c279fe816ad5d39008ae84434510d6e86e36648759856938cf9f5ca",
+    "hash": "fe5214040521ef15548a82d0bce0057b48f22b5179390f99ed2b33cec5111962"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958533+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "On May 25, 1991, Billboard premiered the \"Top Pop Catalog Albums\" chart, the criteria for which were albums that were more than 18 months old and had fallen below no.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "393c7f03cf464060fa5033becbb8549d561d12017390b02d8f84aa14df7a9f24",
+    "hash": "b2b36baa2c279fe816ad5d39008ae84434510d6e86e36648759856938cf9f5ca"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958527+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "\"Both Dark Side of the Moon and The Wall should be in the Billboard Top 200,\" said former Pink Floyd member Roger Waters in 1992.",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "96268889feaf55ff6b0da9e13d02c3473bdc9acb7bc0a154102c7fc4e3405c6d",
+    "hash": "393c7f03cf464060fa5033becbb8549d561d12017390b02d8f84aa14df7a9f24"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958522+00:00",
+    "source": "Wikipedia",
+    "topic": "Charts",
+    "fact": "\"The Wall still does anything up to four million each year...",
+    "image_url": "",
+    "source_url": "https://en.wikipedia.org/wiki/Billboard_200",
+    "prev_hash": "1d5706bb8a7a1ebab65f9e32ffc2c26d20ecd6d190b0cb180d6c55e2bf293366",
+    "hash": "96268889feaf55ff6b0da9e13d02c3473bdc9acb7bc0a154102c7fc4e3405c6d"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958517+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Andre Romell  Young (born February 18, 1965), known professionally as Dr. Dre, is an American rapper, record producer, record executive, and actor.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "93800b6d27cb48a9e8eb127a5c9d40061bc03a42452e863b15e656df5578e68d",
+    "hash": "1d5706bb8a7a1ebab65f9e32ffc2c26d20ecd6d190b0cb180d6c55e2bf293366"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958511+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "N.W.A's debut album Straight Outta Compton (1989) was one of the most successful albums in the West Coast hip-hop scene, and is often credited for the rise in popularity of gangsta rap.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "af0f8edf48080d6a72056ee9655a96ecf328ec0cfb7b980c9308db346345c76b",
+    "hash": "93800b6d27cb48a9e8eb127a5c9d40061bc03a42452e863b15e656df5578e68d"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958506+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Released as Death Row's first major project, Dr. Dre's debut solo album, The Chronic (1992), made him one of the best-selling American music artists of 1993.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "46542ae074df2f2b189f6c7998907b1e1380e214f8da29adb9f4d7c8932cd75c",
+    "hash": "af0f8edf48080d6a72056ee9655a96ecf328ec0cfb7b980c9308db346345c76b"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958501+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Its lead single, \"Nuthin' but a 'G' Thang\" (featuring Snoop Dogg), peaked at number two on the Billboard Hot 100, while its third, Let Me Ride\" won Best Rap Solo Performance at the 36th Annual Grammy Awards.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "7a9950fc53b092252e29042afef39f8dd35de47de5098822d7c1c8e3eed728a2",
+    "hash": "46542ae074df2f2b189f6c7998907b1e1380e214f8da29adb9f4d7c8932cd75c"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958496+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "After years of teasing an album tentatively titled Detox, Dre released his third studio album, Compton, in 2015.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "2a9a79c0c983e307ac0e82b3c494d9e1ae7ca6e70f422f449e76494b878915f6",
+    "hash": "7a9950fc53b092252e29042afef39f8dd35de47de5098822d7c1c8e3eed728a2"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958491+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "He has won seven Grammy Awards, including Producer of the Year, Non-Classical.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "faef35619017ee0c36ec07e6bccfdf7eee2ebffda51c4544e5b6b6a41d8b64a5",
+    "hash": "2a9a79c0c983e307ac0e82b3c494d9e1ae7ca6e70f422f449e76494b878915f6"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958486+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "== Early life == Andre Romell Young was born in Compton, California, on February 18, 1965, the son of Theodore and Verna Young.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "24b8e538de2bff066ec0eda3f47790a29f305a0a191ead0685d7ce1e0e343196",
+    "hash": "faef35619017ee0c36ec07e6bccfdf7eee2ebffda51c4544e5b6b6a41d8b64a5"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958481+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Eve After Dark had a back room with a small four-track studio where Dre and Yella recorded several demos.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "6385aaf3e273691825523b07aa11e358704166457bc3cdfda193df18de6eb73c",
+    "hash": "24b8e538de2bff066ec0eda3f47790a29f305a0a191ead0685d7ce1e0e343196"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958476+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "In their first recording session, they recorded a song entitled \"Surgery\" in 1984.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "8582604078b74dc40026243d2308e6b4d4a27b3b4174282c33b77e7627d45411",
+    "hash": "6385aaf3e273691825523b07aa11e358704166457bc3cdfda193df18de6eb73c"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958470+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Dr. Dre's earliest recordings were released in 1994 on a compilation titled Concrete Roots.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "da546ab321801732c0180ffd85837cabe9af75a3d601c6368d6c435a75cf44f0",
+    "hash": "8582604078b74dc40026243d2308e6b4d4a27b3b4174282c33b77e7627d45411"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958464+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Critic Stephen Thomas Erlewine of AllMusic described the compiled music, released \"several years before Dre developed a distinctive style\", as \"surprisingly generic and unengaging\" and \"for dedicated fans only\".",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "0e98a386871153269aeea12c3127c940696cbe90b5773f0637e103624aff73f6",
+    "hash": "da546ab321801732c0180ffd85837cabe9af75a3d601c6368d6c435a75cf44f0"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958458+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Dre later joined the musical group World Class Wreckin' Cru, which released its debut album under the Kru-Cut label in 1985.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "a06632019a70888ffdce34223d98878013edf5fb0702f4bd501dbee6c2a3433e",
+    "hash": "0e98a386871153269aeea12c3127c940696cbe90b5773f0637e103624aff73f6"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958452+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "\"Surgery\", which was officially released after being recorded prior to the group's official formation, would prominently feature Dr. Dre on the turntable.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "3a6e0a3db5f91f9f768fe717d0245117cc2764a2ceb9f8117cf21c0abaab99d8",
+    "hash": "a06632019a70888ffdce34223d98878013edf5fb0702f4bd501dbee6c2a3433e"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958446+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "The record would become the group's first hit, selling 50,000 copies within the Compton area.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "92d1bdc9dbc54120bd8a7d239c7e5b290b0fde1254f942ab2eecbf204811d2f8",
+    "hash": "3a6e0a3db5f91f9f768fe717d0245117cc2764a2ceb9f8117cf21c0abaab99d8"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958439+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "The Federal Bureau of Investigation sent Ruthless Records a warning letter in response to the song's content.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Dr_Dre_sig.svg/960px-Dr_Dre_sig.svg.png",
+    "source_url": "https://en.wikipedia.org/wiki/Dr._Dre",
+    "prev_hash": "be503b092504190bb4787d9511a0ec440116e2265b95e4126a8c2331829061df",
+    "hash": "92d1bdc9dbc54120bd8a7d239c7e5b290b0fde1254f942ab2eecbf204811d2f8"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958424+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "DJ Whoo Kid Says Rap Game Needs Drake: \u2018When He\u2019s Here, We\u2019re on the Charts\u2019 - Billboard",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxPS3lxa1lxSHpJcjl2eTVNS29fNEJzX3NFNWVMdnk3dmFQT3ZnZFh3ZmcxNFZ2Z3BLTXc2eEcwdG8wTmdWWWFUekpyT1JjNDZPZGFCV1lSNFBvM0lRVUJaQ3dQdU9OQWhJY2hDYzh0Y19ZU1Z4c1JCQTF5RU1maEU4cmVhLURlbnRGNy13ZGZtcldGR3NnYk9kYzNnaw?oc=5",
+    "prev_hash": "9ec272baf494bc1892e0e3892f4a63a4355adda835513c2d267417f916800b84",
+    "hash": "be503b092504190bb4787d9511a0ec440116e2265b95e4126a8c2331829061df"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958410+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "Eminem & 50 Cent Reunite Courtside At Detroit Pistons Playoff Game",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/994856-eminem-50-cent-pistons-game",
+    "prev_hash": "07486e96b811f11f7747cab2af120c75f79cb56a609c3139045df0af9be9b09a",
+    "hash": "9ec272baf494bc1892e0e3892f4a63a4355adda835513c2d267417f916800b84"
+  },
+  {
+    "timestamp": "2026-05-14T12:30:35.958357+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "Protagonist \u2013 Album by Bleood",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/994852-protagonist-bleood",
+    "prev_hash": "d92259c0db60dcccd375b57a0d87fe646e13a1ee7d99e8415b2c78c67c79e0fa",
+    "hash": "07486e96b811f11f7747cab2af120c75f79cb56a609c3139045df0af9be9b09a"
+  },
+  {
     "timestamp": "2026-05-14T11:34:32.800271+00:00",
     "source": "Wikipedia",
     "topic": "Eminem",
