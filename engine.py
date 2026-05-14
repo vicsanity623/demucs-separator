@@ -11,9 +11,14 @@ import os
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
-    nltk.download('punkt')
+    nltk.download('punkt', quiet=True)
 
 LEDGER_FILE = "ledger.json"
+
+# Proper User-Agent to prevent Wikipedia & RSS feeds from blocking the GitHub Actions IP
+HEADERS = {
+    "User-Agent": "AxiomEngineBot/1.0 (https://github.com/; axiom-engine@example.com) python-requests/2.x"
+}
 
 def get_previous_hash(ledger):
     if not ledger:
@@ -37,49 +42,73 @@ def create_block(fact_text, source, topic, prev_hash):
 
 def fetch_wikipedia_facts(title, topic):
     url = f"https://en.wikipedia.org/w/api.php?action=query&prop=extracts&explaintext=1&titles={title}&format=json"
-    response = requests.get(url).json()
-    pages = response['query']['pages']
-    text = list(pages.values())[0].get('extract', '')
-    
-    sentences = nltk.tokenize.sent_tokenize(text)
     facts = []
-    # NLP Filter: Only keep sentences containing verifiable metrics/keywords
-    keywords = ['million', 'billion', 'certified', 'Grammy', 'Billboard', 'released', 'sold', 'record']
     
-    for sentence in sentences:
-        if len(sentence) < 40 or len(sentence) > 200:
-            continue # Skip too short or too long sentences
-        if any(kw in sentence for kw in keywords):
-            facts.append(sentence.strip())
-            if len(facts) >= 20: # Limit per source
-                break
+    try:
+        # Pass the headers to satisfy Wikipedia's bot policy
+        response = requests.get(url, headers=HEADERS, timeout=10)
+        response.raise_for_status() # Raise error if HTTP status is not 200 OK
+        data = response.json()
+        
+        pages = data.get('query', {}).get('pages', {})
+        if not pages:
+            return facts, "Wikipedia"
+            
+        text = list(pages.values())[0].get('extract', '')
+        if not text:
+            return facts, "Wikipedia"
+        
+        sentences = nltk.tokenize.sent_tokenize(text)
+        
+        # NLP Filter: Only keep sentences containing verifiable metrics/keywords
+        keywords = ['million', 'billion', 'certified', 'Grammy', 'Billboard', 'released', 'sold', 'record']
+        
+        for sentence in sentences:
+            if len(sentence) < 40 or len(sentence) > 200:
+                continue # Skip too short or too long sentences
+            if any(kw in sentence for kw in keywords):
+                facts.append(sentence.strip())
+                if len(facts) >= 20: # Limit per source
+                    break
+                    
+    except Exception as e:
+        print(f"⚠️ Error fetching Wikipedia ({title}): {e}")
+        
     return facts, "Wikipedia"
 
 def generate_ledger():
     # Load existing ledger
     if os.path.exists(LEDGER_FILE):
-        with open(LEDGER_FILE, 'r') as f:
-            ledger = json.load(f)
+        try:
+            with open(LEDGER_FILE, 'r') as f:
+                ledger = json.load(f)
+        except json.JSONDecodeError:
+            ledger = []
     else:
         ledger = []
 
     new_facts = []
     
     # 1. Scrape Wikipedia (Eminem & Hip Hop)
+    print("Scraping Wikipedia...")
     wiki_targets = [("Eminem", "Eminem"), ("Hip_hop_music", "Hip Hop History")]
     for title, topic in wiki_targets:
         facts, source = fetch_wikipedia_facts(title, topic)
         for fact in facts:
             new_facts.append({"fact": fact, "source": source, "topic": topic})
 
-    # 2. Scrape RSS Feeds (e.g., HipHopDX or general music news)
-    # Using a generic music/hiphop feed example
-    rss_url = "https://hiphopdx.com/rss/news"
-    feed = feedparser.parse(rss_url)
-    for entry in feed.entries[:10]:
-        title = entry.title
-        if 'eminem' in title.lower() or 'rap' in title.lower():
-            new_facts.append({"fact": title, "source": "HipHopDX RSS", "topic": "Trending"})
+    # 2. Scrape RSS Feeds
+    print("Scraping RSS Feeds...")
+    try:
+        rss_url = "https://hiphopdx.com/rss/news"
+        # Feedparser takes an agent string directly or works without one sometimes, but good to be safe
+        feed = feedparser.parse(rss_url, agent=HEADERS["User-Agent"])
+        for entry in feed.entries[:15]:
+            title = entry.title
+            if 'eminem' in title.lower() or 'rap' in title.lower() or 'hip hop' in title.lower():
+                new_facts.append({"fact": title, "source": "HipHopDX RSS", "topic": "Trending"})
+    except Exception as e:
+        print(f"⚠️ Error fetching RSS: {e}")
 
     # Filter out duplicates against existing ledger
     existing_facts = set(block['fact'] for block in ledger)
@@ -97,10 +126,11 @@ def generate_ledger():
     # Keep only top 500 facts to prevent file bloat on GitHub pages
     ledger = ledger[:500]
 
+    # Save Ledger
     with open(LEDGER_FILE, 'w') as f:
         json.dump(ledger, f, indent=2)
 
-    print(f"Axiom Engine Run Complete. Added {added} new verified blocks.")
+    print(f"✅ Axiom Engine Run Complete. Added {added} new verified blocks.")
 
 if __name__ == "__main__":
     generate_ledger()
