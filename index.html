@@ -2,10 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA & iOS Fullscreen Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
     <meta name="description" content="Digital Clock & Device Dashboard">
-    <title>Digital Clock Dashboard</title>
+    <title>Digital Dashboard</title>
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -30,6 +34,7 @@
             padding: 0;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
         }
 
         body, html {
@@ -67,6 +72,8 @@
             z-index: 2;
             text-align: center;
             text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
+            /* Push clock slightly up to balance the footer */
+            transform: translateY(-5vh); 
         }
 
         .time {
@@ -76,7 +83,7 @@
         }
 
         .date {
-            font-size: 3vw;
+            font-size: 3.5vw;
             margin-top: 10px;
             letter-spacing: 1px;
             opacity: 0.8;
@@ -86,8 +93,9 @@
         /* Footer Stats UI */
         .footer-stats {
             position: absolute;
-            bottom: 20px;
-            z-index: 2;
+            /* safe-area-inset ensures it avoids the iOS bottom home swipe bar */
+            bottom: max(20px, env(safe-area-inset-bottom));
+            z-index: 3;
             width: 90%;
             max-width: 600px;
             display: flex;
@@ -95,8 +103,9 @@
             align-items: center;
             font-size: 14px;
             border-top: 1px solid var(--dim-green);
-            padding-top: 10px;
+            padding-top: 15px;
             text-shadow: 0 0 5px var(--neon-green);
+            cursor: pointer; /* Suggests interactivity for the iOS workaround */
         }
 
         .stat-group {
@@ -104,6 +113,7 @@
             flex-direction: column;
             align-items: center;
             gap: 5px;
+            width: 33%;
         }
 
         .stat-label {
@@ -151,7 +161,7 @@
         @media (min-width: 768px) {
             .time { font-size: 120px; }
             .date { font-size: 24px; }
-            .footer-stats { font-size: 16px; bottom: 40px; }
+            .footer-stats { font-size: 16px; bottom: max(40px, env(safe-area-inset-bottom)); }
         }
     </style>
 </head>
@@ -167,14 +177,14 @@
     </main>
 
     <!-- Bottom Dashboard -->
-    <footer class="footer-stats">
+    <footer class="footer-stats" id="footerClickArea">
         <div class="stat-group">
             <span class="stat-label">CPU Cores</span>
             <span id="cpuDisplay">--</span>
         </div>
         <div class="stat-group">
             <span class="stat-label">RAM</span>
-            <span id="ramDisplay">-- GB</span>
+            <span id="ramDisplay">--</span>
         </div>
         <div class="stat-group">
             <span class="stat-label" id="chargeStatus">Battery</span>
@@ -267,16 +277,15 @@
         class LightParticle {
             constructor() {
                 this.reset();
-                // Randomize initial Y so they don't all start clumped when active
                 this.y = canvas.height + Math.random() * 200; 
             }
 
             reset() {
-                this.x = canvas.width / 2 + (Math.random() - 0.5) * 50; // Flow from center bottom
+                this.x = canvas.width / 2 + (Math.random() - 0.5) * 60; 
                 this.y = canvas.height + 10;
                 this.size = Math.random() * 3 + 1;
-                this.speedY = Math.random() * 2 + 1;
-                this.speedX = (Math.random() - 0.5) * 1.5;
+                this.speedY = Math.random() * 3 + 1.5;
+                this.speedX = (Math.random() - 0.5) * 2.0;
                 this.life = 1.0;
                 this.decay = Math.random() * 0.005 + 0.002;
             }
@@ -284,7 +293,6 @@
             update() {
                 this.y -= this.speedY;
                 this.x += this.speedX;
-                // Spread out as they go up
                 this.speedX += (Math.random() - 0.5) * 0.1;
                 this.life -= this.decay;
 
@@ -300,13 +308,13 @@
                 ctx.shadowBlur = 15;
                 ctx.shadowColor = '#00ff41';
                 ctx.fill();
-                ctx.shadowBlur = 0; // Reset for performance
+                ctx.shadowBlur = 0; 
             }
         }
 
         function initParticles() {
             particles = [];
-            const particleCount = window.innerWidth < 768 ? 40 : 100;
+            const particleCount = window.innerWidth < 768 ? 60 : 120;
             for (let i = 0; i < particleCount; i++) {
                 particles.push(new LightParticle());
             }
@@ -329,17 +337,16 @@
          * @returns {void}
          */
         function initStats() {
-            // CPU & RAM (Fallback for iOS/Safari privacy blocks)
             const cpuDisplay = document.getElementById('cpuDisplay');
             const ramDisplay = document.getElementById('ramDisplay');
-            
-            cpuDisplay.textContent = navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 'N/A';
-            ramDisplay.textContent = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'N/A';
-
-            // Battery API
             const batteryFill = document.getElementById('batteryFill');
             const batteryPct = document.getElementById('batteryPct');
             const chargeStatus = document.getElementById('chargeStatus');
+            const footerClickArea = document.getElementById('footerClickArea');
+            
+            // iOS restricts RAM/CPU. If unavailable, show "SECURE" instead of ugly N/A
+            cpuDisplay.textContent = navigator.hardwareConcurrency ? navigator.hardwareConcurrency : 'SECURE';
+            ramDisplay.textContent = navigator.deviceMemory ? `${navigator.deviceMemory} GB` : 'SECURE';
 
             function updateBatteryUI(battery) {
                 const level = Math.round(battery.level * 100);
@@ -357,6 +364,7 @@
                 }
             }
 
+            // Detect if browser supports Battery API (Android/Chrome)
             if ('getBattery' in navigator) {
                 navigator.getBattery().then(battery => {
                     updateBatteryUI(battery);
@@ -364,11 +372,32 @@
                     battery.addEventListener('chargingchange', () => updateBatteryUI(battery));
                 });
             } else {
-                // iOS Fallback (Apple blocks getBattery for fingerprinting reasons)
+                // iOS FALLBACK: Apple blocks getBattery() 
+                // We provide a manual tap-to-toggle feature so iOS users can still see the animation
                 batteryFill.style.width = '100%';
-                batteryPct.textContent = 'iOS';
-                chargeStatus.textContent = 'POWER';
+                batteryPct.textContent = 'SECURE';
+                chargeStatus.textContent = 'TAP TO CHG';
+                
+                footerClickArea.addEventListener('click', () => {
+                    isCharging = !isCharging;
+                    if (isCharging) {
+                        chargeStatus.textContent = 'CHARGING';
+                        canvas.classList.add('charging');
+                    } else {
+                        chargeStatus.textContent = 'TAP TO CHG';
+                        canvas.classList.remove('charging');
+                    }
+                });
             }
+
+            // Attempt to force fullscreen on interaction (helps hide UI on Android/Desktop)
+            document.body.addEventListener('dblclick', () => {
+                if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                } else if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            });
         }
 
         // Initialization
