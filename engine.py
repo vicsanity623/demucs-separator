@@ -4,6 +4,7 @@ import feedparser  # type: ignore
 import nltk  # type: ignore
 from datetime import datetime, timezone
 import time
+import random
 from typing import List, Dict, Tuple
 from ledger_manager import load_ledger, save_ledger
 
@@ -17,7 +18,8 @@ HEADERS: Dict[str, str] = {
     "User-Agent": "AxiomEngineBot/2.0 (https://github.com/; axiom-engine@example.com) python-requests/2.x"
 }
 
-WIKI_TARGETS: List[Tuple[str, str]] = [
+# Expanded seed list for dynamic Wikipedia exploration
+WIKI_SEEDS: List[Tuple[str, str]] = [
     ("Eminem", "Eminem"),
     ("Hip_hop_music", "Hip Hop History"),
     ("Dr._Dre", "Hip Hop History"),
@@ -28,17 +30,24 @@ WIKI_TARGETS: List[Tuple[str, str]] = [
     ("Rap_God", "Eminem"),
     ("Lose_Yourself", "Eminem"),
     ("Tupac_Shakur", "Hip Hop History"),
+    ("The_Notorious_B.I.G.", "Hip Hop History"),
+    ("Snoop_Dogg", "Hip Hop History"),
+    ("Detroit_hip_hop", "Hip Hop History"),
+    ("Aftermath_Entertainment", "Hip Hop Business"),
+    ("Interscope_Records", "Hip Hop Business"),
+    ("Billboard_200", "Charts"),
+    ("RIAA_certification", "Industry Stats"),
+    ("Grammy_Award_for_Best_Rap_Album", "Awards"),
+    ("N.W.A", "Hip Hop History"),
+    ("Jay-Z", "Hip Hop History")
 ]
 
 RSS_TARGETS: List[Tuple[str, str]] = [
+    ("Google News Hip Hop", "https://news.google.com/rss/search?q=hip+hop+music+news&hl=en-US&gl=US&ceid=US:en"),
     ("HipHopDX", "https://hiphopdx.com/rss/news"),
     ("Billboard Hip-Hop", "https://www.billboard.com/c/music/rb-hip-hop/feed/"),
     ("Rolling Stone", "https://www.rollingstone.com/music/feed/"),
     ("HotNewHipHop", "https://www.hotnewhiphop.com/feed/"),
-    ("Uproxx Music", "https://uproxx.com/music/feed/"),
-    ("Stereogum", "https://www.stereogum.com/category/music/feed/"),
-    ("Consequence", "https://consequence.net/category/music/feed/"),
-    ("NME Music", "https://www.nme.com/news/music/feed"),
     ("Pitchfork", "https://pitchfork.com/rss/news/"),
     ("AllHipHop", "https://allhiphop.com/feed/"),
 ]
@@ -110,13 +119,17 @@ def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, 
             "record",
             "platinum",
             "debut",
+            "born",
+            "track",
+            "rhyme",
+            "song",
         ]
 
         for sentence in sentences:
-            if 40 <= len(sentence) <= 200 and any(kw in sentence for kw in keywords):
+            if 40 <= len(sentence) <= 220 and any(kw in sentence for kw in keywords):
                 clean_fact = sentence.replace("\n", " ").strip()
                 facts.append(clean_fact)
-                if len(facts) >= 20:
+                if len(facts) >= 15:
                     break
 
     except Exception as e:
@@ -125,14 +138,14 @@ def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, 
     return facts, "Wikipedia", image_url, source_url
 
 
-# Ledger I/O moved to ledger_manager.py
-
-
 def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, str]]]:
     new_facts: List[Dict[str, str]] = []
 
-    print("Scraping Wikipedia Hubs...")
-    for title, topic in WIKI_TARGETS:
+    # DYNAMIC DISCOVERY: Pick 4 random targets from the wiki seeds to avoid stagnation
+    current_wiki_batch = random.sample(WIKI_SEEDS, k=min(4, len(WIKI_SEEDS)))
+    
+    print(f"Scraping Wikipedia (Discovery Mode: {', '.join([t[0] for t in current_wiki_batch])})...")
+    for title, topic in current_wiki_batch:
         facts, source, img_url, src_url = fetch_wikipedia_facts(title, topic)
         for fact in facts:
             new_facts.append(
@@ -144,17 +157,17 @@ def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, 
                     "source_url": src_url,
                 }
             )
-        time.sleep(1)  # Respect Wiki API limit
+        time.sleep(1)
 
-    print("Scraping RSS Feeds...")
+    print("Scraping RSS Feeds (Discovery Mode)...")
     for source_name, rss_url in RSS_TARGETS:
         try:
             feed = feedparser.parse(rss_url, agent=HEADERS["User-Agent"])
-            for entry in feed.entries[:10]:
+            for entry in feed.entries[:15]:
                 title = entry.get("title", "")
-                if any(
-                    kw in title.lower() for kw in ["eminem", "rap", "hip hop", "dre"]
-                ):
+                # Broadened keywords to capture more industry news
+                discovery_keywords = ["eminem", "rap", "hip hop", "dre", "album", "music", "chart", "concert"]
+                if any(kw in title.lower() for kw in discovery_keywords):
                     img_url = ""
                     src_url = entry.get("link", "")
 
@@ -177,7 +190,7 @@ def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, 
                     )
         except Exception as e:
             print(f"⚠️ Error fetching RSS ({source_name}): {e}")
-        time.sleep(2)  # Respect RSS limits
+        time.sleep(1)
 
     existing_facts = set(block["fact"] for block in ledger)
     added = 0
@@ -217,11 +230,14 @@ if __name__ == "__main__":
 
         print(f"\n--- Starting Cycle {cycle} ---")
         added, ledger = run_engine_cycle(ledger)
-        save_ledger(ledger)  # Save to disk after every cycle as a failsafe
+        save_ledger(ledger)
 
         print(f"✅ Cycle {cycle} Complete. Added {added} new verified blocks.")
 
-        sleep_duration: float = 20.0 * 60.0
+        # Sleep for 15 minutes instead of 20 to increase news capture frequency
+        sleep_duration: float = 15.0 * 60.0
+        sleep_duration += random.randint(1, 30)
+
         if (time.time() - start_time) + sleep_duration > MAX_RUNTIME_SEC:
             sleep_duration = float(MAX_RUNTIME_SEC) - (time.time() - start_time)
 
