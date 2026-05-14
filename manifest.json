@@ -1,10 +1,11 @@
 {
-  "name": "Rage: Eternal",
-  "short_name": "RageMMORPG",
+  "name": "Digital Dashboard",
+  "short_name": "Dashboard",
+  "description": "Professional Digital Clock and Device Stats Dashboard",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#050505",
-  "theme_color": "#FF8C00",
+  "background_color": "#000000",
+  "theme_color": "#000000",
   "orientation": "portrait",
   "icons": [
     {
