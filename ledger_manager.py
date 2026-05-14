@@ -34,4 +34,3 @@ def flag_block(block_hash: str, status: str) -> bool:
             save_ledger(ledger)
             return True
     return False
-    return False
