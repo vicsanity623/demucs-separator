@@ -21,8 +21,8 @@ echo "✅ All required web files are present."
 
 # 2. Check for Icons (Warn if missing since user adds them)
 echo "[2/4] Checking for icon assets..."
-if [ ! -f "idle192x192.png" ] || [ ! -f "idle512x512.png" ]; then
-    echo "⚠️  WARNING: idle192x192.png or idle512x512.png not found."
+if [ ! -f "idle192.png" ] || [ ! -f "idle512.png" ]; then
+    echo "⚠️  WARNING: idle192.png or idle512.png not found."
     echo "   (Make sure to add them before deploying to GitHub Pages)"
 else
     echo "✅ Icons found."
