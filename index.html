@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>NotGPT | Hip Hop Ledger</title>
+    <title>Axiom Engine | Hip Hop Ledger</title>
     
-    <!-- PWA Manifest & App Icons -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f0f0f">
     <link rel="apple-touch-icon" href="icon-192x192.png">
@@ -25,12 +24,7 @@
             --verified-color: #2ba640;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
 
         body {
             background-color: var(--bg-color);
@@ -48,13 +42,12 @@
             justify-content: space-between;
             padding: 0 20px;
             padding-top: max(20px, env(safe-area-inset-top)); 
-            height: auto;
             min-height: 60px;
             padding-bottom: 10px;
             background-color: var(--bg-color);
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 20;
         }
 
         .logo {
@@ -64,6 +57,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            cursor: pointer;
         }
 
         .logo-icon {
@@ -105,19 +99,11 @@
             padding: 0 20px;
             color: var(--text-primary);
             cursor: pointer;
-            transition: 0.2s;
         }
 
-        .search-bar button:hover { background-color: #303030; }
+        /* --- LAYOUTS --- */
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
 
-        /* --- MAIN LAYOUT --- */
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        /* --- SIDEBAR --- */
         .sidebar {
             width: 240px;
             background-color: var(--bg-color);
@@ -140,179 +126,116 @@
             gap: 15px;
         }
 
-        .sidebar-item:hover, .sidebar-item.active {
-            background-color: var(--surface-color);
-        }
+        .sidebar-item:hover, .sidebar-item.active { background-color: var(--surface-color); }
 
-        /* --- CONTENT AREA --- */
         .content {
             flex: 1;
             overflow-y: auto;
             background-color: var(--bg-color);
             padding: 20px;
-            /* FIX: Add bottom padding so last items aren't hidden by iOS home bar */
             padding-bottom: max(50px, env(safe-area-inset-bottom));
         }
 
-        /* --- FILTERS --- */
-        .filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-        }
-
+        /* --- HOME GRID VIEW --- */
+        .filters { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
         .filter-chip {
-            background-color: var(--surface-color);
-            color: var(--text-primary);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: 0.2s;
+            background-color: var(--surface-color); color: var(--text-primary); border: none;
+            padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap;
         }
-
-        .filter-chip:hover { background-color: var(--hover-color); }
         .filter-chip.active { background-color: var(--text-primary); color: var(--bg-color); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
 
-        /* --- VIDEO / FACT GRID --- */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .card {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            cursor: pointer;
-        }
-
+        .card { display: flex; flex-direction: column; gap: 12px; cursor: pointer; }
         .thumbnail {
+            width: 100%; aspect-ratio: 16/9; border-radius: 12px; position: relative;
+            background-color: #222; background-size: cover; background-position: center top;
+            display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; transition: 0.2s;
+        }
+        .thumbnail-text { font-size: 22px; font-weight: 700; text-shadow: 2px 2px 8px rgba(0,0,0,1); z-index: 2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .source-badge { position: absolute; bottom: 8px; right: 8px; background-color: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; z-index: 2; }
+        .card-info { display: flex; gap: 12px; }
+        .channel-icon { width: 36px; height: 36px; border-radius: 50%; background-color: var(--surface-color); display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; background-size: cover; background-position: center; }
+        .meta { display: flex; flex-direction: column; }
+        .fact-title { font-size: 16px; font-weight: 500; line-height: 1.4; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .fact-details { font-size: 14px; color: var(--text-secondary); }
+
+        /* --- YOUTUBE STYLE WATCH VIEW --- */
+        .watch-container {
+            display: none; /* Hidden by default */
+            flex-direction: row;
+            gap: 24px;
+            width: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .watch-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 15px; }
+        .watch-sidebar { width: 400px; display: flex; flex-direction: column; gap: 15px; }
+
+        .watch-player {
             width: 100%;
             aspect-ratio: 16/9;
             border-radius: 12px;
-            position: relative;
-            background-color: #222;
+            background-color: #000;
             background-size: cover;
-            background-position: center top;
+            background-position: center 20%;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px;
             text-align: center;
-            transition: 0.2s;
-            /* We use an inline style to apply the dark gradient overlay over the image */
+            position: relative;
         }
-
-        .card:hover .thumbnail {
-            border-radius: 0px; 
+        .watch-player-text { font-size: 4vw; font-weight: 700; text-shadow: 0px 5px 20px rgba(0,0,0,1); z-index: 2; line-height: 1.2; }
+        .watch-title { font-size: 20px; font-weight: 700; line-height: 1.4; }
+        
+        .watch-channel-row { display: flex; justify-content: space-between; align-items: center; }
+        .watch-channel-info { display: flex; align-items: center; gap: 15px; }
+        .watch-channel-name { font-weight: bold; font-size: 16px; }
+        .watch-channel-sub { font-size: 12px; color: var(--text-secondary); }
+        
+        .watch-btn {
+            background-color: var(--surface-color); color: var(--text-primary); border: none;
+            padding: 10px 20px; border-radius: 20px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px;
         }
+        .watch-btn:hover { background-color: var(--hover-color); }
 
-        .thumbnail-text {
-            font-size: 22px;
-            font-weight: 700;
-            text-shadow: 2px 2px 8px rgba(0,0,0,1);
-            z-index: 2;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .source-badge {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background-color: rgba(0,0,0,0.8);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 500;
-            z-index: 2;
-        }
-
-        .card-info {
-            display: flex;
-            gap: 12px;
-        }
-
-        .channel-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+        .watch-description {
             background-color: var(--surface-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            flex-shrink: 0;
-            background-size: cover;
-            background-position: center;
-        }
-
-        .meta {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .fact-title {
-            font-size: 16px;
-            font-weight: 500;
-            line-height: 1.4;
-            margin-bottom: 4px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .fact-details {
+            border-radius: 12px;
+            padding: 20px;
             font-size: 14px;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            line-height: 1.6;
+            color: var(--text-primary);
         }
-
-        .verified-icon {
-            color: var(--verified-color);
-            font-size: 12px;
+        .watch-description a { color: var(--accent-color); text-decoration: none; }
+        .watch-description a:hover { text-decoration: underline; }
+        .crypto-box {
+            background-color: #121212; border-left: 3px solid var(--verified-color);
+            padding: 15px; border-radius: 0 8px 8px 0; margin-top: 15px; font-family: monospace; font-size: 12px; word-break: break-all;
         }
-
-        .action-btns {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-        }
-
-        .action-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 12px;
-        }
-        .action-btn:hover { color: var(--text-primary); }
 
         /* Responsive */
+        @media (max-width: 1000px) {
+            .watch-container { flex-direction: column; }
+            .watch-sidebar { width: 100%; }
+            .watch-player-text { font-size: 24px; }
+        }
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .search-bar { margin: 0 10px; flex: 1; }
-            .logo-text-hide { display: none; } /* hide text on mobile to save space */
+            .logo-text-hide { display: none; }
+            .watch-channel-row { flex-direction: column; align-items: flex-start; gap: 15px; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="logo">
-            <div class="logo-icon">AE</div>
+        <div class="logo" onclick="closeWatchView()">
+            <div class="logo-icon">v1</div>
             <span class="logo-text-hide">NotGPT</span>
         </div>
         <div class="search-bar">
@@ -325,7 +248,8 @@
     </header>
 
     <div class="main-container">
-        <aside class="sidebar">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar" id="mainSidebar">
             <div class="sidebar-item active" onclick="setCategory('All')">🏠 Home</div>
             <div class="sidebar-item" onclick="setCategory('Eminem')">🎤 Eminem Facts</div>
             <div class="sidebar-item" onclick="setCategory('Trending')">🔥 Trending News</div>
@@ -334,24 +258,64 @@
             <div class="sidebar-item" onclick="setCategory('History')">🕒 History</div>
         </aside>
 
-        <main class="content">
-            <div class="filters" id="filterContainer">
-                <button class="filter-chip active" onclick="setCategory('All')">All</button>
-                <button class="filter-chip" onclick="setCategory('Eminem')">Eminem</button>
-                <button class="filter-chip" onclick="setCategory('Hip Hop History')">Classics</button>
-                <button class="filter-chip" onclick="setCategory('Trending')">Trending</button>
+        <main class="content" id="mainContent">
+            
+            <!-- Default Grid View -->
+            <div id="gridContainer">
+                <div class="filters" id="filterContainer">
+                    <button class="filter-chip active" onclick="setCategory('All')">All</button>
+                    <button class="filter-chip" onclick="setCategory('Eminem')">Eminem</button>
+                    <button class="filter-chip" onclick="setCategory('Hip Hop History')">Classics</button>
+                    <button class="filter-chip" onclick="setCategory('Trending')">Trending</button>
+                </div>
+                <div class="grid" id="videoGrid"></div>
             </div>
 
-            <div class="grid" id="videoGrid">
-                <!-- Data injected here via JS -->
+            <!-- YouTube Style Watch View -->
+            <div id="watchContainer" class="watch-container">
+                <div class="watch-main">
+                    <div class="watch-player" id="wPlayer">
+                        <div class="watch-player-text" id="wPlayerText">Fact Text</div>
+                    </div>
+                    <div class="watch-title" id="wTitle">Full Fact Description</div>
+                    
+                    <div class="watch-channel-row">
+                        <div class="watch-channel-info">
+                            <div class="channel-icon" id="wChannelIcon" style="width:48px; height:48px;"></div>
+                            <div>
+                                <div class="watch-channel-name" id="wChannelName">Source</div>
+                                <div class="watch-channel-sub">Axiom Engine <span style="color:var(--verified-color)">✔</span></div>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button class="watch-btn" id="wFavBtn">☆ Save</button>
+                            <a class="watch-btn" id="wSourceBtn" href="#" target="_blank" style="text-decoration:none;">🔗 Read Source</a>
+                        </div>
+                    </div>
+
+                    <div class="watch-description">
+                        <p style="font-weight:bold; margin-bottom:10px;">Topic: <span id="wTopic" style="color:var(--accent-color)">Topic</span> • <span id="wTime">Time</span></p>
+                        <p>This block has been cryptographically sealed and verified by the Axiom Engine ledger.</p>
+                        <div class="crypto-box">
+                            <strong style="color:var(--text-secondary)">Block Hash:</strong><br>
+                            <span id="wHash" style="color:var(--verified-color)">hash</span><br><br>
+                            <strong style="color:var(--text-secondary)">Previous Hash:</strong><br>
+                            <span id="wPrevHash">prev</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="watch-sidebar" id="wSidebar">
+                    <!-- Related thumbs injected here -->
+                </div>
             </div>
+
         </main>
     </div>
 
     <script>
         let fullLedger = [];
         let currentCategory = 'All';
-        
         let favorites = JSON.parse(localStorage.getItem('axiom_favs')) || [];
         let history = JSON.parse(localStorage.getItem('axiom_history')) || [];
 
@@ -378,25 +342,135 @@
         }
 
         function toggleFav(hash, event) {
-            event.stopPropagation();
+            if(event) event.stopPropagation();
             if (favorites.includes(hash)) {
                 favorites = favorites.filter(h => h !== hash);
             } else {
                 favorites.push(hash);
             }
             localStorage.setItem('axiom_favs', JSON.stringify(favorites));
-            applyFilters();
+            
+            // Refresh UI state without reloading full grid if in watch view
+            if(document.getElementById('watchContainer').style.display === 'flex') {
+                const btn = document.getElementById('wFavBtn');
+                btn.innerHTML = favorites.includes(hash) ? '⭐ Saved' : '☆ Save';
+            } else {
+                applyFilters();
+            }
         }
 
-        function recordHistory(hash) {
+        // --- NEW WATCH VIEW LOGIC ---
+        function openWatchView(hash) {
+            const block = fullLedger.find(b => b.hash === hash);
+            if(!block) return;
+
+            // Record history
             if (!history.includes(hash)) {
                 history.unshift(hash);
                 if (history.length > 50) history.pop();
                 localStorage.setItem('axiom_history', JSON.stringify(history));
             }
-            alert("Block Hash Copied: \n" + hash);
+
+            // Hide Grid, Show Watch Container
+            document.getElementById('gridContainer').style.display = 'none';
+            const watchContainer = document.getElementById('watchContainer');
+            watchContainer.style.display = 'flex';
+            
+            // Scroll to top
+            document.getElementById('mainContent').scrollTop = 0;
+
+            // Populate Main Player
+            const hasImage = block.image_url && block.image_url.length > 5;
+            const player = document.getElementById('wPlayer');
+            player.style.background = hasImage 
+                ? `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9)), url('${block.image_url}')` 
+                : hashToGradient(block.hash);
+            player.style.backgroundSize = "cover";
+            player.style.backgroundPosition = "center 20%";
+            
+            document.getElementById('wPlayerText').innerText = block.topic;
+            document.getElementById('wTitle').innerText = block.fact;
+            
+            // Populate Channel Info
+            const cIcon = document.getElementById('wChannelIcon');
+            if (hasImage) {
+                cIcon.style.backgroundImage = `url('${block.image_url}')`;
+                cIcon.innerText = '';
+            } else {
+                cIcon.style.backgroundImage = 'none';
+                cIcon.innerText = block.source.charAt(0);
+            }
+            document.getElementById('wChannelName').innerText = block.source;
+            
+            // Populate Description/Crypto
+            document.getElementById('wTopic').innerText = block.topic;
+            document.getElementById('wTime').innerText = timeSince(block.timestamp);
+            document.getElementById('wHash').innerText = block.hash;
+            document.getElementById('wPrevHash').innerText = block.prev_hash;
+            
+            const srcBtn = document.getElementById('wSourceBtn');
+            if (block.source_url && block.source_url.length > 5) {
+                srcBtn.href = block.source_url;
+                srcBtn.style.display = 'flex';
+            } else {
+                srcBtn.style.display = 'none';
+            }
+
+            // Save Button
+            const favBtn = document.getElementById('wFavBtn');
+            favBtn.innerHTML = favorites.includes(block.hash) ? '⭐ Saved' : '☆ Save';
+            favBtn.onclick = () => toggleFav(block.hash);
+
+            // Populate Sidebar (Related items from same topic)
+            populateWatchSidebar(block);
         }
 
+        function populateWatchSidebar(currentBlock) {
+            const sidebar = document.getElementById('wSidebar');
+            sidebar.innerHTML = '<h3 style="font-size:16px; margin-bottom:10px;">Up Next</h3>';
+            
+            // Filter related, exclude current
+            let related = fullLedger.filter(b => b.topic === currentBlock.topic && b.hash !== currentBlock.hash);
+            if(related.length < 5) {
+                // Pad with random if not enough related
+                const others = fullLedger.filter(b => b.hash !== currentBlock.hash);
+                related = related.concat(others).slice(0, 8);
+            } else {
+                related = related.slice(0, 8);
+            }
+
+            related.forEach(block => {
+                const hasImage = block.image_url && block.image_url.length > 5;
+                const bgStyle = hasImage 
+                    ? `background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('${block.image_url}');` 
+                    : `background: ${hashToGradient(block.hash)};`;
+
+                const el = document.createElement('div');
+                el.style.display = 'flex';
+                el.style.gap = '10px';
+                el.style.cursor = 'pointer';
+                el.onclick = () => openWatchView(block.hash);
+
+                el.innerHTML = `
+                    <div style="width:160px; height:90px; border-radius:8px; flex-shrink:0; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; ${bgStyle}">
+                        <span style="font-size:12px; font-weight:bold; text-shadow:1px 1px 3px #000; text-align:center;">${block.topic}</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; justify-content:flex-start; overflow:hidden;">
+                        <span style="font-size:14px; font-weight:500; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3; margin-bottom:4px;">${block.fact}</span>
+                        <span style="font-size:12px; color:var(--text-secondary);">${block.source}</span>
+                    </div>
+                `;
+                sidebar.appendChild(el);
+            });
+        }
+
+        function closeWatchView() {
+            document.getElementById('watchContainer').style.display = 'none';
+            document.getElementById('gridContainer').style.display = 'block';
+            applyFilters(); // refresh grid to show read history
+        }
+
+        // --- GRID RENDERING ---
         function renderGrid(data) {
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '';
@@ -407,22 +481,18 @@
             }
 
             data.forEach(block => {
-                const isFav = favorites.includes(block.hash);
-                
-                // Construct the background. If there's an image_url, overlay a dark gradient so text remains readable
                 const hasImage = block.image_url && block.image_url.length > 5;
                 const bgStyle = hasImage 
                     ? `background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('${block.image_url}');` 
                     : `background: ${hashToGradient(block.hash)};`;
                 
-                // Small channel icon uses image if available, else first letter
                 const channelIcon = hasImage 
                     ? `<div class="channel-icon" style="background-image: url('${block.image_url}')"></div>`
                     : `<div class="channel-icon">${block.source.charAt(0)}</div>`;
 
                 const card = document.createElement('div');
                 card.className = 'card';
-                card.onclick = () => recordHistory(block.hash);
+                card.onclick = () => openWatchView(block.hash);
                 
                 card.innerHTML = `
                     <div class="thumbnail" style="${bgStyle}">
@@ -435,12 +505,6 @@
                             <div class="fact-title">${block.fact}</div>
                             <div class="fact-details">
                                 Axiom Engine <span class="verified-icon">✔</span> • ${timeSince(block.timestamp)}
-                            </div>
-                            <div class="action-btns">
-                                <button class="action-btn" onclick="toggleFav('${block.hash}', event)">
-                                    ${isFav ? '⭐ Saved' : '☆ Save'}
-                                </button>
-                                <button class="action-btn" title="Block Hash: ${block.hash}">🔗 View Block</button>
                             </div>
                         </div>
                     </div>
@@ -463,6 +527,7 @@
 
             if (query) {
                 filtered = filtered.filter(b => b.fact.toLowerCase().includes(query) || b.topic.toLowerCase().includes(query));
+                closeWatchView(); // Close watch view on search
             }
 
             renderGrid(filtered);
@@ -485,12 +550,11 @@
                 }
             });
 
-            applyFilters();
+            closeWatchView();
         }
 
         async function init() {
             try {
-                // Fetch JSON with a timestamp to bust the browser cache
                 const response = await fetch('ledger.json?nocache=' + new Date().getTime());
                 if(!response.ok) throw new Error("Ledger not found");
                 fullLedger = await response.json();
@@ -506,7 +570,6 @@
             if (e.key === 'Enter') applyFilters();
         });
 
-        // --- PWA Service Worker Registration ---
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js').catch(error => {
