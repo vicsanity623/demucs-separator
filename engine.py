@@ -6,20 +6,19 @@ import nltk
 from datetime import datetime, timezone
 import os
 import time
+from typing import List, Dict, Tuple, Any
 
-# Download NLTK tokenizer models
 nltk.download('punkt', quiet=True)
 nltk.download('punkt_tab', quiet=True)
 
-LEDGER_FILE = "ledger.json"
-MAX_RUNTIME_SEC = (2 * 60 * 60) + (45 * 60) # Run for 2 hours and 45 minutes
+LEDGER_FILE: str = "ledger.json"
+MAX_RUNTIME_SEC: int = (2 * 60 * 60) + (45 * 60) # Run for 2 hours and 45 minutes
 
-HEADERS = {
+HEADERS: Dict[str, str] = {
     "User-Agent": "AxiomEngineBot/2.0 (https://github.com/; axiom-engine@example.com) python-requests/2.x"
 }
 
-# 20 Premium Targets (10 Wiki Hubs, 10 RSS Feeds)
-WIKI_TARGETS = [
+WIKI_TARGETS: List[Tuple[str, str]] = [
     ("Eminem", "Eminem"), ("Hip_hop_music", "Hip Hop History"),
     ("Dr._Dre", "Hip Hop History"), ("50_Cent", "Hip Hop History"),
     ("The_Marshall_Mathers_LP", "Eminem"), ("The_Eminem_Show", "Eminem"),
@@ -27,7 +26,7 @@ WIKI_TARGETS = [
     ("Lose_Yourself", "Eminem"), ("Tupac_Shakur", "Hip Hop History")
 ]
 
-RSS_TARGETS = [
+RSS_TARGETS: List[Tuple[str, str]] = [
     ("HipHopDX", "https://hiphopdx.com/rss/news"),
     ("Billboard Hip-Hop", "https://www.billboard.com/c/music/rb-hip-hop/feed/"),
     ("Rolling Stone", "https://www.rollingstone.com/music/feed/"),
@@ -40,12 +39,12 @@ RSS_TARGETS = [
     ("AllHipHop", "https://allhiphop.com/feed/")
 ]
 
-def get_previous_hash(ledger):
+def get_previous_hash(ledger: List[Dict[str, str]]) -> str:
     if not ledger:
         return "0000000000000000000000000000000000000000000000000000000000000000"
     return ledger[0]['hash']
 
-def create_block(fact_text, source, topic, prev_hash, image_url="", source_url=""):
+def create_block(fact_text: str, source: str, topic: str, prev_hash: str, image_url: str = "", source_url: str = "") -> Dict[str, str]:
     timestamp = datetime.now(timezone.utc).isoformat()
     payload = f"{timestamp}|{source}|{topic}|{fact_text}|{image_url}|{source_url}|{prev_hash}"
     block_hash = hashlib.sha256(payload.encode('utf-8')).hexdigest()
@@ -61,11 +60,11 @@ def create_block(fact_text, source, topic, prev_hash, image_url="", source_url="
         "hash": block_hash
     }
 
-def fetch_wikipedia_facts(title, topic):
+def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, str]:
     url = f"https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&explaintext=1&titles={title}&pithumbsize=800&format=json"
     source_url = f"https://en.wikipedia.org/wiki/{title}"
-    facts = []
-    image_url = ""
+    facts: List[str] = []
+    image_url: str = ""
     
     try:
         response = requests.get(url, headers=HEADERS, timeout=10)
@@ -98,23 +97,24 @@ def fetch_wikipedia_facts(title, topic):
         
     return facts, "Wikipedia", image_url, source_url
 
-def load_ledger():
+def load_ledger() -> List[Dict[str, str]]:
     if os.path.exists(LEDGER_FILE):
         try:
             with open(LEDGER_FILE, 'r') as f:
-                return json.load(f)
+                data = json.load(f)
+                if isinstance(data, list):
+                    return data
         except json.JSONDecodeError:
             pass
     return []
 
-def save_ledger(ledger):
-    # Keep ledger optimized to 1000 facts to prevent massive file bloat
-    ledger = ledger[:1000]
+def save_ledger(ledger: List[Dict[str, str]]) -> None:
+    optimized_ledger = ledger[:1000]
     with open(LEDGER_FILE, 'w') as f:
-        json.dump(ledger, f, indent=2)
+        json.dump(optimized_ledger, f, indent=2)
 
-def run_engine_cycle(ledger):
-    new_facts = []
+def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, str]]]:
+    new_facts: List[Dict[str, str]] = []
     
     print("Scraping Wikipedia Hubs...")
     for title, topic in WIKI_TARGETS:
@@ -128,10 +128,10 @@ def run_engine_cycle(ledger):
         try:
             feed = feedparser.parse(rss_url, agent=HEADERS["User-Agent"])
             for entry in feed.entries[:10]:
-                title = entry.title
-                if 'eminem' in title.lower() or 'rap' in title.lower() or 'hip hop' in title.lower() or 'dre' in title.lower():
+                title = entry.get('title', '')
+                if any(kw in title.lower() for kw in ['eminem', 'rap', 'hip hop', 'dre']):
                     img_url = ""
-                    src_url = entry.link if 'link' in entry else ""
+                    src_url = entry.get('link', '')
                     
                     if 'media_content' in entry and len(entry.media_content) > 0:
                         img_url = entry.media_content[0]['url']
@@ -149,7 +149,6 @@ def run_engine_cycle(ledger):
     existing_facts = set(block['fact'] for block in ledger)
     added = 0
     
-    # Insert newest facts at the top
     for item in reversed(new_facts):
         if item['fact'] not in existing_facts:
             prev_hash = get_previous_hash(ledger)
@@ -162,12 +161,12 @@ def run_engine_cycle(ledger):
 
 if __name__ == "__main__":
     print(f"🚀 Starting Axiom Engine. Programmed to run for {MAX_RUNTIME_SEC / 60:.1f} minutes...")
-    start_time = time.time()
-    ledger = load_ledger()
+    start_time: float = time.time()
+    ledger: List[Dict[str, str]] = load_ledger()
     
-    cycle = 1
+    cycle: int = 1
     while True:
-        elapsed = time.time() - start_time
+        elapsed: float = time.time() - start_time
         if elapsed > MAX_RUNTIME_SEC:
             print("🛑 Max runtime reached. Saving final ledger and shutting down.")
             save_ledger(ledger)
@@ -179,10 +178,9 @@ if __name__ == "__main__":
         
         print(f"✅ Cycle {cycle} Complete. Added {added} new verified blocks.")
         
-        # Calculate time left. Sleep for 20 minutes between cycles, unless we are out of time.
-        sleep_duration = 20 * 60
+        sleep_duration: float = 20.0 * 60.0
         if (time.time() - start_time) + sleep_duration > MAX_RUNTIME_SEC:
-            sleep_duration = MAX_RUNTIME_SEC - (time.time() - start_time)
+            sleep_duration = float(MAX_RUNTIME_SEC) - (time.time() - start_time)
             
         if sleep_duration > 0:
             print(f"💤 Sleeping for {sleep_duration / 60:.1f} minutes before next cycle...")
