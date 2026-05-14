@@ -5,7 +5,7 @@ import nltk  # type: ignore
 from datetime import datetime, timezone
 import time
 import random
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 from ledger_manager import load_ledger, save_ledger
 
 nltk.download("punkt", quiet=True)
@@ -114,6 +114,7 @@ def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, 
             "certified",
             "Grammy",
             "Billboard",
+            "Tour",
             "released",
             "sold",
             "record",
@@ -121,7 +122,6 @@ def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, 
             "debut",
             "born",
             "track",
-            "rhyme",
             "song",
         ]
 
@@ -141,7 +141,7 @@ def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, 
 def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, str]]]:
     new_facts: List[Dict[str, str]] = []
 
-    # DYNAMIC DISCOVERY: Pick 4 random targets from the wiki seeds to avoid stagnation
+    # Discovery Mode: Pick 4 random targets
     current_wiki_batch = random.sample(WIKI_SEEDS, k=min(4, len(WIKI_SEEDS)))
     
     print(f"Scraping Wikipedia (Discovery Mode: {', '.join([t[0] for t in current_wiki_batch])})...")
@@ -165,18 +165,18 @@ def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, 
             feed = feedparser.parse(rss_url, agent=HEADERS["User-Agent"])
             for entry in feed.entries[:15]:
                 title = entry.get("title", "")
-                # Broadened keywords to capture more industry news
                 discovery_keywords = ["eminem", "rap", "hip hop", "dre", "album", "music", "chart", "concert"]
                 if any(kw in title.lower() for kw in discovery_keywords):
                     img_url = ""
                     src_url = entry.get("link", "")
 
+                    # FIXED: Added safe get() calls to prevent Pitchfork/RSS 'url' errors
                     if "media_content" in entry and len(entry.media_content) > 0:
-                        img_url = entry.media_content[0]["url"]
+                        img_url = entry.media_content[0].get("url", "")
                     elif "links" in entry:
                         for link in entry.links:
                             if "image" in link.get("type", ""):
-                                img_url = link.href
+                                img_url = link.get("href", "")
                                 break
 
                     new_facts.append(
@@ -234,7 +234,6 @@ if __name__ == "__main__":
 
         print(f"✅ Cycle {cycle} Complete. Added {added} new verified blocks.")
 
-        # Sleep for 15 minutes instead of 20 to increase news capture frequency
         sleep_duration: float = 15.0 * 60.0
         sleep_duration += random.randint(1, 30)
 
