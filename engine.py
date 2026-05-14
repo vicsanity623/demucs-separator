@@ -12,7 +12,7 @@ nltk.download("punkt", quiet=True)
 nltk.download("punkt_tab", quiet=True)
 
 LEDGER_FILE: str = "ledger.json"
-MAX_RUNTIME_SEC: int = (2 * 60 * 60) + (45 * 60)  # Run for 2 hours and 45 minutes
+MAX_RUNTIME_SEC: int = (45 * 60)
 
 HEADERS: Dict[str, str] = {
     "User-Agent": "AxiomEngineBot/2.0 (https://github.com/; axiom-engine@example.com) python-requests/2.x"
