@@ -1,5 +1,445 @@
 [
   {
+    "timestamp": "2026-05-14T17:07:52.034123+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "Doja Cat Says She Hopes to \u2018Take 3 Years Off\u2019 From Music: \u2018I Want to Just Do Whatever\u2019 - Billboard",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMimwFBVV95cUxQdGVjZWFnU3ZJcldzTllhRTc5aVg5cURLWEhYRHRRUW8xR0tkcEhPZTdKU3VhVGNhdWJwWEdoR3lQQUZKdS1nZXFOSk1jdVcxWTBzZjNqVkxyTEg4MDdzUnA0ekxxelhLTXdlZ0trY19SRDYxT3MwTjNPdWhMd0p5YmZfVmFsUFJXQkw1SHlXR190elB6cmdZOWxqNA?oc=5",
+    "prev_hash": "970d77a8205dd463cde2e07bc75be7bd2e39ff0fbcebfbd312ebd194f7ddb285",
+    "hash": "0f4a162238cbe8b49554df627b3448be558bac39770c7e19d8c9d1c3a85fc1de"
+  },
+  {
+    "timestamp": "2026-05-14T17:07:52.034069+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "Chance The Rapper Is Celebrating 10th Anniversary of \u2018Coloring Book\u2019 With a Tour: Here Are the Dates - Billboard",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMitAFBVV95cUxPSnFBdWoyb2l4QWJOQ3hfc0VmMVpVX1FfVldpS3JzQUlGeWcxd2hPUjk2c3h5ZjZjQVdvVXhoZ21JTTNYVFdvcTNYNW51TlFMUWFYbjQ1VVNMU1RTTk5CNWNqeHhGQm1hMEstdVV4QUJOT0J1ZjNTQTJETGhsZTN3WjdQOEItcnFFS0JQOHh4ei1hQnFVeEtCZS1NU2wweFdXdl9rR0g1OGZ0U25waVZxRmhESXc?oc=5",
+    "prev_hash": "2e3868443102673f0dd69de0870a45bfa3e0a0f24c53b8ef5e0aa3a1c2ac34f4",
+    "hash": "970d77a8205dd463cde2e07bc75be7bd2e39ff0fbcebfbd312ebd194f7ddb285"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188687+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Calvin Cordozar Broadus Jr. (born October 20, 1971), known professionally as Snoop Dogg, is an American rapper, singer, record producer, songwriter, and actor.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "f7fff65570e2095a49246b12f794c9ab4937b46524cfaabea40222a8b3422d42",
+    "hash": "2e3868443102673f0dd69de0870a45bfa3e0a0f24c53b8ef5e0aa3a1c2ac34f4"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188683+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Produced by Dr. Dre, his debut album Doggystyle (1993) debuted atop the Billboard 200 with 806,000 copies sold in its first week.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "5d324506c95b01b5d718516f77fc2cbdd0ef0e8b5c99eddf4883d5f4e14e1c42",
+    "hash": "f7fff65570e2095a49246b12f794c9ab4937b46524cfaabea40222a8b3422d42"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188679+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "and \"Gin and Juice\", later receiving quadruple platinum certification by the Recording Industry Association of America (RIAA).",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "64080f48e62e42a44258e6d572e7112ae19ae60f668f36e63bcb92c880b38658",
+    "hash": "5d324506c95b01b5d718516f77fc2cbdd0ef0e8b5c99eddf4883d5f4e14e1c42"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188675+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "His second album, Tha Doggfather (1996), also debuted at number one.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "6157c6c7fd1558f3ab23714b02ce5c9ae117c25eed992cbe2f41fc64377fbe73",
+    "hash": "64080f48e62e42a44258e6d572e7112ae19ae60f668f36e63bcb92c880b38658"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188671+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "His album R&G (Rhythm & Gangsta): The Masterpiece (2004) spawned the single \"Drop It Like It's Hot\" (featuring Pharrell), his first Billboard Hot 100 number one.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "33cc14476489add7b17189303dfd32f7ecd38100d659546393d50315c80438ae",
+    "hash": "6157c6c7fd1558f3ab23714b02ce5c9ae117c25eed992cbe2f41fc64377fbe73"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188667+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "In later years, he adopted the alias Snoop Lion, under which he released a reggae album, Reincarnated (2013), and a namesake documentary film about his experience in Jamaica.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "9632af377fdf27c8e4d379fd4e42a59e5bd62c603069c5ed4224a7d12c4f63ff",
+    "hash": "33cc14476489add7b17189303dfd32f7ecd38100d659546393d50315c80438ae"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188663+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "In 2022, he acquired Death Row Records from MNRK Music Group and released BODR (2022).",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "375db63170f1a0ee88a49c0067f56cbda2bcfa483191f2c5bb75f0f2aa7e3951",
+    "hash": "9632af377fdf27c8e4d379fd4e42a59e5bd62c603069c5ed4224a7d12c4f63ff"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188658+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Snoop Dogg has sold over 35 million records worldwide.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "c6c5480c1904a1d3bb4ab2858aa06c1e6ebdae020f0a88975d08afdabe1bb330",
+    "hash": "375db63170f1a0ee88a49c0067f56cbda2bcfa483191f2c5bb75f0f2aa7e3951"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188654+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "He has received several accolades including seventeen Grammy Award nominations, two Sports Emmy Awards and a star on the Hollywood Walk of Fame.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "0344f1edb8a808694c90b28d979a147aed3c9f9013fb3b3936f2adc5e978907d",
+    "hash": "c6c5480c1904a1d3bb4ab2858aa06c1e6ebdae020f0a88975d08afdabe1bb330"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188648+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "== Early life == Calvin Cordozar Broadus Jr. was born on October 20, 1971, in Long Beach, California, to Beverly Tate (1951\u20132021) and Vernell Varnado.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "eba5b9eccbac514731d3a5b92ce4e40bf98455611f5bf44bc4e7ea045c73e093",
+    "hash": "0344f1edb8a808694c90b28d979a147aed3c9f9013fb3b3936f2adc5e978907d"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188644+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "In his youth, Snoop Dogg sold candy, delivered newspapers, and bagged groceries.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "9e43f1929a4f206bd2395e3a17b8aa9e62ac70a555fa2a0f45e7282a6c6aa4dd",
+    "hash": "eba5b9eccbac514731d3a5b92ce4e40bf98455611f5bf44bc4e7ea045c73e093"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188639+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "With his two cousins, Nate Dogg and Lil' \u00bd Dead, and friend Warren G, he recorded homemade tapes, with one titled Over the Counter attracting some label interest.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "9873db17eee46e22f63e7938814b95c1ef57872c33f53b6544cf4c8ad80a7f29",
+    "hash": "9e43f1929a4f206bd2395e3a17b8aa9e62ac70a555fa2a0f45e7282a6c6aa4dd"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188635+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "The four called their group 213 after the area code of their native Long Beach at that time, and recorded their first four-song demo at their local VIP Records store.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "f7c7d66903fbe115782b7b303d373e97a27507b7f32b35b9a889abd8939178f6",
+    "hash": "9873db17eee46e22f63e7938814b95c1ef57872c33f53b6544cf4c8ad80a7f29"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188630+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "== Music career ==   === 1991\u20131997: Death Row, Doggystyle, and Tha Doggfather === When he began recording, the young rapper took the stage name Snoop Doggy Dogg.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "8331fdc1c70f7b63be0f72b4cff35b89f4092ff514176e9c4cf2534d8b6bbe9b",
+    "hash": "f7c7d66903fbe115782b7b303d373e97a27507b7f32b35b9a889abd8939178f6"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188625+00:00",
+    "source": "Wikipedia",
+    "topic": "Hip Hop History",
+    "fact": "Dr. Dre began working with him, first on the theme song of the 1992 film Deep Cover, and then on Dr. Dre's debut solo album The Chronic, along with the other members of his former starting group, Tha Dogg Pound.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ad/Snoop_Dogg_2023_%2853775197331%29_%28cropped%29_%28cropped%29.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail_unscaled",
+    "source_url": "https://en.wikipedia.org/wiki/Snoop_Dogg",
+    "prev_hash": "f30fc18dff06f3e6088f925ad670ae4bd19d37b181708c52d2976e0513287451",
+    "hash": "8331fdc1c70f7b63be0f72b4cff35b89f4092ff514176e9c4cf2534d8b6bbe9b"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188621+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Marshall Bruce Mathers III (born October 17, 1972), known professionally as Eminem, is an American rapper, songwriter, record producer, and record executive.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "a81f3569916270b059cef8fe40d4006c46007ef13a019e548675e979f49b25fa",
+    "hash": "f30fc18dff06f3e6088f925ad670ae4bd19d37b181708c52d2976e0513287451"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188616+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "After the release of his debut album, Infinite (1996), and the extended play Slim Shady EP (1997), Eminem signed with Dr. Dre's Aftermath Entertainment and achieved mainstream popularity with The Slim Shady LP (1999).",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "7498da0121bf7aac8be1950a7206a5a5b1f4da05ff2425a8b577cd4974393c7b",
+    "hash": "a81f3569916270b059cef8fe40d4006c46007ef13a019e548675e979f49b25fa"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188612+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "His other ventures include co-founding the record label Shady Records, establishing the Sirius XM Radio channel Shade 45 and opening the restaurant Mom's Spaghetti.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "7857e5bdb50a4939bdc63495d19087bd64c4f03107f24becf27083dbab70a70c",
+    "hash": "7498da0121bf7aac8be1950a7206a5a5b1f4da05ff2425a8b577cd4974393c7b"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188608+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Eminem is the best-selling rapper and one of the best-selling music artists of all time, with estimated sales of over 220 million records.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "4a905b83a0935f9dcfb0e42e0b5ec752ea3a917504dc618ec53d48f0f90e3f2c",
+    "hash": "7857e5bdb50a4939bdc63495d19087bd64c4f03107f24becf27083dbab70a70c"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188604+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "He is the first musical act to have ten albums consecutively debut at number one on the Billboard 200, and also has five number-one singles on the Billboard Hot 100.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "9f40a61e91860de5080f77bcd18c04c1489e2ddc955f64f41a964caab5edc09f",
+    "hash": "4a905b83a0935f9dcfb0e42e0b5ec752ea3a917504dc618ec53d48f0f90e3f2c"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188600+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Eminem is on the list of highest-certified music artists in the United States, with three of his albums and four of his singles certified diamond by the Recording Industry Association of America (RIAA).",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "11045fc830b0176565ee1d528503ab4d98b60a70d385a34a31940b742fe2cdaf",
+    "hash": "9f40a61e91860de5080f77bcd18c04c1489e2ddc955f64f41a964caab5edc09f"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188596+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Billboard named him the Artist of the 2000s and Rolling Stone ranked him among the greatest artists and greatest songwriters of all time.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "f55f5877c406367754deda3f54c970ea814291b6fd5141763ec6f53c331d3b22",
+    "hash": "11045fc830b0176565ee1d528503ab4d98b60a70d385a34a31940b742fe2cdaf"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188590+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "== Early life and education == Marshall Bruce Mathers III was born on October 17, 1972, in St. Joseph, Missouri, the only child of Deborah \"Debbie\" Nelson (1955\u20132024) and Marshall Bruce Mathers Jr. (1951\u20132019).",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "499bbfbb33b3632e0a180f9d93741f663ff6903eec8592ff56e0e7a001a82b97",
+    "hash": "f55f5877c406367754deda3f54c970ea814291b6fd5141763ec6f53c331d3b22"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188585+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "When he was a child, a bully named D'Angelo Bailey severely injured his head in an assault, an incident that Eminem later recounted on the song \"Brain Damage\".",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "e98dbf3ead3b5c6cbe63ddfb68fc19f45566473af4357b376fd14aa240bc6f0b",
+    "hash": "499bbfbb33b3632e0a180f9d93741f663ff6903eec8592ff56e0e7a001a82b97"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188580+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "He heard his first rap song, \"Reckless\", on the Breakin' soundtrack, a gift from Ronnie Polkingharn, Nelson's half-brother and Eminem's uncle.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "0845b9f67fd2dd46e30f9f23c425867c816157b2ac9a7d01f9acfd988c43bf69",
+    "hash": "e98dbf3ead3b5c6cbe63ddfb68fc19f45566473af4357b376fd14aa240bc6f0b"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188576+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Eminem snuck into neighboring Osborn High School with friend and fellow rapper Proof for lunchroom freestyle rap battles.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "27fdd6c6f9391b83e4157772a55778c996ea839914ab77452f460355c2852080",
+    "hash": "0845b9f67fd2dd46e30f9f23c425867c816157b2ac9a7d01f9acfd988c43bf69"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188572+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "When she left to play bingo, he would blast the stereo and write songs.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "88a64adeda78b443259ab126951d699d33fa2e851cddf9c12e5ffc4fac361f2a",
+    "hash": "27fdd6c6f9391b83e4157772a55778c996ea839914ab77452f460355c2852080"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188567+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "They released a two track single on cassette in 1995 featuring Proof.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "4a1d388dbae27822b6481ab7d91721a0c3d65e8957fdbe2ed947de68d0a3039e",
+    "hash": "88a64adeda78b443259ab126951d699d33fa2e851cddf9c12e5ffc4fac361f2a"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188562+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Eminem also made his first music video appearance in 1992 in a song titled, \"Do-Da-Dippity\", by Champtown.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "7b421912399603edcbbf02a1a74be841905a833ad14350136020450809461b32",
+    "hash": "4a1d388dbae27822b6481ab7d91721a0c3d65e8957fdbe2ed947de68d0a3039e"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188556+00:00",
+    "source": "Wikipedia",
+    "topic": "Eminem",
+    "fact": "Later in 1996, Eminem and Proof teamed up with four other rappers to form The Dirty Dozen (D12), who released The Underground E.P.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/Eminem_2021_Color_Corrected.jpg/960px-Eminem_2021_Color_Corrected.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Eminem",
+    "prev_hash": "0273e2fc74d2cb4485d7fe1b28cf53d419b952c5843e8a8ad8645bb388780717",
+    "hash": "7b421912399603edcbbf02a1a74be841905a833ad14350136020450809461b32"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188521+00:00",
+    "source": "Billboard Hip-Hop",
+    "topic": "Trending News",
+    "fact": "Chance The Rapper Is Celebrating 10th Anniversary of \u2018Coloring Book\u2019 With a Tour: Here Are the\u00a0Dates",
+    "image_url": "",
+    "source_url": "https://www.billboard.com/music/rb-hip-hop/chance-the-rapper-tour-dates-coloring-book-anniversary-tour-1236248216/",
+    "prev_hash": "f4a017d35af4e8169cd78e30b4dbab08714a5d4f82de5e9b38df9685c7dd0b53",
+    "hash": "0273e2fc74d2cb4485d7fe1b28cf53d419b952c5843e8a8ad8645bb388780717"
+  },
+  {
+    "timestamp": "2026-05-14T16:52:08.188471+00:00",
+    "source": "Rolling Stone",
+    "topic": "Trending News",
+    "fact": "See Odessa A\u2019zion Dance With De-Aged Rolling Stones in \u2018In the Stars\u2019 Music Video",
+    "image_url": "",
+    "source_url": "https://www.rollingstone.com/music/music-news/rolling-stones-in-the-stars-music-video-odessa-azion-1235562708/",
+    "prev_hash": "a6819623ad8b2767748d7df1e900c3b2f34c83df83fa214716f149ec8cf46bf9",
+    "hash": "f4a017d35af4e8169cd78e30b4dbab08714a5d4f82de5e9b38df9685c7dd0b53"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451629+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "Chance the Rapper adds Louisville show to 2026 'And We Back Tour' - The Courier-Journal",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMi3gFBVV95cUxNM3FHUG5LNlRRQU5zWExLWjg0SUVMRExXQnBsOW1aR1BocWtsRmNXcjg5TXA5QjdZSW9rXzY3OUl0SnVSM0U3b193aVVvd0p1cFZPT2VUME10VEN5STZOV1o3V1NfZlBoRW1Hd0QxaVJQaUR5M2o4UExDZDB3UXpseVNWTXZ5X1czSmhTRlhPd2V6UWthR3ZiN20xVzU2ZDRxb2JwRThCQkdmMnhSdXpQZWxBQ25NRkFDcVVoampTTnZJOWtJVk1DeTNOR2JkWXlHZWVBYXc3VXBjemdJRVE?oc=5",
+    "prev_hash": "6f1b558239eaa3be58127f99697050b4b28c69276973a2db1d2e8f2906fc8016",
+    "hash": "a6819623ad8b2767748d7df1e900c3b2f34c83df83fa214716f149ec8cf46bf9"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451624+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "Remember When an Anarchic Hip-Hop Duo and a Legendary Country Diva Made Pop Music Magic in 1991? - American Songwriter",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNS0k2dXRhSUVNbU9hTXc1UElwVWpGeEdjME9sSHBwLTN4bURZQUJRMkpUanVzcm0tWkRZN01RMGp4ZF9BbHNlQTl5aUhuLUdwNlF5N3Z3SVEwaUtJMURIcUJsbHJNTWd4TjJDZk1pU1JkWENJOUkzeXVNaThhS2h3LTNVWURtNjV4MHpVN3VSdU5UMDNPcUliOHNzc2JzLXBWNC02OFY0T0tFMzdzdE9FUG5BVU9sblZGS2o0WmtCLXRfbEZQZlE?oc=5",
+    "prev_hash": "ad2dd5b20b67564893a4b8e5326d4ace96d7d71164366bc06c7a687072103eef",
+    "hash": "6f1b558239eaa3be58127f99697050b4b28c69276973a2db1d2e8f2906fc8016"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451618+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "Today In Hip Hop History: KMD Released Their Debut \u2018Mr. Hood\u2019 35 Years Ago - The Source Magazine",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMipwFBVV95cUxQclFKc3c1TEhILVpDU0tzcmVhUmZnYTIwUEpXNjZxRVgxNFpUTDlUTlVDaFhtNkxrVDhkR0Z4Y1BGWHRCNy14WWlFM2NFV21VbnJ0NGU3WlV6cGZLLWE2VW9ZZmVLcWJiYjM4TWtVdWpKYndWRUluMWZjTE05TUozTkg1NEVJTE5xTUxta1A2UVRCV2V5RlhvNlNUanlQb3ZTT0ZUSzJfVQ?oc=5",
+    "prev_hash": "103bd8c9c20baee7b05e21fa3d6c3035554aa46fa18ecd7a143b1a00b12c0117",
+    "hash": "ad2dd5b20b67564893a4b8e5326d4ace96d7d71164366bc06c7a687072103eef"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451610+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "Over 40% of independent hip hop artists value fan community over streams, 75% don't use AI - Headliner Magazine",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMimgFBVV95cUxNakNxWTVrNjBMRHdRMGdGNGVvUWtFN3UyMkZJckIzak13NEktWUNKNkZIbUpTSG9PS2V4M1VoZ1ZzWE1oNFVBTGZSMF9HaFBvTTN1UUVRejdJc1Rwek80ZWtaVGVDN3ZXbWdYczUzNHQ3eEE0LVVrS1k1S2JXOHhNMkhidzdXNkgtQ2Z5OFI1NGRLRzlrZF9DRFNB?oc=5",
+    "prev_hash": "e2f402757901797ceca920aefba44a7f6e1f19618d8096f4eed657534c999fd8",
+    "hash": "103bd8c9c20baee7b05e21fa3d6c3035554aa46fa18ecd7a143b1a00b12c0117"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451603+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "BabyChiefDoit drops \u2018Rambo\u2019 single ahead of new album - Rolling Out",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMie0FVX3lxTE83dGJoNHdRd3JGZ1p0UzNxa0Z3cjJ0T1ZqZU9XNGpWWVpROGI5V1pSQkFlMXA2T05MdVhielE5cmRrOUpfYTVRUnlYV05pbEJKUWNJaVlDajk3akd1MVc4ZDEyRlI2NjcybVhMTldpZXdvcjF2aGZpdlNrRQ?oc=5",
+    "prev_hash": "1098f2e25353acbcfb207bb58ccf9467b65047619f22575c26efd18b81f0254c",
+    "hash": "e2f402757901797ceca920aefba44a7f6e1f19618d8096f4eed657534c999fd8"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451597+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "New Music Friday: The 50 Hip-Hop And R&B Releases You Need On Your Playlist - VIBE.com",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMijwFBVV95cUxQUUh6ZW91aklVU3dad2VGX1d3bzN2M2tucUxxbXp1cHFEWDNSQS03VFdmT2tHT1BsUk4yQThxaFZuSUVnWkpsNFYzSWdzR0ZEYTh5bm13cmZFNmtxYmZEOUprQ3VzMW0taUtESjNZeWFNOFRNVVVpM1RTdFpNRFJ2VWtfX1NzcUtJUUxOMlVQdw?oc=5",
+    "prev_hash": "b9069980dda6831c5c002b2d36b2ca0681d3f78254e72c7a9559204bcbb9e1db",
+    "hash": "1098f2e25353acbcfb207bb58ccf9467b65047619f22575c26efd18b81f0254c"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451588+00:00",
+    "source": "Rolling Stone",
+    "topic": "Trending News",
+    "fact": "Pete Townshend Sells Name, Image, and Music Rights in New Deal: Reports",
+    "image_url": "",
+    "source_url": "https://www.rollingstone.com/music/music-news/pete-townshend-primary-wave-deal-1235562560/",
+    "prev_hash": "67a96b307d26b77199be8254c2156efa22c024aeacc8c758a32c7e36d5b8d324",
+    "hash": "b9069980dda6831c5c002b2d36b2ca0681d3f78254e72c7a9559204bcbb9e1db"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451580+00:00",
+    "source": "Rolling Stone",
+    "topic": "Trending News",
+    "fact": "Jack Antonoff Blasts AI Music Creators as \u2018Godless Whores\u2019",
+    "image_url": "",
+    "source_url": "https://www.rollingstone.com/music/music-news/jack-antonoff-ai-music-creators-godless-whores-1235562653/",
+    "prev_hash": "d350a6304a7f9e60df3e59adfde04f40ea826ad96439f718bcb91fa1d8b8a63e",
+    "hash": "67a96b307d26b77199be8254c2156efa22c024aeacc8c758a32c7e36d5b8d324"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451572+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "Chance The Rapper Officially Announces Coloring Book 10 Year Anniversary Tour: How To Cop Tickets",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/994894-chance-the-rapper-coloring-book-anniversary-tour",
+    "prev_hash": "3bf5b4d031bdb2398d202dcdf1727c5e7fea51d0797008a9332248d2eb39603f",
+    "hash": "d350a6304a7f9e60df3e59adfde04f40ea826ad96439f718bcb91fa1d8b8a63e"
+  },
+  {
+    "timestamp": "2026-05-14T16:36:39.451518+00:00",
+    "source": "Pitchfork",
+    "topic": "Trending News",
+    "fact": "Jane Remover Drops Surprise New Album as Leroy",
+    "image_url": "",
+    "source_url": "https://pitchfork.com/news/jane-remover-drops-surprise-new-album-as-leroy/",
+    "prev_hash": "2fc8c128a1ebc252301b92bc9f3360f45d464e3d163972bf3bfe591051d75281",
+    "hash": "3bf5b4d031bdb2398d202dcdf1727c5e7fea51d0797008a9332248d2eb39603f"
+  },
+  {
     "timestamp": "2026-05-14T12:45:54.826966+00:00",
     "source": "Wikipedia",
     "topic": "Hip Hop History",
