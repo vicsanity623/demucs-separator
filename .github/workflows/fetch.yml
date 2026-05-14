@@ -2,8 +2,8 @@ name: Axiom Engine Ledger Fetch
 
 on:
   schedule:
-    - cron: '0 */3 * * *' # Runs every 3 hours
-  workflow_dispatch: # Allows you to run it manually from the Actions tab
+    - cron: '0 */4 * * *' # Runs automatically every 4 hours
+  workflow_dispatch: # Allows manual trigger
 
 permissions:
   contents: write
@@ -24,8 +24,10 @@ jobs:
         run: |
           pip install requests beautifulsoup4 feedparser nltk
           python -m nltk.downloader punkt
+          python -m nltk.downloader punkt_tab
 
       - name: Run Axiom Engine (Scrape, NLP & Seal)
+        # This script will now run in a loop for ~2.8 hours before finishing
         run: python engine.py
 
       - name: Commit and Push Ledger
