@@ -9,6 +9,7 @@
     <meta name="theme-color" content="#0f0f0f">
     <link rel="apple-touch-icon" href="icon-192x192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Using black-translucent allows us to control the area behind the icons via CSS -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
@@ -32,18 +33,22 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            overflow: hidden;
+            /* Prevent bouncing on iOS which reveals white space */
+            overflow: hidden; 
+            position: fixed;
+            width: 100%;
         }
         
+        /* --- THE NOTCH FIX --- */
         .status-bar-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
+            display: block;
             width: 100%;
-
+            /* Sticky at 0 keeps this at the very top of the screen */
+            position: sticky;
+            top: 0;
             height: env(safe-area-inset-top);
             background-color: #000000;
-            z-index: 100; /* Always stays on top */
+            z-index: 100; 
         }
 
         header {
@@ -51,6 +56,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
+            /* Sticky below the status-bar-bg */
             position: sticky;
             top: env(safe-area-inset-top);
             height: 60px;
@@ -148,7 +154,8 @@
             overflow-y: auto;
             background-color: var(--bg-color);
             padding: 20px;
-            padding-bottom: max(50px, env(safe-area-inset-bottom));
+            /* Standard YouTube padding + iOS Home bar protection */
+            padding-bottom: calc(80px + env(safe-area-inset-bottom));
         }
 
         /* --- HOME GRID VIEW --- */
@@ -248,6 +255,7 @@
 </head>
 <body>
     
+    <!-- This div creates the solid black bar behind the iPhone notch clock/battery -->
     <div class="status-bar-bg"></div>
 
     <header>
