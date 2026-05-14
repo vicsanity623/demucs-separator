@@ -1,5 +1,325 @@
 [
   {
+    "timestamp": "2026-05-14T21:00:25.686359+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "DJ Hed Claims Drake Has An Alleged Second Album Dropping Tonight Called \u201cMan Of Honor\u201d",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/994960-dj-hed-drake-alleged-second-album-man-of-honor",
+    "prev_hash": "f762780ad6d9fb5f9284fe929d5be1e8b13d396a043e490e2f3101ce232a391c",
+    "hash": "aeab9c0a560d97976451537d1600f68f32461433e9312bb2aaebcefd8f5cd592"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668659+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "In the United States, the Recording Industry Association of America (RIAA) operates an awards program based on the certified number of albums and singles sold through retail and other ancillary markets.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "c760326791ea3737ccb07f6b4c2a0e97b82daef1eb2777c23eb46f9ecb0452d0",
+    "hash": "f762780ad6d9fb5f9284fe929d5be1e8b13d396a043e490e2f3101ce232a391c"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668654+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "Other countries have similar awards (see music recording certification).",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "e228f053620b70b5365bde08b65bdd2d1b0e2f4cf243bbec483fd20d48989e81",
+    "hash": "c760326791ea3737ccb07f6b4c2a0e97b82daef1eb2777c23eb46f9ecb0452d0"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668649+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "Certification is not automatic; for an award to be made, the record label must first request certification.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "3c2fd05062dab985cc122155e1b518b7fe729fac2c6e77e333bfc18971ca7940",
+    "hash": "e228f053620b70b5365bde08b65bdd2d1b0e2f4cf243bbec483fd20d48989e81"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668644+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "If multiple certification levels are certified simultaneously, only an audit certification fee will be charged.\"",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "bb365cebee6f2a5babe0ecc0a9ff58b2ebf81a665fc697dbb9359f54c87d8c9d",
+    "hash": "3c2fd05062dab985cc122155e1b518b7fe729fac2c6e77e333bfc18971ca7940"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668638+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "== Description and qualifications ==  A Gold record is a song or album that sells 500,000 units (records, tapes, and compact discs).",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "da47be8ae3c29c22cec130cccde94b3a35f2ebc500d4a3772af50355e4755c4a",
+    "hash": "bb365cebee6f2a5babe0ecc0a9ff58b2ebf81a665fc697dbb9359f54c87d8c9d"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668633+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "The award was launched in 1958; originally, the requirement for a Gold single was one million units sold and a Gold album represented $1 million in sales (at wholesale value, around a third of the list price).",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "869902c8748e02585735d0f167000703e7d9098e23a93d26a593615acebd7794",
+    "hash": "da47be8ae3c29c22cec130cccde94b3a35f2ebc500d4a3772af50355e4755c4a"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668628+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "In 1975, the additional requirement of 500,000 units sold was added for Gold albums.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "013e161bc5f418f8763905e79d28ebcb74ecbd9e676f651e0f31c332cbd5f628",
+    "hash": "869902c8748e02585735d0f167000703e7d9098e23a93d26a593615acebd7794"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668623+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "Reflecting growth in record sales, the Platinum award was added in 1976, for albums that sold one million units and for singles selling two million units.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "30134a3199c5d898341f6852532e20de75e3167ef6a2f506299bf43b42476baa",
+    "hash": "013e161bc5f418f8763905e79d28ebcb74ecbd9e676f651e0f31c332cbd5f628"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668618+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "Reflecting additional growth in music sales, the Diamond award was instituted in 1999 for albums or singles selling ten million units.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "ba24ccd5c40d5a24d130655039cab286936ef4962e53018fedb71b31366a832a",
+    "hash": "30134a3199c5d898341f6852532e20de75e3167ef6a2f506299bf43b42476baa"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668612+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "This system has permitted, at times, record labels to promote an album as Gold or Platinum simply based on large shipments.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "d69174801e1edc6cd07f872f50cf8d808f1ddcc4b17ed5e72e4405556f8a5554",
+    "hash": "ba24ccd5c40d5a24d130655039cab286936ef4962e53018fedb71b31366a832a"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668607+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "Pepper's Lonely Hearts Club Band soundtrack shipped Platinum but was a sales bust, with two million returns.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "5d835bd014202ce21bd7c80aad0352c66c9faa48230eea2ac31cd251d56752e9",
+    "hash": "d69174801e1edc6cd07f872f50cf8d808f1ddcc4b17ed5e72e4405556f8a5554"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668601+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "Similarly, all four solo albums by the members of Kiss simultaneously shipped Platinum that same year but did not reach the top 20 of the Billboard 200 album chart.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "ab96475d6a87ea457fb5cdb68416a1bc60de19a9084c8ca88569979ca8cf5a8d",
+    "hash": "5d835bd014202ce21bd7c80aad0352c66c9faa48230eea2ac31cd251d56752e9"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668595+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "The following year, the RIAA began requiring 120 days from the release date before recordings were eligible for certification, although that requirement has been reduced over the years and currently stands at 30 days.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "0a3c579de72614633c30710f8c5e22e4e9fc880e4b72e5348df76c278dd9fd23",
+    "hash": "ab96475d6a87ea457fb5cdb68416a1bc60de19a9084c8ca88569979ca8cf5a8d"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668587+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "All Spanish-language albums certified prior to 2008 were updated to match the current certification at the time.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "6a169b07adf2b7b9edd9bdbaabe1d19ef8b6aed7d80dd0e5fe750531f72b01d5",
+    "hash": "0a3c579de72614633c30710f8c5e22e4e9fc880e4b72e5348df76c278dd9fd23"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668576+00:00",
+    "source": "Wikipedia",
+    "topic": "Industry Stats",
+    "fact": "The Disco de Diamante is awarded to Latin albums that have been certified 10\u00d7 Platinum.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/RIAA_logo_colored.svg/960px-RIAA_logo_colored.svg.png?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/RIAA_certification",
+    "prev_hash": "fb86817b35dafe036ddd217967911afc32cae348a8aec583cb107f754141eee0",
+    "hash": "6a169b07adf2b7b9edd9bdbaabe1d19ef8b6aed7d80dd0e5fe750531f72b01d5"
+  },
+  {
+    "timestamp": "2026-05-14T20:44:41.668499+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "New UK Rap & Hip-Hop You Need To Hear | 2026 - Stanisland Magazine",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMiY0FVX3lxTE80bW01bTBRNmhFcDNORi1QRzcxajBlV3hPRlJOV3hhdDZfSlFfUEZ4Ni1nTUZ0TDBuY1J3dGI1NDBSaXJoNjRrTkEwQWQyUHVyNXFTWkpfaGxWRl9kdHBVUTFmSQ?oc=5",
+    "prev_hash": "94c909d7629266d129e03feb64e775f2aeee4699f6e42418f53cdfacf9883d45",
+    "hash": "fb86817b35dafe036ddd217967911afc32cae348a8aec583cb107f754141eee0"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.376068+00:00",
+    "source": "Wikipedia",
+    "topic": "Awards",
+    "fact": "The Grammy Award for Best Rap Album is an award presented to recording artists for quality albums with rapping at the Grammy Awards, a ceremony that was established in 1958 and originally called the Gramophone Awards.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg/960px-KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Grammy_Award_for_Best_Rap_Album",
+    "prev_hash": "89b99c6e02b47f6be478ef7d36f7f55b8d7c3e4e52c9a046b044ad3ebce3d776",
+    "hash": "94c909d7629266d129e03feb64e775f2aeee4699f6e42418f53cdfacf9883d45"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.376063+00:00",
+    "source": "Wikipedia",
+    "topic": "Awards",
+    "fact": "The first award was presented to the group Naughty by Nature at the 38th Grammy Awards the following year.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg/960px-KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Grammy_Award_for_Best_Rap_Album",
+    "prev_hash": "0fd935c629be001b130b0eea3afb5f9fa05e03f1c8709a8a167fc446241f1c6c",
+    "hash": "89b99c6e02b47f6be478ef7d36f7f55b8d7c3e4e52c9a046b044ad3ebce3d776"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.376058+00:00",
+    "source": "Wikipedia",
+    "topic": "Awards",
+    "fact": "According to the category description guide for the 52nd Grammy Awards, the award is presented for \"albums containing at least 51% playing time of tracks with newly recorded rapped performances\".",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg/960px-KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Grammy_Award_for_Best_Rap_Album",
+    "prev_hash": "30cc36617658093c1b98b0dd3fe5d9f803e3dd3aae2063d9b614cb915163d3d2",
+    "hash": "0fd935c629be001b130b0eea3afb5f9fa05e03f1c8709a8a167fc446241f1c6c"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.376053+00:00",
+    "source": "Wikipedia",
+    "topic": "Awards",
+    "fact": "Award recipients often include the producers, engineers, and/or mixers associated with the nominated work in addition to the recording artists.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg/960px-KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Grammy_Award_for_Best_Rap_Album",
+    "prev_hash": "eb1467649366b89c2d51d18d32914dd3fec248dede86d8d742285333a8cbcf46",
+    "hash": "30cc36617658093c1b98b0dd3fe5d9f803e3dd3aae2063d9b614cb915163d3d2"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.376047+00:00",
+    "source": "Wikipedia",
+    "topic": "Awards",
+    "fact": "As of 2025, Eminem holds the record for the most wins in this category, with six.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg/960px-KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Grammy_Award_for_Best_Rap_Album",
+    "prev_hash": "7d91c67c1e31b5e4eea23572633cf7fcf853acdc0b820c5c3202f5845f75fd77",
+    "hash": "eb1467649366b89c2d51d18d32914dd3fec248dede86d8d742285333a8cbcf46"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.376042+00:00",
+    "source": "Wikipedia",
+    "topic": "Awards",
+    "fact": "Jay-Z holds the record for the most nominations, with eleven.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg/960px-KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Grammy_Award_for_Best_Rap_Album",
+    "prev_hash": "ba22eabee1518bd962e3a4d0535930a7b549daf446afb4584d0b6d1addc724bf",
+    "hash": "7d91c67c1e31b5e4eea23572633cf7fcf853acdc0b820c5c3202f5845f75fd77"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.376036+00:00",
+    "source": "Wikipedia",
+    "topic": "Awards",
+    "fact": "== Recipients ==   === 1990s ===   === 2000s ===   === 2010s ===   === 2020s ===  ^[I] Each year is linked to the article about the Grammy Awards held that year.",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg/960px-KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Grammy_Award_for_Best_Rap_Album",
+    "prev_hash": "e3ce99cc023f2147847735bda18c67556f5f1fe9667879d91a7238a89bc9ed25",
+    "hash": "ba22eabee1518bd962e3a4d0535930a7b549daf446afb4584d0b6d1addc724bf"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.376030+00:00",
+    "source": "Wikipedia",
+    "topic": "Awards",
+    "fact": "== Artists with multiple wins ==   == Artists with multiple nominations ==   == See also == Grammy Award for Best Rap Performance Grammy Award for Best Rap Song Hip hop music   == References == General  Specific",
+    "image_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg/960px-KendrickSZASPurs230725-144_%28cropped%29_desaturated.jpg?utm_source=en.wikipedia.org&utm_campaign=api&utm_content=thumbnail",
+    "source_url": "https://en.wikipedia.org/wiki/Grammy_Award_for_Best_Rap_Album",
+    "prev_hash": "d3d2860c27bc32915fff0b01eb8256d46d77102161a368d2da898a9f61e46435",
+    "hash": "e3ce99cc023f2147847735bda18c67556f5f1fe9667879d91a7238a89bc9ed25"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.376005+00:00",
+    "source": "Billboard Hip-Hop",
+    "topic": "Trending News",
+    "fact": "Eminem & 50 Cent Reunite Courtside at Detroit Pistons Playoff Game: \u2018There Is Nothing Like\u00a0It\u2019",
+    "image_url": "",
+    "source_url": "https://www.billboard.com/music/rb-hip-hop/eminem-50-cent-reunite-detroit-pistons-nba-playoff-game-1236248275/",
+    "prev_hash": "4b01bbfcf63d0c99d151fab4b4583779ba82046aad8aa9e041d8df30f5d05878",
+    "hash": "d3d2860c27bc32915fff0b01eb8256d46d77102161a368d2da898a9f61e46435"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.375996+00:00",
+    "source": "Rolling Stone",
+    "topic": "Trending News",
+    "fact": "Kanye West\u2019s Unlikely New Concert Partner: Live Nation Israel",
+    "image_url": "",
+    "source_url": "https://www.rollingstone.com/music/music-news/ye-kanye-west-tbilisi-georgia-concert-live-nation-israel-1235561670/",
+    "prev_hash": "99326e190bf1e159d32ad0fbe2a70e00734262ea41c37d7a1e6242c60c3cbc54",
+    "hash": "4b01bbfcf63d0c99d151fab4b4583779ba82046aad8aa9e041d8df30f5d05878"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.375989+00:00",
+    "source": "Rolling Stone",
+    "topic": "Trending News",
+    "fact": "Shannon Shaw and Tycho Carry on San Francisco\u2019s Musical Legacy at Rolling Stone and Sonesta International Hotel\u2019s Musicians on Musicians Event",
+    "image_url": "",
+    "source_url": "https://www.rollingstone.com/music/music-news/shannon-shaw-tycho-sf-sonesta-international-hotels-1235559372/",
+    "prev_hash": "4395103de0219cdf343183202642bf276f0d5cdfef86d04758ce1cd53fdbc5f9",
+    "hash": "99326e190bf1e159d32ad0fbe2a70e00734262ea41c37d7a1e6242c60c3cbc54"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.375981+00:00",
+    "source": "Rolling Stone",
+    "topic": "Trending News",
+    "fact": "Dua Lipa Announces Live Album and Concert Film From Radical Optimism Tour\u2019s Mexico City Shows",
+    "image_url": "",
+    "source_url": "https://www.rollingstone.com/music/music-news/dua-lipa-live-album-concert-film-radical-optimism-tour-1235562674/",
+    "prev_hash": "f45c5647898e5fe33e00e96f1ee974d3aff4e17eeca7e314adf9f0a4710ab14a",
+    "hash": "4395103de0219cdf343183202642bf276f0d5cdfef86d04758ce1cd53fdbc5f9"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.375970+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "Eminem\u2019s Ex-Wife, Kim Scott, Arrested Two Days After Pleading No Contest To Drunk Driving Charge",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/994947-eminem-ex-wife-kim-scott-arrested",
+    "prev_hash": "7b2a7ba028715538ada955c88e6c636dc4473be33b050a23b9da0b61e6eef296",
+    "hash": "f45c5647898e5fe33e00e96f1ee974d3aff4e17eeca7e314adf9f0a4710ab14a"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.375959+00:00",
+    "source": "Pitchfork",
+    "topic": "Trending News",
+    "fact": "There\u2019s a New Salem Album Out Today",
+    "image_url": "",
+    "source_url": "https://pitchfork.com/news/theres-a-new-salem-album-out/",
+    "prev_hash": "1c2c9dc1640d9748af8773cecd5eb3cc19eaef60b3ffe3b469e90b3596c3cc60",
+    "hash": "7b2a7ba028715538ada955c88e6c636dc4473be33b050a23b9da0b61e6eef296"
+  },
+  {
+    "timestamp": "2026-05-14T20:29:16.375897+00:00",
+    "source": "Pitchfork",
+    "topic": "Trending News",
+    "fact": "Chance the Rapper Announces Coloring Book Anniversary Tour",
+    "image_url": "",
+    "source_url": "https://pitchfork.com/news/chance-the-rapper-coloring-book-anniversary-tour-2026/",
+    "prev_hash": "0f4a162238cbe8b49554df627b3448be558bac39770c7e19d8c9d1c3a85fc1de",
+    "hash": "1c2c9dc1640d9748af8773cecd5eb3cc19eaef60b3ffe3b469e90b3596c3cc60"
+  },
+  {
     "timestamp": "2026-05-14T17:07:52.034123+00:00",
     "source": "Google News Hip Hop",
     "topic": "Trending News",
