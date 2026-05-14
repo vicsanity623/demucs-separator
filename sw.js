@@ -1,10 +1,11 @@
 'use strict';
 
-const CACHE_NAME = 'dashboard-cache-v1.0.7';
+const CACHE_NAME = 'dashboard-cache-v1.0.8';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './engine.py',
+    './ledger_manager.py',
     './manifest.json',
     './idle192x192.png',
     './idle512x512.png'
