@@ -1,12 +1,11 @@
-import json
 import hashlib
 import requests
 import feedparser  # type: ignore
 import nltk  # type: ignore
 from datetime import datetime, timezone
-import os
 import time
 from typing import List, Dict, Tuple
+from ledger_manager import load_ledger, save_ledger
 
 nltk.download("punkt", quiet=True)
 nltk.download("punkt_tab", quiet=True)
@@ -126,22 +125,7 @@ def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, 
     return facts, "Wikipedia", image_url, source_url
 
 
-def load_ledger() -> List[Dict[str, str]]:
-    if os.path.exists(LEDGER_FILE):
-        try:
-            with open(LEDGER_FILE, "r") as f:
-                data = json.load(f)
-                if isinstance(data, list):
-                    return data
-        except json.JSONDecodeError:
-            pass
-    return []
-
-
-def save_ledger(ledger: List[Dict[str, str]]) -> None:
-    optimized_ledger = ledger[:1000]
-    with open(LEDGER_FILE, "w") as f:
-        json.dump(optimized_ledger, f, indent=2)
+# Ledger I/O moved to ledger_manager.py
 
 
 def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, str]]]:
