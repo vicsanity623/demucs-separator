@@ -59,7 +59,7 @@ RSS_TARGETS: List[Tuple[str, str]] = [
 def get_previous_hash(ledger: List[Dict[str, str]]) -> str:
     if not ledger:
         return "0000000000000000000000000000000000000000000000000000000000000000"
-    return ledger[0]["hash"]
+    return str(ledger[0]["hash"])
 
 
 def verify_ledger_integrity(ledger: List[Dict[str, str]]) -> bool:
