@@ -496,9 +496,9 @@
             applyFilters(); // refresh grid to show read history
         }
 
-        async function verifyChain(): Promise<void> {
-            let isValid: boolean = true;
-            for (let i: number = 1; i < fullLedger.length; i++) {
+        async function verifyChain() {
+            let isValid = true;
+            for (let i = 1; i < fullLedger.length; i++) {
                 if (fullLedger[i].prev_hash !== fullLedger[i - 1].hash) {
                     isValid = false;
                     break;
