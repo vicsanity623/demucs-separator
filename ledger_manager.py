@@ -34,3 +34,25 @@ def flag_block(block_hash: str, status: str) -> bool:
             save_ledger(ledger)
             return True
     return False
+
+
+def get_ledger_statistics() -> Dict[str, int]:
+    """
+    Calculates the distribution of block statuses for dashboard reporting.
+    """
+    ledger: List[Dict[str, str]] = load_ledger()
+    stats: Dict[str, int] = {
+        "total": len(ledger),
+        "verified": 0,
+        "disputed": 0,
+        "pending": 0,
+    }
+
+    for block in ledger:
+        status: str = block.get("status", "pending")
+        if status in stats:
+            stats[status] += 1
+        else:
+            stats["pending"] += 1
+
+    return stats
