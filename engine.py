@@ -1,6 +1,7 @@
 import hashlib
 import requests
 import feedparser  # type: ignore
+import shutil
 import nltk  # type: ignore
 from datetime import datetime, timezone
 import time
@@ -60,6 +61,70 @@ def get_previous_hash(ledger: List[Dict[str, str]]) -> str:
     if not ledger:
         return "0000000000000000000000000000000000000000000000000000000000000000"
     return ledger[0]["hash"]
+
+
+def interactive_ledger_view(ledger: List[Dict[str, str]]) -> None:
+    page_size = 10
+    current_page = 0
+    filter_by: Dict[str, str] = {}
+    filtered: List[Dict[str, str]] = list(ledger)
+
+    def refresh() -> None:
+        nonlocal filtered
+        filtered = [
+            block
+            for block in ledger
+            if all(
+                block.get(k, "").lower().startswith(v.lower())
+                for k, v in filter_by.items()
+            )
+        ]
+
+    while True:
+        term_size = shutil.get_terminal_size(fallback=(80, 24))
+        cols = term_size.columns
+        start = current_page * page_size
+        page_blocks = filtered[start : start + page_size]
+
+        print("\n" + "=" * cols)
+        print(
+            f" Ledger Viewer â Page {current_page + 1} of {max(1, (len(filtered) - 1) // page_size + 1)}"
+        )
+        print(f" Filters: {filter_by if filter_by else 'None'}")
+        print("-" * cols)
+        for block in page_blocks:
+            text = block["fact"][: cols - 40] + (
+                "â¦" if len(block["fact"]) > cols - 40 else ""
+            )
+            print(
+                f"{block['timestamp']} | {block['source']:<12} | {block['topic']:<15} | {text}"
+            )
+        print("-" * cols)
+        cmd = (
+            input(
+                "Commands: [n] next, [p] prev, [f <k> <v>] filter, [d <hash>] delete, [q] quit\n=> "
+            )
+            .strip()
+            .lower()
+        )
+
+        if cmd == "q":
+            break
+        elif cmd == "n" and (current_page + 1) * page_size < len(filtered):
+            current_page += 1
+        elif cmd == "p" and current_page > 0:
+            current_page -= 1
+        elif cmd.startswith("f "):
+            parts = cmd.split(maxsplit=2)
+            if len(parts) == 3 and parts[1] in ("source", "topic"):
+                filter_by[parts[1]] = parts[2]
+                refresh()
+                current_page = 0
+        elif cmd.startswith("d "):
+            to_del = cmd.split(maxsplit=1)[1]
+            ledger[:] = [b for b in ledger if b["hash"] != to_del]
+            refresh()
+            current_page = min(current_page, max(0, (len(filtered) - 1) // page_size))
 
 
 def create_block(
