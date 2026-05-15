@@ -102,7 +102,7 @@ def create_block(
     )
     block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
-    return {
+    block: Dict[str, str] = {
         "timestamp": timestamp,
         "source": source,
         "topic": topic,
@@ -112,6 +112,7 @@ def create_block(
         "prev_hash": prev_hash,
         "hash": block_hash,
     }
+    return block
 
 
 def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, str]:
