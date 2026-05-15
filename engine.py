@@ -10,6 +10,7 @@ from ledger_manager import load_ledger, save_ledger
 
 nltk.download("punkt", quiet=True)
 nltk.download("punkt_tab", quiet=True)
+nltk.download("punkt_tab", quiet=True)
 
 LEDGER_FILE: str = "ledger.json"
 MAX_RUNTIME_SEC: int = 45 * 60
@@ -59,7 +60,33 @@ RSS_TARGETS: List[Tuple[str, str]] = [
 def get_previous_hash(ledger: List[Dict[str, str]]) -> str:
     if not ledger:
         return "0000000000000000000000000000000000000000000000000000000000000000"
-    return ledger[0]["hash"]
+    return str(ledger[0]["hash"])
+
+
+def verify_ledger_integrity(ledger: List[Dict[str, str]]) -> bool:
+    """
+    Validates the integrity of the ledger by re-calculating hashes
+    and checking the link between blocks.
+    """
+    for i in range(len(ledger) - 1):
+        current_block: Dict[str, str] = ledger[i]
+        next_block: Dict[str, str] = ledger[i + 1]
+
+        payload: str = (
+            f"{current_block['timestamp']}|{current_block['source']}|"
+            f"{current_block['topic']}|{current_block['fact']}|"
+            f"{current_block['image_url']}|{current_block['source_url']}|"
+            f"{current_block['prev_hash']}"
+        )
+        calculated_hash: str = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+        if calculated_hash != current_block["hash"]:
+            return False
+
+        if current_block["prev_hash"] != next_block["hash"]:
+            return False
+
+    return True
 
 
 def create_block(
@@ -76,7 +103,7 @@ def create_block(
     )
     block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
-    return {
+    block: Dict[str, str] = {
         "timestamp": timestamp,
         "source": source,
         "topic": topic,
@@ -86,6 +113,7 @@ def create_block(
         "prev_hash": prev_hash,
         "hash": block_hash,
     }
+    return block
 
 
 def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, str]:
