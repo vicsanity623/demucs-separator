@@ -167,8 +167,8 @@ def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, 
     print("Scraping RSS Feeds (Discovery Mode)...")
     for source_name, rss_url in RSS_TARGETS:
         try:
-            # Note: feedparser doesn't support direct timeout, but we can wrap the fetch
-            feed = feedparser.parse(rss_url, agent=HEADERS["User-Agent"])
+            resp = requests.get(rss_url, headers=HEADERS, timeout=10)
+            feed = feedparser.parse(resp.content)
             for entry in feed.entries[:15]:
                 title = entry.get("title", "")
                 # Broadened keywords to capture more industry news
