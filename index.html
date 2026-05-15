@@ -324,6 +324,7 @@
                     <div class="watch-description">
                         <p style="font-weight:bold; margin-bottom:10px;">Topic: <span id="wTopic" style="color:var(--accent-color)">Topic</span> • <span id="wTime">Time</span></p>
                         <p>This block has been cryptographically sealed and verified by the Axiom Engine ledger.</p>
+                        <button class="watch-btn" onclick="verifyChain()" style="margin-top: 10px; width: 100%; justify-content: center;">ð¡ï¸ Verify Chain Integrity</button>
                         <div class="crypto-box">
                             <strong style="color:var(--text-secondary)">Block Hash:</strong><br>
                             <span id="wHash" style="color:var(--verified-color)">hash</span><br><br>
@@ -493,6 +494,17 @@
             document.getElementById('watchContainer').style.display = 'none';
             document.getElementById('gridContainer').style.display = 'block';
             applyFilters(); // refresh grid to show read history
+        }
+
+        async function verifyChain(): Promise<void> {
+            let isValid: boolean = true;
+            for (let i: number = 1; i < fullLedger.length; i++) {
+                if (fullLedger[i].prev_hash !== fullLedger[i - 1].hash) {
+                    isValid = false;
+                    break;
+                }
+            }
+            alert(isValid ? "Chain Integrity Verified: Ledger is unbroken." : "CRITICAL: Integrity breach detected!");
         }
 
         // --- GRID RENDERING ---
