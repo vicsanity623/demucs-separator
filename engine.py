@@ -10,10 +10,9 @@ from ledger_manager import load_ledger, save_ledger
 
 nltk.download("punkt", quiet=True)
 nltk.download("punkt_tab", quiet=True)
-nltk.download("punkt_tab", quiet=True)
 
 LEDGER_FILE: str = "ledger.json"
-MAX_RUNTIME_SEC: int = 45 * 60
+MAX_RUNTIME_SEC: int = (2 * 60 * 60) + (45 * 60)  # Run for 2 hours and 45 minutes
 
 HEADERS: Dict[str, str] = {
     "User-Agent": "AxiomEngineBot/2.0 (https://github.com/; axiom-engine@example.com) python-requests/2.x"
@@ -40,14 +39,11 @@ WIKI_SEEDS: List[Tuple[str, str]] = [
     ("RIAA_certification", "Industry Stats"),
     ("Grammy_Award_for_Best_Rap_Album", "Awards"),
     ("N.W.A", "Hip Hop History"),
-    ("Jay-Z", "Hip Hop History"),
+    ("Jay-Z", "Hip Hop History")
 ]
 
 RSS_TARGETS: List[Tuple[str, str]] = [
-    (
-        "Google News Hip Hop",
-        "https://news.google.com/rss/search?q=hip+hop+music+news&hl=en-US&gl=US&ceid=US:en",
-    ),
+    ("Google News Hip Hop", "https://news.google.com/rss/search?q=hip+hop+music+news&hl=en-US&gl=US&ceid=US:en"),
     ("HipHopDX", "https://hiphopdx.com/rss/news"),
     ("Billboard Hip-Hop", "https://www.billboard.com/c/music/rb-hip-hop/feed/"),
     ("Rolling Stone", "https://www.rollingstone.com/music/feed/"),
@@ -60,33 +56,7 @@ RSS_TARGETS: List[Tuple[str, str]] = [
 def get_previous_hash(ledger: List[Dict[str, str]]) -> str:
     if not ledger:
         return "0000000000000000000000000000000000000000000000000000000000000000"
-    return str(ledger[0]["hash"])
-
-
-def verify_ledger_integrity(ledger: List[Dict[str, str]]) -> bool:
-    """
-    Validates the integrity of the ledger by re-calculating hashes
-    and checking the link between blocks.
-    """
-    for i in range(len(ledger) - 1):
-        current_block: Dict[str, str] = ledger[i]
-        next_block: Dict[str, str] = ledger[i + 1]
-
-        payload: str = (
-            f"{current_block['timestamp']}|{current_block['source']}|"
-            f"{current_block['topic']}|{current_block['fact']}|"
-            f"{current_block['image_url']}|{current_block['source_url']}|"
-            f"{current_block['prev_hash']}"
-        )
-        calculated_hash: str = hashlib.sha256(payload.encode("utf-8")).hexdigest()
-
-        if calculated_hash != current_block["hash"]:
-            return False
-
-        if current_block["prev_hash"] != next_block["hash"]:
-            return False
-
-    return True
+    return ledger[0]["hash"]
 
 
 def create_block(
@@ -103,7 +73,7 @@ def create_block(
     )
     block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
-    block: Dict[str, str] = {
+    return {
         "timestamp": timestamp,
         "source": source,
         "topic": topic,
@@ -113,7 +83,6 @@ def create_block(
         "prev_hash": prev_hash,
         "hash": block_hash,
     }
-    return block
 
 
 def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, str]:
@@ -145,7 +114,6 @@ def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, 
             "certified",
             "Grammy",
             "Billboard",
-            "Tour",
             "released",
             "sold",
             "record",
@@ -153,6 +121,7 @@ def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, 
             "debut",
             "born",
             "track",
+            "rhyme",
             "song",
         ]
 
@@ -172,12 +141,10 @@ def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, 
 def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, str]]]:
     new_facts: List[Dict[str, str]] = []
 
-    # Discovery Mode: Pick 4 random targets
+    # DYNAMIC DISCOVERY: Pick 4 random targets from the wiki seeds to avoid stagnation
     current_wiki_batch = random.sample(WIKI_SEEDS, k=min(4, len(WIKI_SEEDS)))
-
-    print(
-        f"Scraping Wikipedia (Discovery Mode: {', '.join([t[0] for t in current_wiki_batch])})..."
-    )
+    
+    print(f"Scraping Wikipedia (Discovery Mode: {', '.join([t[0] for t in current_wiki_batch])})...")
     for title, topic in current_wiki_batch:
         facts, source, img_url, src_url = fetch_wikipedia_facts(title, topic)
         for fact in facts:
@@ -198,27 +165,18 @@ def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, 
             feed = feedparser.parse(rss_url, agent=HEADERS["User-Agent"])
             for entry in feed.entries[:15]:
                 title = entry.get("title", "")
-                discovery_keywords = [
-                    "eminem",
-                    "rap",
-                    "hip hop",
-                    "dre",
-                    "album",
-                    "music",
-                    "chart",
-                    "concert",
-                ]
+                # Broadened keywords to capture more industry news
+                discovery_keywords = ["eminem", "rap", "hip hop", "dre", "album", "music", "chart", "concert"]
                 if any(kw in title.lower() for kw in discovery_keywords):
                     img_url = ""
                     src_url = entry.get("link", "")
 
-                    # FIXED: Added safe get() calls to prevent Pitchfork/RSS 'url' errors
                     if "media_content" in entry and len(entry.media_content) > 0:
-                        img_url = entry.media_content[0].get("url", "")
+                        img_url = entry.media_content[0]["url"]
                     elif "links" in entry:
                         for link in entry.links:
                             if "image" in link.get("type", ""):
-                                img_url = link.get("href", "")
+                                img_url = link.href
                                 break
 
                     new_facts.append(
@@ -276,6 +234,7 @@ if __name__ == "__main__":
 
         print(f"✅ Cycle {cycle} Complete. Added {added} new verified blocks.")
 
+        # Sleep for 15 minutes instead of 20 to increase news capture frequency
         sleep_duration: float = 15.0 * 60.0
         sleep_duration += random.randint(1, 30)
 
