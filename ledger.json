@@ -1,5 +1,115 @@
 [
   {
+    "timestamp": "2026-05-15T05:46:01.140884+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "BELOVED: Act II \u2013 Album by Giveon",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/995055-beloved-act-ii-giveon",
+    "prev_hash": "ec21ec6f41e60e85024c8d4bdf58ae1ed8876045bc9765d71f5a59579e7e63de",
+    "hash": "c5221b6b2c5573874f165b2bd56c4c8c67eebb154c4545c43a23f60eb254f217"
+  },
+  {
+    "timestamp": "2026-05-15T05:30:36.099917+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "GENESIS FM \u2013 Album by BNYX",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/995052-genesis-fm-bnyx",
+    "prev_hash": "e5aedaee1800c8d5b11175a047e1a259d2508ac0fa99d275cce62ab2b72e3695",
+    "hash": "ec21ec6f41e60e85024c8d4bdf58ae1ed8876045bc9765d71f5a59579e7e63de"
+  },
+  {
+    "timestamp": "2026-05-15T05:30:36.099871+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "Dr*gs R Bad \u2013 Album by Lucki",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/995045-drgs-r-bad-lucki",
+    "prev_hash": "65d56c73472346631ab4edfd09d5007fab74d5f2febc25614666496c012e8c20",
+    "hash": "e5aedaee1800c8d5b11175a047e1a259d2508ac0fa99d275cce62ab2b72e3695"
+  },
+  {
+    "timestamp": "2026-05-15T05:15:18.132097+00:00",
+    "source": "Google News Hip Hop",
+    "topic": "Trending News",
+    "fact": "#TSRReactionz: #Drake said surprise! \ud83d\ude05 The rapper caught fans off guard after dropping three projects at once. \u2018Habibti,\u2019 \u2018Maid of Honour,\u2019 and \u2018Iceman\u2019 already have social media in a frenzy, with fans reacting online and streaming services seemingly struggli - instagram.com",
+    "image_url": "",
+    "source_url": "https://news.google.com/rss/articles/CBMiUkFVX3lxTFAxNHNSUC1qOHNVSFZ1ZlZ6NXVXWFNpUmNzb21TUHZxMjhzbVotdFFQV1ZQRkZjTFlXcDRkVFJDUVYzbGc1MWFHQmlnaFdiLWQ3elE?oc=5",
+    "prev_hash": "108b4e8df310a748e655ace59740788433d04df833d412b0312d96c269d2f7cd",
+    "hash": "65d56c73472346631ab4edfd09d5007fab74d5f2febc25614666496c012e8c20"
+  },
+  {
+    "timestamp": "2026-05-15T05:15:18.132075+00:00",
+    "source": "Billboard Hip-Hop",
+    "topic": "Trending News",
+    "fact": "Drake Returns With Three New Albums as \u2018Iceman,\u2019  \u2018Maid of Honour\u2019 & \u2018Habibti\u2019 Arrive: Stream Them\u00a0Now",
+    "image_url": "",
+    "source_url": "https://www.billboard.com/music/rb-hip-hop/drake-iceman-album-stream-1236248614/",
+    "prev_hash": "bc0628d9cf121e5ee5cc5b56ef541ae0d74ec8bf31eb207ef6bcd1e00fecb9fb",
+    "hash": "108b4e8df310a748e655ace59740788433d04df833d412b0312d96c269d2f7cd"
+  },
+  {
+    "timestamp": "2026-05-15T05:15:18.132062+00:00",
+    "source": "Rolling Stone",
+    "topic": "Trending News",
+    "fact": "Drake Finally Unveils \u2018Iceman\u2019 \u2014 and Surprise Drops 2 More Albums",
+    "image_url": "",
+    "source_url": "https://www.rollingstone.com/music/music-news/drake-iceman-three-albums-habibti-maid-of-honour-1235563246/",
+    "prev_hash": "5c5f1a50f267f04049266238485d67812faa784aeec1baed4aebce5f33e56d46",
+    "hash": "bc0628d9cf121e5ee5cc5b56ef541ae0d74ec8bf31eb207ef6bcd1e00fecb9fb"
+  },
+  {
+    "timestamp": "2026-05-15T05:15:18.132048+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "ICEMAN \u2013 Album by Drake",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/994886-iceman-drake",
+    "prev_hash": "cee1015d3fae4587bbafa644f9def65785e5ee4921c4a36fb60fc7a3a9cf6f9d",
+    "hash": "5c5f1a50f267f04049266238485d67812faa784aeec1baed4aebce5f33e56d46"
+  },
+  {
+    "timestamp": "2026-05-15T05:15:18.132037+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "MAID OF HONOUR \u2013 Album by Drake",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/995010-maid-of-honour-drake",
+    "prev_hash": "5dd5e23053ff44114437e4b91bf8e5dbbaa5b1226fbc29662784a644baceb04e",
+    "hash": "cee1015d3fae4587bbafa644f9def65785e5ee4921c4a36fb60fc7a3a9cf6f9d"
+  },
+  {
+    "timestamp": "2026-05-15T05:15:18.132022+00:00",
+    "source": "HotNewHipHop",
+    "topic": "Trending News",
+    "fact": "HABIBTI \u2013 Album by Drake",
+    "image_url": "",
+    "source_url": "https://www.hotnewhiphop.com/995009-habibti-drake",
+    "prev_hash": "30716b5386ba90e74721ca6521ea8dfea556cfade7575bf2f28010c64f9f920e",
+    "hash": "5dd5e23053ff44114437e4b91bf8e5dbbaa5b1226fbc29662784a644baceb04e"
+  },
+  {
+    "timestamp": "2026-05-15T05:15:18.132007+00:00",
+    "source": "Pitchfork",
+    "topic": "Trending News",
+    "fact": "Drake Drops Three Albums at Once",
+    "image_url": "",
+    "source_url": "https://pitchfork.com/news/drake-drops-three-albums-at-once/",
+    "prev_hash": "8e6c82576785f8d3d96573c1af473df6a83b3383370e73ab79a581e3eb2e80d5",
+    "hash": "30716b5386ba90e74721ca6521ea8dfea556cfade7575bf2f28010c64f9f920e"
+  },
+  {
+    "timestamp": "2026-05-15T05:15:18.131934+00:00",
+    "source": "Pitchfork",
+    "topic": "Trending News",
+    "fact": "Lady Gaga Releases New Live Album Mayhem Requiem",
+    "image_url": "",
+    "source_url": "https://pitchfork.com/news/lady-gaga-releases-new-live-album-mayhem-requiem/",
+    "prev_hash": "293562d9537dd57f9ad4caf4a3d085043fbba5f956d1177a302625b3ec86418d",
+    "hash": "8e6c82576785f8d3d96573c1af473df6a83b3383370e73ab79a581e3eb2e80d5"
+  },
+  {
     "timestamp": "2026-05-15T00:20:42.173917+00:00",
     "source": "Wikipedia",
     "topic": "Hip Hop Business",
