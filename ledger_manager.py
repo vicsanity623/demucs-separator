@@ -1,6 +1,7 @@
 import json
 import os
 from typing import List, Dict
+import sys
 
 LEDGER_FILE: str = "ledger.json"
 
@@ -33,3 +34,37 @@ def flag_block(block_hash: str, status: str) -> bool:
             save_ledger(ledger)
             return True
     return False
+
+
+def interactive_flag_block() -> None:
+    """
+    Prompt the user to enter a block hash and a status, then flag the block.
+    """
+    ledger: List[Dict[str, str]] = load_ledger()
+    if not ledger:
+        print("Ledger is empty or missing.", file=sys.stderr)
+        return
+
+    block_hash: str = input("Enter block hash to flag: ").strip()
+    if not any(b.get("hash") == block_hash for b in ledger):
+        print(f"No block found with hash: {block_hash}", file=sys.stderr)
+        return
+
+    status: str = ""
+    while status not in ("verified", "disputed"):
+        status_input: str = (
+            input("Set status ('verified' or 'disputed'): ").strip().lower()
+        )
+        if status_input in ("verified", "disputed"):
+            status = status_input
+        else:
+            print("Invalid status. Please enter 'verified' or 'disputed'.")
+
+    if flag_block(block_hash, status):
+        print(f"Block {block_hash} flagged as {status}.")
+    else:
+        print(f"Failed to flag block {block_hash}.", file=sys.stderr)
+
+
+if __name__ == "__main__":
+    interactive_flag_block()
