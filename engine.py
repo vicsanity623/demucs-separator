@@ -4,21 +4,19 @@ import json
 from datetime import datetime, timezone
 import time
 import re
-from html import unescape
 from typing import List, Dict, Any
 from ledger_manager import load_ledger, save_ledger
 
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "User-Agent": "linux:axiom.uap.tracker:v1.0.0 (by /u/axiom_uap)",
     "Accept": "application/json"
 }
-
 
 REDDIT_SUBS = ["UFOs", "UAP", "UFObelievers", "UFOdocumentaries"]
 FOURCHAN_BOARD = "x"
 
-POSITIVE_KEYWORDS = ["ufo", "uap", "uso", "orb", "saucer", "tic tac", "tic-tac", "triangle", "sighting", "craft", "phenomenon"]
-NEGATIVE_KEYWORDS = ["furry", "ai", "psyop", "generated", "ai generated" "meme", "fake", "debunk", "cgi", "vfx", "blender", "movie", "game", "art", "drawing", "tattoo", "fiction", "joke", "project blue beam"]
+POSITIVE_KEYWORDS = ["ufo", "uap", "orb", "saucer", "tic tac", "tic-tac", "triangle", "sighting", "craft", "phenomenon"]
+NEGATIVE_KEYWORDS = ["furry", "ai", "ai generated", "generated", "psyop", "meme", "fake", "debunk", "cgi", "vfx", "blender", "movie", "game", "art", "drawing", "tattoo", "fiction", "joke", "project blue beam"]
 
 def get_previous_hash(ledger: List[Dict[str, Any]]) -> str:
     if not ledger:
@@ -38,7 +36,7 @@ def create_block(
         "source": source,
         "author": author,
         "title": title,
-        "description": description[:800], # Keep it concise
+        "description": description[:800], 
         "media_url": media_url,
         "thumbnail_url": thumbnail_url,
         "media_type": media_type,
@@ -57,18 +55,22 @@ def fetch_reddit_sightings() -> List[Dict[str, Any]]:
     results = []
     for sub in REDDIT_SUBS:
         print(f"Scraping Reddit: /r/{sub} (Hot)...")
-        url = f"https://www.reddit.com/r/{sub}/hot.json?limit=30"
+        
+        # raw_json=1 prevents Reddit from sending broken &amp; links
+        url = f"https://www.reddit.com/r/{sub}/hot.json?limit=30&raw_json=1"
         try:
             res = requests.get(url, headers=HEADERS, timeout=10)
             if res.status_code != 200:
-                print(f"⚠️ Reddit blocked request for /r/{sub} (Status: {res.status_code}).")
+                print(f"⚠️ Reddit blocked request for /r/{sub} (Status: {res.status_code}). Response: {res.text[:100]}")
+                time.sleep(3)
                 continue
 
             posts = res.json().get("data", {}).get("children", [])
             for post in posts:
                 p = post["data"]
-                title = unescape(p.get("title", ""))
+                title = p.get("title", "")
                 
+                # STRICT QUALITY CONTROL: Must have at least 50 upvotes
                 if p.get("score", 0) < 50:
                     continue
                 
@@ -79,28 +81,30 @@ def fetch_reddit_sightings() -> List[Dict[str, Any]]:
                 thumbnail_url = ""
                 media_type = ""
                 
+                # 1. Check for Reddit Hosted Video
                 if p.get("is_video") and p.get("media") and p["media"].get("reddit_video"):
                     media_url = p["media"]["reddit_video"].get("fallback_url", "")
                     thumbnail_url = p.get("thumbnail", "")
                     media_type = "video"
                 
+                # 2. Check for High-Res Image or GIF
                 elif p.get("preview") and p["preview"].get("images"):
                     img_data = p["preview"]["images"][0]
-                    media_url = unescape(img_data["source"]["url"])
+                    media_url = img_data["source"]["url"]
                     
                     resolutions = img_data.get("resolutions", [])
                     if len(resolutions) > 2:
-                        thumbnail_url = unescape(resolutions[2]["url"])
+                        thumbnail_url = resolutions[2]["url"]
                     else:
                         thumbnail_url = media_url
                     
                     media_type = "image"
-                    if "mp4" in p.get("url", "") or "gifv" in p.get("url", ""):
-                        if "variants" in img_data and "mp4" in img_data["variants"]:
-                            media_url = unescape(img_data["variants"]["mp4"]["source"]["url"])
-                            media_type = "video"
+                    
+                    if "variants" in img_data and "mp4" in img_data["variants"]:
+                        media_url = img_data["variants"]["mp4"]["source"]["url"]
+                        media_type = "video"
 
-                if thumbnail_url in ["self", "default", "nsfw", "spoiler"]:
+                if thumbnail_url in ["self", "default", "nsfw", "spoiler", ""]:
                     thumbnail_url = media_url
 
                 if media_url and thumbnail_url:
@@ -108,7 +112,7 @@ def fetch_reddit_sightings() -> List[Dict[str, Any]]:
                         "source": f"Reddit (/r/{sub})",
                         "author": p.get("author", "Anonymous"),
                         "title": title,
-                        "description": unescape(p.get("selftext", "")),
+                        "description": p.get("selftext", ""),
                         "media_url": media_url,
                         "thumbnail_url": thumbnail_url,
                         "media_type": media_type,
@@ -116,7 +120,9 @@ def fetch_reddit_sightings() -> List[Dict[str, Any]]:
                     })
         except Exception as e:
             print(f"⚠️ Error parsing /r/{sub}: {e}")
-        time.sleep(6)
+        
+        # Polite delay to respect API limits
+        time.sleep(3)
     return results
 
 def fetch_4chan_sightings() -> List[Dict[str, Any]]:
@@ -128,10 +134,10 @@ def fetch_4chan_sightings() -> List[Dict[str, Any]]:
         
         for page in res.json():
             for thread in page.get("threads", []):
-                title = unescape(thread.get("sub", ""))
-                comment = unescape(re.sub(r'<[^>]+>', ' ', thread.get("com", "")))
+                title = thread.get("sub", "")
+                comment = re.sub(r'<[^>]+>', ' ', thread.get("com", ""))
                 
-                # Quality control: Must have some replies to be relevant
+                # Quality control: Must have replies to be relevant
                 if thread.get("replies", 0) < 5:
                     continue
 
@@ -140,7 +146,6 @@ def fetch_4chan_sightings() -> List[Dict[str, Any]]:
                     ext = thread["ext"]
                     
                     media_url = f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tim}{ext}"
-                    # 4chan generates dedicated thumbnails with 's.jpg'
                     thumbnail_url = f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tim}s.jpg"
                     media_type = "video" if ext in [".webm", ".mp4"] else "image"
                     
