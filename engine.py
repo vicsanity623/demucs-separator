@@ -10,7 +10,7 @@ ITUNES_BASE_URL = "https://itunes.apple.com"
 
 TARGET_ARTISTS = [
     "Eminem", "Kendrick Lamar", "2Pac", "The Notorious B.I.G.",
-    "Jay-Z", "Nas", "Dr. Dre", "Snoop Dogg", "50 Cent", "Wu-Tang Clan", "J. Cole", "Drake"
+    "Jay-Z", "Nas", "Dr. Dre", "Snoop Dogg", "50 Cent", "NF", "J. Cole", "Tech N9ne"
 ]
 
 def get_previous_hash(ledger: List[Dict[str, Any]]) -> str:
