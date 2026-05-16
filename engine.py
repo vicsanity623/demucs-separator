@@ -8,7 +8,8 @@ from typing import List, Dict, Any
 from ledger_manager import load_ledger, save_ledger
 
 HEADERS = {
-    "User-Agent": "AxiomUAPTracker/1.0 (Educational OSINT Project)"
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+    "Accept": "application/json"
 }
 
 # Target platforms
@@ -55,6 +56,15 @@ def fetch_reddit_sightings() -> List[Dict[str, Any]]:
         url = f"https://www.reddit.com/r/{sub}/new.json?limit=50"
         try:
             res = requests.get(url, headers=HEADERS, timeout=10)
+            
+            if res.status_code == 429:
+                print(f"⚠️ Reddit Rate Limited (429) for /r/{sub}. Sleeping for 5s...")
+                time.sleep(5)
+                continue
+            elif res.status_code != 200:
+                print(f"⚠️ Reddit blocked request for /r/{sub} (Status: {res.status_code}).")
+                continue
+
             data = res.json()
             posts = data.get("data", {}).get("children", [])
             
@@ -62,19 +72,16 @@ def fetch_reddit_sightings() -> List[Dict[str, Any]]:
                 p_data = post["data"]
                 title = p_data.get("title", "")
                 
-                # Only care if it mentions our keywords
                 if not contains_keywords(title):
                     continue
                 
                 media_url = ""
                 media_type = ""
                 
-                # Check for Reddit Video (.mp4 usually via fallback URL)
                 if p_data.get("is_video") and "media" in p_data and p_data["media"]:
                     reddit_video = p_data["media"].get("reddit_video", {})
                     media_url = reddit_video.get("fallback_url", "")
                     media_type = "video"
-                # Check for Image (.jpg, .png)
                 elif "url_overridden_by_dest" in p_data:
                     url_dest = p_data["url_overridden_by_dest"]
                     if url_dest.endswith((".jpg", ".png", ".jpeg")):
@@ -85,18 +92,21 @@ def fetch_reddit_sightings() -> List[Dict[str, Any]]:
                         media_type = "video"
                         
                 if media_url:
+                    desc = p_data.get("selftext", "")
                     results.append({
                         "source": f"Reddit (/r/{sub})",
                         "author": p_data.get("author", "Anonymous"),
                         "title": title,
-                        "description": p_data.get("selftext", ""),
+                        "description": desc[:1000] + ("..." if len(desc) > 1000 else ""),
                         "media_url": media_url,
                         "media_type": media_type,
                         "source_url": f"https://reddit.com{p_data.get('permalink', '')}"
                     })
         except Exception as e:
             print(f"⚠️ Error with /r/{sub}: {e}")
-        time.sleep(2) # Respect rate limits
+        
+        time.sleep(6) 
+        
     return results
 
 def fetch_4chan_sightings() -> List[Dict[str, Any]]:
