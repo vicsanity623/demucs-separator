@@ -15,18 +15,15 @@ def load_ledger() -> List[Dict[str, Any]]:
             pass
     return []
 
-
 def save_ledger(ledger: List[Dict[str, Any]]) -> None:
-    # Expanded to hold 5000 records. Tracklists require slightly more space, 
-    # but 5000 albums is plenty to store the entire history of top hip-hop artists.
-    optimized_ledger = ledger[:5000]
+    # Cap at 2000 sightings to keep the JSON payload fast for the frontend browser
+    optimized_ledger = ledger[:2000]
     with open(LEDGER_FILE, "w") as f:
         json.dump(optimized_ledger, f, indent=2)
 
-
 def flag_block(block_hash: str, status: str) -> bool:
     """
-    Interactive Feature: Allows users to flag an album entry as 'verified' or 'disputed'.
+    Interactive Feature: Allows researchers to flag a sighting as 'debunked' or 'verified'.
     """
     ledger = load_ledger()
     for block in ledger:
