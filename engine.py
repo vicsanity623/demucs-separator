@@ -1,265 +1,209 @@
 import hashlib
 import requests
-import feedparser  # type: ignore
-import nltk  # type: ignore
+import json
 from datetime import datetime, timezone
 import time
-import random
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Any
 from ledger_manager import load_ledger, save_ledger
 
-nltk.download("punkt", quiet=True)
-nltk.download("punkt_tab", quiet=True)
+# We use iTunes API because it is free, unauthenticated, and highly accurate for discography/tracklists.
+ITUNES_BASE_URL = "https://itunes.apple.com"
 
-LEDGER_FILE: str = "ledger.json"
-MAX_RUNTIME_SEC: int = (2 * 60 * 60) + (45 * 60)  # Run for 2 hours and 45 minutes
-
-HEADERS: Dict[str, str] = {
-    "User-Agent": "AxiomEngineBot/2.0 (https://github.com/; axiom-engine@example.com) python-requests/2.x"
-}
-
-# Expanded seed list for dynamic Wikipedia exploration
-WIKI_SEEDS: List[Tuple[str, str]] = [
-    ("Eminem", "Eminem"),
-    ("Hip_hop_music", "Hip Hop History"),
-    ("Dr._Dre", "Hip Hop History"),
-    ("50_Cent", "Hip Hop History"),
-    ("The_Marshall_Mathers_LP", "Eminem"),
-    ("The_Eminem_Show", "Eminem"),
-    ("Recovery_(Eminem_album)", "Eminem"),
-    ("Rap_God", "Eminem"),
-    ("Lose_Yourself", "Eminem"),
-    ("Tupac_Shakur", "Hip Hop History"),
-    ("The_Notorious_B.I.G.", "Hip Hop History"),
-    ("Snoop_Dogg", "Hip Hop History"),
-    ("Detroit_hip_hop", "Hip Hop History"),
-    ("Aftermath_Entertainment", "Hip Hop Business"),
-    ("Interscope_Records", "Hip Hop Business"),
-    ("Billboard_200", "Charts"),
-    ("RIAA_certification", "Industry Stats"),
-    ("Grammy_Award_for_Best_Rap_Album", "Awards"),
-    ("N.W.A", "Hip Hop History"),
-    ("Jay-Z", "Hip Hop History"),
-]
-
-RSS_TARGETS: List[Tuple[str, str]] = [
-    (
-        "Google News Hip Hop",
-        "https://news.google.com/rss/search?q=hip+hop+music+news&hl=en-US&gl=US&ceid=US:en",
-    ),
-    ("HipHopDX", "https://hiphopdx.com/rss/news"),
-    ("Billboard Hip-Hop", "https://www.billboard.com/c/music/rb-hip-hop/feed/"),
-    ("Rolling Stone", "https://www.rollingstone.com/music/feed/"),
-    ("HotNewHipHop", "https://www.hotnewhiphop.com/feed/"),
-    ("Pitchfork", "https://pitchfork.com/rss/news/"),
-    ("AllHipHop", "https://allhiphop.com/feed/"),
+# The artists to build the discography ledger for
+TARGET_ARTISTS = [
+    "Eminem",
+    "Kendrick Lamar",
+    "2Pac",
+    "The Notorious B.I.G.",
+    "Jay-Z",
+    "Nas",
+    "Dr. Dre",
+    "Snoop Dogg",
+    "50 Cent",
+    "Wu-Tang Clan",
+    "J. Cole",
+    "Drake"
 ]
 
 
-def get_previous_hash(ledger: List[Dict[str, str]]) -> str:
+def get_previous_hash(ledger: List[Dict[str, Any]]) -> str:
     if not ledger:
         return "0000000000000000000000000000000000000000000000000000000000000000"
     return ledger[0]["hash"]
 
 
 def create_block(
-    fact_text: str,
-    source: str,
-    topic: str,
+    artist: str,
+    album: str,
+    release_date: str,
+    image_url: str,
+    tracks: List[str],
     prev_hash: str,
-    image_url: str = "",
-    source_url: str = "",
-) -> Dict[str, str]:
+) -> Dict[str, Any]:
     timestamp = datetime.now(timezone.utc).isoformat()
-    payload = (
-        f"{timestamp}|{source}|{topic}|{fact_text}|{image_url}|{source_url}|{prev_hash}"
-    )
+    # Create a deterministic string of tracks for the hash payload
+    tracks_str = "||".join(tracks)
+    
+    payload = f"{timestamp}|{artist}|{album}|{release_date}|{image_url}|{tracks_str}|{prev_hash}"
     block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     return {
         "timestamp": timestamp,
-        "source": source,
-        "topic": topic,
-        "fact": fact_text,
+        "artist": artist,
+        "album": album,
+        "release_date": release_date,
         "image_url": image_url,
-        "source_url": source_url,
+        "tracks": tracks,
         "prev_hash": prev_hash,
         "hash": block_hash,
     }
 
 
-def fetch_wikipedia_facts(title: str, topic: str) -> Tuple[List[str], str, str, str]:
-    url = f"https://en.wikipedia.org/w/api.php?action=query&prop=extracts|pageimages&explaintext=1&titles={title}&pithumbsize=800&format=json"
-    source_url = f"https://en.wikipedia.org/wiki/{title}"
-    facts: List[str] = []
-    image_url: str = ""
-
+def fetch_artist_id(artist_name: str) -> str:
+    """Fetch the unique iTunes artist ID."""
+    url = f"{ITUNES_BASE_URL}/search?term={artist_name}&entity=musicArtist&limit=1"
     try:
-        response = requests.get(url, headers=HEADERS, timeout=10)
-        response.raise_for_status()
+        response = requests.get(url, timeout=10)
         data = response.json()
-
-        pages = data.get("query", {}).get("pages", {})
-        if not pages:
-            return facts, "Wikipedia", image_url, source_url
-
-        page_data = list(pages.values())[0]
-        text = page_data.get("extract", "")
-        image_url = page_data.get("thumbnail", {}).get("source", "")
-
-        if not text:
-            return facts, "Wikipedia", image_url, source_url
-
-        sentences = nltk.tokenize.sent_tokenize(text)
-        keywords = [
-            "million",
-            "billion",
-            "certified",
-            "Grammy",
-            "Billboard",
-            "released",
-            "sold",
-            "record",
-            "platinum",
-            "debut",
-            "born",
-            "track",
-            "rhyme",
-            "song",
-        ]
-
-        for sentence in sentences:
-            if 40 <= len(sentence) <= 220 and any(kw in sentence for kw in keywords):
-                clean_fact = sentence.replace("\n", " ").strip()
-                facts.append(clean_fact)
-                if len(facts) >= 15:
-                    break
-
+        if data.get("resultCount", 0) > 0:
+            return str(data["results"][0]["artistId"])
     except Exception as e:
-        print(f"⚠️ Error fetching Wikipedia ({title}): {e}")
+        print(f"⚠️ Error fetching ID for {artist_name}: {e}")
+    return ""
 
-    return facts, "Wikipedia", image_url, source_url
+
+def fetch_artist_albums(artist_id: str) -> List[Dict[str, Any]]:
+    """Fetch all albums by the artist, handling basic deduplication."""
+    url = f"{ITUNES_BASE_URL}/lookup?id={artist_id}&entity=album"
+    albums = []
+    seen_names = set()
+    
+    try:
+        response = requests.get(url, timeout=10)
+        data = response.json()
+        
+        for item in data.get("results", []):
+            if item.get("wrapperType") == "collection":
+                raw_name = item.get("collectionName", "")
+                
+                # Basic deduplication (ignore explicit/clean duplicates by standardizing names)
+                clean_name = raw_name.lower().replace(" (deluxe)", "").replace(" (explicit)", "").replace(" (clean)", "").strip()
+                
+                if clean_name not in seen_names:
+                    seen_names.add(clean_name)
+                    # Request 600x600 high res album covers instead of the default 100x100
+                    img_url = item.get("artworkUrl100", "").replace("100x100bb", "600x600bb")
+                    albums.append({
+                        "id": str(item["collectionId"]),
+                        "artist": item.get("artistName", "Unknown"),
+                        "album": raw_name,
+                        "release_date": item.get("releaseDate", ""),
+                        "image_url": img_url
+                    })
+    except Exception as e:
+        print(f"⚠️ Error fetching albums for ID {artist_id}: {e}")
+        
+    return albums
 
 
-def run_engine_cycle(ledger: List[Dict[str, str]]) -> Tuple[int, List[Dict[str, str]]]:
-    new_facts: List[Dict[str, str]] = []
+def fetch_tracks_for_albums(album_ids: List[str]) -> Dict[str, List[str]]:
+    """
+    Fetch tracks for multiple albums at once to save API limits.
+    Returns a dict mapping album_id -> list of track names.
+    """
+    if not album_ids:
+        return {}
+        
+    # iTunes allows multiple IDs separated by commas
+    ids_str = ",".join(album_ids)
+    url = f"{ITUNES_BASE_URL}/lookup?id={ids_str}&entity=song"
+    
+    track_map: Dict[str, List[str]] = {aid: [] for aid in album_ids}
+    
+    try:
+        response = requests.get(url, timeout=15)
+        data = response.json()
+        
+        # iTunes returns both the collections and the tracks in the same flat list
+        for item in data.get("results", []):
+            if item.get("wrapperType") == "track":
+                col_id = str(item.get("collectionId", ""))
+                track_name = item.get("trackName", "")
+                if col_id in track_map and track_name:
+                    track_map[col_id].append(track_name)
+    except Exception as e:
+        print(f"⚠️ Error fetching tracks: {e}")
+        
+    return track_map
 
-    # DYNAMIC DISCOVERY: Pick 4 random targets from the wiki seeds to avoid stagnation
-    current_wiki_batch = random.sample(WIKI_SEEDS, k=min(4, len(WIKI_SEEDS)))
 
-    print(
-        f"Scraping Wikipedia (Discovery Mode: {', '.join([t[0] for t in current_wiki_batch])})..."
-    )
-    for title, topic in current_wiki_batch:
-        facts, source, img_url, src_url = fetch_wikipedia_facts(title, topic)
-        for fact in facts:
-            new_facts.append(
-                {
-                    "fact": fact,
-                    "source": source,
-                    "topic": topic,
-                    "image_url": img_url,
-                    "source_url": src_url,
-                }
-            )
-        time.sleep(1)
+def build_discography_ledger() -> None:
+    print("🚀 Starting Discography Ledger Engine...")
+    ledger = load_ledger()
+    
+    # Create a fast lookup set of "Artist - Album" to avoid duplicate blocks
+    existing_records = { f"{b['artist'].lower()}||{b['album'].lower()}" for b in ledger }
+    
+    added_count = 0
 
-    print("Scraping RSS Feeds (Discovery Mode)...")
-    for source_name, rss_url in RSS_TARGETS:
-        try:
-            # Note: feedparser doesn't support direct timeout, but we can wrap the fetch
-            feed = feedparser.parse(rss_url, agent=HEADERS["User-Agent"])
-            for entry in feed.entries[:15]:
-                title = entry.get("title", "")
-                # Broadened keywords to capture more industry news
-                discovery_keywords = [
-                    "eminem",
-                    "rap",
-                    "hip hop",
-                    "dre",
-                    "album",
-                    "music",
-                    "chart",
-                    "concert",
-                ]
-                if any(kw in title.lower() for kw in discovery_keywords):
-                    img_url = ""
-                    src_url = entry.get("link", "")
+    for artist in TARGET_ARTISTS:
+        print(f"\n🔍 Processing Artist: {artist}")
+        artist_id = fetch_artist_id(artist)
+        
+        if not artist_id:
+            print(f"❌ Could not find iTunes ID for {artist}. Skipping.")
+            continue
+            
+        albums = fetch_artist_albums(artist_id)
+        
+        # Sort albums chronologically (oldest first).
+        # We process oldest first, inserting them at the beginning of the ledger. 
+        # This results in the ledger having the *newest* albums at index 0 (top of the feed).
+        albums.sort(key=lambda x: x["release_date"])
+        
+        # Batch requests to get tracklists (max 30 albums per request)
+        batch_size = 30
+        for i in range(0, len(albums), batch_size):
+            batch = albums[i:i+batch_size]
+            batch_ids = [a["id"] for a in batch]
+            
+            print(f"   Fetching tracklists for {len(batch)} albums...")
+            track_data = fetch_tracks_for_albums(batch_ids)
+            time.sleep(2) # Respect API rate limits
+            
+            for album_info in batch:
+                record_key = f"{album_info['artist'].lower()}||{album_info['album'].lower()}"
+                
+                if record_key in existing_records:
+                    continue
+                    
+                tracks = track_data.get(album_info["id"], [])
+                if not tracks:
+                    continue # Skip albums with empty tracklists
+                    
+                prev_hash = get_previous_hash(ledger)
+                block = create_block(
+                    artist=album_info["artist"],
+                    album=album_info["album"],
+                    release_date=album_info["release_date"],
+                    image_url=album_info["image_url"],
+                    tracks=tracks,
+                    prev_hash=prev_hash
+                )
+                
+                # Insert at the front so newest processed is at top
+                ledger.insert(0, block)
+                existing_records.add(record_key)
+                added_count += 1
+                
+        print(f"✅ Finished {artist}")
 
-                    if "media_content" in entry and len(entry.media_content) > 0:
-                        img_url = entry.media_content[0]["url"]
-                    elif "links" in entry:
-                        for link in entry.links:
-                            if "image" in link.get("type", ""):
-                                img_url = link.href
-                                break
-
-                    new_facts.append(
-                        {
-                            "fact": title,
-                            "source": source_name,
-                            "topic": "Trending News",
-                            "image_url": img_url,
-                            "source_url": src_url,
-                        }
-                    )
-        except Exception as e:
-            print(f"⚠️ Error fetching RSS ({source_name}): {e}")
-        time.sleep(1)
-
-    existing_facts = set(block["fact"] for block in ledger)
-    added = 0
-
-    for item in reversed(new_facts):
-        if item["fact"] not in existing_facts:
-            prev_hash = get_previous_hash(ledger)
-            block = create_block(
-                item["fact"],
-                item["source"],
-                item["topic"],
-                prev_hash,
-                item.get("image_url", ""),
-                item.get("source_url", ""),
-            )
-            ledger.insert(0, block)
-            existing_facts.add(item["fact"])
-            added += 1
-
-    return added, ledger
+    if added_count > 0:
+        print(f"\n💾 Saving {added_count} new albums to ledger...")
+        save_ledger(ledger)
+    else:
+        print("\n📭 No new albums found. Ledger is up to date.")
 
 
 if __name__ == "__main__":
-    print(
-        f"🚀 Starting Axiom Engine. Programmed to run for {MAX_RUNTIME_SEC / 60:.1f} minutes..."
-    )
-    start_time: float = time.time()
-    ledger: List[Dict[str, str]] = load_ledger()
-
-    cycle: int = 1
-    while True:
-        elapsed: float = time.time() - start_time
-        if elapsed > MAX_RUNTIME_SEC:
-            print("🛑 Max runtime reached. Saving final ledger and shutting down.")
-            save_ledger(ledger)
-            break
-
-        print(f"\n--- Starting Cycle {cycle} ---")
-        added, ledger = run_engine_cycle(ledger)
-        save_ledger(ledger)
-
-        print(f"✅ Cycle {cycle} Complete. Added {added} new verified blocks.")
-
-        # Sleep for 15 minutes instead of 20 to increase news capture frequency
-        sleep_duration: float = 15.0 * 60.0
-        sleep_duration += random.randint(1, 30)
-
-        if (time.time() - start_time) + sleep_duration > MAX_RUNTIME_SEC:
-            sleep_duration = float(MAX_RUNTIME_SEC) - (time.time() - start_time)
-
-        if sleep_duration > 0:
-            print(
-                f"💤 Sleeping for {sleep_duration / 60:.1f} minutes before next cycle..."
-            )
-            time.sleep(sleep_duration)
-
-        cycle += 1
+    build_discography_ledger()
