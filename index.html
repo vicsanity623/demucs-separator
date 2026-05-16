@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Axiom | UAP Disclosure Ledger</title>
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -10,62 +12,357 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
-        
-        :root { --bg-color: #050505; --surface-color: #141414; --hover-color: #222; --text-primary: #e0e0e0; --text-secondary: #888; --accent-color: #00ff88; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
-        body { background-color: var(--bg-color); color: var(--text-primary); display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: fixed; width: 100%; }
-        
-        .status-bar-bg { display: block; width: 100%; position: sticky; top: 0; height: calc(env(safe-area-inset-top) + 20px); background-color: #000; z-index: 100; }
-        header { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: sticky; top: calc(env(safe-area-inset-top) + 20px); height: 60px; background-color: var(--bg-color); z-index: 90; border-bottom: 1px solid #1f1f1f; }
-        
-        .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer; letter-spacing: 1px; }
-        .logo-icon { width: 30px; height: 30px; background: #111; border: 1px solid var(--accent-color); color: var(--accent-color); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; }
-        
-        .search-bar { display: flex; flex: 0 1 600px; background-color: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; margin: 0 20px; }
-        .search-bar input { flex: 1; background: transparent; border: none; color: var(--text-primary); padding: 10px 20px; font-size: 14px; outline: none; }
-        .search-bar button { background-color: #1a1a1a; border: none; border-left: 1px solid #333; padding: 0 20px; color: var(--accent-color); cursor: pointer; }
 
-        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
-        .sidebar { width: 240px; background-color: var(--bg-color); padding: 12px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; border-right: 1px solid #111;}
-        .sidebar-item { padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.2s;}
-        .sidebar-item:hover, .sidebar-item.active { background-color: var(--surface-color); color: var(--accent-color); }
-        
-        .content { flex: 1; overflow-y: auto; background-color: var(--bg-color); padding: 20px; padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+        :root {
+            --bg-color: #050505;
+            --surface-color: #141414;
+            --hover-color: #222;
+            --text-primary: #e0e0e0;
+            --text-secondary: #888;
+            --accent-color: #00ff88;
+        }
 
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { display: flex; flex-direction: column; gap: 10px; cursor: pointer; position: relative; background: var(--surface-color); padding: 10px; border-radius: 8px; border: 1px solid #222; transition: border 0.2s;}
-        .card:hover { border-color: var(--accent-color); }
-        
-        .thumbnail { width: 100%; aspect-ratio: 16/9; border-radius: 4px; background-color: #111; background-size: cover; background-position: center; position: relative; }
-        .media-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 4px; border: 1px solid #333; text-transform: uppercase; }
-        
-        .menu-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; transition: 0.2s; }
-        .menu-btn:hover { background: var(--accent-color); color: black; }
-        
-        .card-title { font-weight: 700; font-size: 14px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .card-meta { font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+        }
+
+        .status-bar-bg {
+            display: block;
+            width: 100%;
+            position: sticky;
+            top: 0;
+            height: calc(env(safe-area-inset-top) + 20px);
+            background-color: #000;
+            z-index: 100;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            position: sticky;
+            top: calc(env(safe-area-inset-top) + 20px);
+            height: 60px;
+            background-color: var(--bg-color);
+            z-index: 90;
+            border-bottom: 1px solid #1f1f1f;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+
+        .logo-icon {
+            width: 30px;
+            height: 30px;
+            background: #111;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .search-bar {
+            display: flex;
+            flex: 0 1 600px;
+            background-color: #111;
+            border: 1px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 0 20px;
+        }
+
+        .search-bar input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            padding: 10px 20px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-bar button {
+            background-color: #1a1a1a;
+            border: none;
+            border-left: 1px solid #333;
+            padding: 0 20px;
+            color: var(--accent-color);
+            cursor: pointer;
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-color);
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            overflow-y: auto;
+            border-right: 1px solid #111;
+        }
+
+        .sidebar-item {
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: 0.2s;
+        }
+
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background-color: var(--surface-color);
+            color: var(--accent-color);
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            background-color: var(--bg-color);
+            padding: 20px;
+            padding-bottom: calc(40px + env(safe-area-inset-bottom));
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            cursor: pointer;
+            position: relative;
+            background: var(--surface-color);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #222;
+            transition: border 0.2s;
+        }
+
+        .card:hover {
+            border-color: var(--accent-color);
+        }
+
+        .thumbnail {
+            width: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 4px;
+            background-color: #111;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .media-badge {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #333;
+            text-transform: uppercase;
+        }
+
+        .menu-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            transition: 0.2s;
+        }
+
+        .menu-btn:hover {
+            background: var(--accent-color);
+            color: black;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .card-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+        }
 
         /* WATCH VIEW */
-        .watch-container { display: none; flex-direction: column; gap: 20px; max-width: 1000px; margin: 0 auto; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .media-player-wrapper { width: 100%; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; display: flex; align-items: center; justify-content: center; min-height: 300px; max-height: 70vh;}
-        .media-player-wrapper video, .media-player-wrapper img { max-width: 100%; max-height: 70vh; object-fit: contain; }
-        
-        .post-details { background: var(--surface-color); padding: 20px; border-radius: 8px; border: 1px solid #222; }
-        .post-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; color: var(--text-primary); }
-        .post-meta { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333; }
-        .post-body { font-size: 14px; line-height: 1.6; color: #ccc; white-space: pre-wrap; word-wrap: break-word; }
-        
-        .action-row { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { padding: 10px 20px; background: #111; border: 1px solid #333; color: white; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 13px; font-weight: bold; }
-        .btn:hover { background: #222; border-color: var(--accent-color); color: var(--accent-color); }
-        
-        .crypto-box { background: #0a0a0a; border-left: 2px solid var(--accent-color); padding: 15px; border-radius: 0 4px 4px 0; margin-top: 20px; font-family: monospace; font-size: 11px; word-break: break-all; color: #666; }
+        .watch-container {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+            animation: fadeIn 0.3s ease;
+        }
 
-        @media (max-width: 768px) { .sidebar { display: none; } }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .media-player-wrapper {
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            max-height: 70vh;
+        }
+
+        .media-player-wrapper video,
+        .media-player-wrapper img {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+        }
+
+        .post-details {
+            background: var(--surface-color);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #222;
+        }
+
+        .post-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .post-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        .post-body {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #ccc;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background: #222;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .crypto-box {
+            background: #0a0a0a;
+            border-left: 2px solid var(--accent-color);
+            padding: 15px;
+            border-radius: 0 4px 4px 0;
+            margin-top: 20px;
+            font-family: monospace;
+            font-size: 11px;
+            word-break: break-all;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="status-bar-bg"></div>
 
@@ -75,7 +372,8 @@
             <span>AXIOM <span style="font-weight:400; color:var(--text-secondary)">UAP</span></span>
         </div>
         <form class="search-bar" action="javascript:void(0);" onsubmit="applyFilters(); return false;">
-            <input type="search" id="searchInput" placeholder="Search sightings, locations, keywords..." enterkeyhint="search">
+            <input type="search" id="searchInput" placeholder="Search sightings, locations, keywords..."
+                enterkeyhint="search">
             <button type="submit">SEARCH</button>
         </form>
     </header>
@@ -90,16 +388,34 @@
         </aside>
 
         <main class="content">
+            <div class="filters" style="margin-bottom: 10px; border-bottom: 1px solid #111; padding-bottom: 15px;">
+                <div style="display:flex; flex-direction:column; gap:10px; width:100%;">
+                    <div style="display:flex; gap:10px; overflow-x:auto;">
+                        <span
+                            style="font-size:10px; color:var(--accent-color); align-self:center; font-weight:bold; letter-spacing:1px;">SORT:</span>
+                        <button class="filter-chip active" id="sort-recent" onclick="setSort('recent')">RECENT</button>
+                        <button class="filter-chip" id="sort-popular" onclick="setSort('popular')">POPULAR</button>
+                    </div>
+                    <div style="display:flex; gap:10px; overflow-x:auto;">
+                        <span
+                            style="font-size:10px; color:var(--accent-color); align-self:center; font-weight:bold; letter-spacing:1px;">TYPE:</span>
+                        <button class="filter-chip active" id="type-all" onclick="setMediaType('all')">ALL</button>
+                        <button class="filter-chip" id="type-video" onclick="setMediaType('video')">VIDEOS</button>
+                        <button class="filter-chip" id="type-image" onclick="setMediaType('image')">IMAGES</button>
+                    </div>
+                </div>
+            </div>
+
             <div id="gridContainer" class="grid"></div>
 
             <div id="watchContainer" class="watch-container">
                 <div class="media-player-wrapper" id="wMedia"></div>
-                
+
                 <div class="post-details">
                     <div class="post-title" id="wTitle">Sighting Title</div>
                     <div class="post-meta">
-                        Source: <span id="wSource" style="color:var(--accent-color);">Reddit</span> • 
-                        Author: <span id="wAuthor">User</span> • 
+                        Source: <span id="wSource" style="color:var(--accent-color);">Reddit</span> •
+                        Author: <span id="wAuthor">User</span> •
                         <span id="wDate">Date</span>
                     </div>
                     <div class="post-body" id="wDesc">No description provided.</div>
@@ -121,6 +437,8 @@
     <script>
         let fullLedger = [];
         let currentCategory = 'All';
+        let currentSort = 'recent';
+        let currentMediaType = 'all';
         let savedSightings = JSON.parse(localStorage.getItem('axiom_uap_saved')) || [];
 
         function decodeEntities(encodedString) {
@@ -130,38 +448,37 @@
         }
 
         function toggleSave(event, hash) {
-            event.stopPropagation(); 
+            event.stopPropagation();
             if (savedSightings.includes(hash)) {
                 savedSightings = savedSightings.filter(h => h !== hash);
             } else {
                 savedSightings.push(hash);
             }
             localStorage.setItem('axiom_uap_saved', JSON.stringify(savedSightings));
-            
-            if(document.getElementById('watchContainer').style.display === 'flex') {
+
+            if (document.getElementById('watchContainer').style.display === 'flex') {
                 document.getElementById('wSaveBtn').innerText = savedSightings.includes(hash) ? '✅ Saved' : '💾 Save to local';
             }
-            if(currentCategory === 'Saved') applyFilters(); 
+            if (currentCategory === 'Saved') applyFilters();
         }
 
         function openWatchView(hash) {
             const block = fullLedger.find(b => b.hash === hash);
-            if(!block) return;
+            if (!block) return;
 
             document.getElementById('gridContainer').style.display = 'none';
             document.getElementById('watchContainer').style.display = 'flex';
-            
+
             const mediaContainer = document.getElementById('wMedia');
             const safeMediaUrl = decodeEntities(block.media_url);
             const safeThumbUrl = block.thumbnail_url ? decodeEntities(block.thumbnail_url) : '';
 
-            // Using proper HTML5 video parameters for mobile playback
-            if(block.media_type === 'video') {
+            if (block.media_type === 'video') {
                 mediaContainer.innerHTML = `<video src="${safeMediaUrl}" poster="${safeThumbUrl}" controls playsinline style="max-width:100%;"></video>`;
             } else {
                 mediaContainer.innerHTML = `<img src="${safeMediaUrl}" alt="Sighting Image" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23222\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'12\\'>MEDIA ARCHIVED</text></svg>'">`;
             }
-            
+
             document.getElementById('wTitle').innerText = decodeEntities(block.title);
             document.getElementById('wSource').innerText = block.source;
             document.getElementById('wAuthor').innerText = block.author;
@@ -170,7 +487,7 @@
             document.getElementById('wLinkBtn').href = block.source_url;
             document.getElementById('wHash').innerText = block.hash;
             document.getElementById('wPrevHash').innerText = block.prev_hash;
-            
+
             const saveBtn = document.getElementById('wSaveBtn');
             saveBtn.innerText = savedSightings.includes(block.hash) ? '✅ Saved' : '💾 Save to local';
             saveBtn.onclick = (e) => toggleSave(e, block.hash);
@@ -178,15 +495,61 @@
 
         function closeWatchView() {
             document.getElementById('watchContainer').style.display = 'none';
-            document.getElementById('wMedia').innerHTML = ''; // Stops video audio
+            document.getElementById('wMedia').innerHTML = '';
             document.getElementById('gridContainer').style.display = 'grid';
+        }
+
+        function setSort(type) {
+            currentSort = type;
+            document.getElementById('sort-recent').classList.toggle('active', type === 'recent');
+            document.getElementById('sort-popular').classList.toggle('active', type === 'popular');
+            applyFilters();
+        }
+
+        function setMediaType(type) {
+            currentMediaType = type;
+            document.getElementById('type-all').classList.toggle('active', type === 'all');
+            document.getElementById('type-video').classList.toggle('active', type === 'video');
+            document.getElementById('type-image').classList.toggle('active', type === 'image');
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = [...fullLedger];
+
+            if (currentCategory === 'Saved') {
+                filtered = filtered.filter(b => savedSightings.includes(b.hash));
+            } else if (currentCategory !== 'All') {
+                filtered = filtered.filter(b => b.source.includes(currentCategory));
+            }
+
+            if (currentMediaType !== 'all') {
+                filtered = filtered.filter(b => b.media_type === currentMediaType);
+            }
+
+            if (query) {
+                filtered = filtered.filter(b =>
+                    b.title.toLowerCase().includes(query) ||
+                    b.description.toLowerCase().includes(query)
+                );
+            }
+
+            if (currentSort === 'popular') {
+                filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
+            } else {
+                filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            }
+
+            closeWatchView();
+            renderGrid(filtered);
         }
 
         function renderGrid(data) {
             const grid = document.getElementById('gridContainer');
             grid.innerHTML = '';
 
-            if(data.length === 0) {
+            if (data.length === 0) {
                 grid.innerHTML = `<div style="color:#555; grid-column:1/-1;">No records found. Note: The engine filters for extremely strict high-quality UAP data only.</div>`;
                 return;
             }
@@ -195,7 +558,7 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.onclick = () => openWatchView(block.hash);
-                
+
                 // Fallback to media_url if thumbnail_url doesn't exist (for old blocks)
                 const thumbUrl = decodeEntities(block.thumbnail_url || block.media_url);
                 const bgStyle = `background-image: url('${thumbUrl}')`;
@@ -228,8 +591,8 @@
             }
 
             if (query) {
-                filtered = filtered.filter(b => 
-                    b.title.toLowerCase().includes(query) || 
+                filtered = filtered.filter(b =>
+                    b.title.toLowerCase().includes(query) ||
                     b.description.toLowerCase().includes(query)
                 );
             }
@@ -241,7 +604,7 @@
             currentCategory = category;
             document.querySelectorAll('.sidebar-item').forEach(el => {
                 el.classList.remove('active');
-                if(el.innerText.includes(category) || (category === 'All' && el.innerText.includes('Global'))) {
+                if (el.innerText.includes(category) || (category === 'All' && el.innerText.includes('Global'))) {
                     el.classList.add('active');
                 }
             });
@@ -251,7 +614,7 @@
         async function init() {
             try {
                 const response = await fetch('ledger.json?nocache=' + new Date().getTime());
-                if(response.ok) {
+                if (response.ok) {
                     fullLedger = await response.json();
                     applyFilters();
                 }
@@ -261,4 +624,5 @@
         init();
     </script>
 </body>
+
 </html>
