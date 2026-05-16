@@ -24,6 +24,9 @@
             --accent-color: #3ea6ff;
             --verified-color: #2ba640;
         }
+        .copy-btn { background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 18px; margin-left: 8px; }
+        .copy-btn:hover { color: var(--accent-color); }
+        #toastMsg { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--accent-color); color: var(--bg-color); padding: 8px 16px; border-radius: 20px; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; font-weight: 500; font-size: 14px; z-index: 200; }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
 
@@ -327,7 +330,9 @@
                         <button class="watch-btn" onclick="verifyChain()" style="margin-top: 10px; width: 100%; justify-content: center;">ð¡ï¸ Verify Chain Integrity</button>
                         <div class="crypto-box">
                             <strong style="color:var(--text-secondary)">Block Hash:</strong><br>
-                            <span id="wHash" style="color:var(--verified-color)">hash</span><br><br>
+                            <span id="wHash" style="color:var(--verified-color)">hash</span> 
+                            <button class="copy-btn" onclick="copyToClipboard(document.getElementById('wHash').textContent || '')">ð</button>
+                            <br><br>
                             <strong style="color:var(--text-secondary)">Previous Hash:</strong><br>
                             <span id="wPrevHash">prev</span>
                         </div>
@@ -348,10 +353,25 @@
         let favorites = JSON.parse(localStorage.getItem('axiom_favs')) || [];
         let history = JSON.parse(localStorage.getItem('axiom_history')) || [];
 
-        function hashToGradient(hash) {
-            const c1 = `#${hash.substring(0, 6)}`;
-            const c2 = `#${hash.substring(6, 12)}`;
+        function hashToGradient(hash: string): string {
+            const c1: string = `#${hash.substring(0, 6)}`;
+            const c2: string = `#${hash.substring(6, 12)}`;
             return `linear-gradient(135deg, ${c1}, ${c2})`;
+        }
+
+        function showToast(msg: string): void {
+            const toast: HTMLElement = document.getElementById('toastMsg') as HTMLElement;
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 1500);
+        }
+
+        function copyToClipboard(text: string): void {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Hash copied to clipboard');
+            }, () => {
+                showToast('Failed to copy');
+            });
         }
 
         function timeSince(dateString) {
