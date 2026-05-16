@@ -11,7 +11,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
         
-        :root { --bg-color: #050505; --surface-color: #141414; --hover-color: #222; --text-primary: #e0e0e0; --text-secondary: #888; --accent-color: #00ff88; --verified-color: #00ff88; }
+        :root { --bg-color: #050505; --surface-color: #141414; --hover-color: #222; --text-primary: #e0e0e0; --text-secondary: #888; --accent-color: #00ff88; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-primary); display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: fixed; width: 100%; }
         
@@ -36,10 +36,9 @@
         .card { display: flex; flex-direction: column; gap: 10px; cursor: pointer; position: relative; background: var(--surface-color); padding: 10px; border-radius: 8px; border: 1px solid #222; transition: border 0.2s;}
         .card:hover { border-color: var(--accent-color); }
         
-        .thumbnail { width: 100%; aspect-ratio: 16/9; border-radius: 4px; background-color: #000; background-size: cover; background-position: center; position: relative; }
+        .thumbnail { width: 100%; aspect-ratio: 16/9; border-radius: 4px; background-color: #111; background-size: cover; background-position: center; position: relative; }
         .media-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 4px; border: 1px solid #333; text-transform: uppercase; }
         
-        /* 3-DOT MENU */
         .menu-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; transition: 0.2s; }
         .menu-btn:hover { background: var(--accent-color); color: black; }
         
@@ -64,9 +63,7 @@
         
         .crypto-box { background: #0a0a0a; border-left: 2px solid var(--accent-color); padding: 15px; border-radius: 0 4px 4px 0; margin-top: 20px; font-family: monospace; font-size: 11px; word-break: break-all; color: #666; }
 
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-        }
+        @media (max-width: 768px) { .sidebar { display: none; } }
     </style>
 </head>
 <body>
@@ -96,9 +93,7 @@
             <div id="gridContainer" class="grid"></div>
 
             <div id="watchContainer" class="watch-container">
-                <div class="media-player-wrapper" id="wMedia">
-                    <!-- Video or Image injected here -->
-                </div>
+                <div class="media-player-wrapper" id="wMedia"></div>
                 
                 <div class="post-details">
                     <div class="post-title" id="wTitle">Sighting Title</div>
@@ -107,14 +102,11 @@
                         Author: <span id="wAuthor">User</span> • 
                         <span id="wDate">Date</span>
                     </div>
-                    
-                    <div class="post-body" id="wDesc">No additional description provided.</div>
-                    
+                    <div class="post-body" id="wDesc">No description provided.</div>
                     <div class="action-row">
                         <button class="btn" id="wSaveBtn">💾 Save to local</button>
                         <a href="#" target="_blank" class="btn" id="wLinkBtn">🔗 View Original</a>
                     </div>
-                    
                     <div class="crypto-box">
                         <strong style="color:var(--text-secondary)">IMMUTABLE HASH:</strong><br>
                         <span id="wHash" style="color:var(--accent-color)">hash</span><br><br>
@@ -131,21 +123,25 @@
         let currentCategory = 'All';
         let savedSightings = JSON.parse(localStorage.getItem('axiom_uap_saved')) || [];
 
+        function decodeEntities(encodedString) {
+            const textArea = document.createElement('textarea');
+            textArea.innerHTML = encodedString;
+            return textArea.value;
+        }
+
         function toggleSave(event, hash) {
-            event.stopPropagation(); // Prevent opening the card
+            event.stopPropagation(); 
             if (savedSightings.includes(hash)) {
                 savedSightings = savedSightings.filter(h => h !== hash);
-                alert("Removed from Saved Files.");
             } else {
                 savedSightings.push(hash);
-                alert("File Saved to Local Storage.");
             }
             localStorage.setItem('axiom_uap_saved', JSON.stringify(savedSightings));
             
             if(document.getElementById('watchContainer').style.display === 'flex') {
                 document.getElementById('wSaveBtn').innerText = savedSightings.includes(hash) ? '✅ Saved' : '💾 Save to local';
             }
-            if(currentCategory === 'Saved') applyFilters(); // refresh if in saved tab
+            if(currentCategory === 'Saved') applyFilters(); 
         }
 
         function openWatchView(hash) {
@@ -155,22 +151,23 @@
             document.getElementById('gridContainer').style.display = 'none';
             document.getElementById('watchContainer').style.display = 'flex';
             
-            // Render Media
             const mediaContainer = document.getElementById('wMedia');
+            const safeMediaUrl = decodeEntities(block.media_url);
+            const safeThumbUrl = block.thumbnail_url ? decodeEntities(block.thumbnail_url) : '';
+
+            // Using proper HTML5 video parameters for mobile playback
             if(block.media_type === 'video') {
-                mediaContainer.innerHTML = `<video src="${block.media_url}" controls autoplay loop playsinline></video>`;
+                mediaContainer.innerHTML = `<video src="${safeMediaUrl}" poster="${safeThumbUrl}" controls playsinline style="max-width:100%;"></video>`;
             } else {
-                mediaContainer.innerHTML = `<img src="${block.media_url}" alt="Sighting Image">`;
+                mediaContainer.innerHTML = `<img src="${safeMediaUrl}" alt="Sighting Image" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100\\' height=\\'100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23222\\'/><text x=\\'50%\\' y=\\'50%\\' dominant-baseline=\\'middle\\' text-anchor=\\'middle\\' fill=\\'%23666\\' font-size=\\'12\\'>MEDIA ARCHIVED</text></svg>'">`;
             }
             
-            document.getElementById('wTitle').innerText = block.title;
+            document.getElementById('wTitle').innerText = decodeEntities(block.title);
             document.getElementById('wSource').innerText = block.source;
             document.getElementById('wAuthor').innerText = block.author;
             document.getElementById('wDate').innerText = new Date(block.timestamp).toLocaleString();
-            
-            document.getElementById('wDesc').innerText = block.description || "No description provided.";
+            document.getElementById('wDesc').innerText = decodeEntities(block.description) || "No description provided.";
             document.getElementById('wLinkBtn').href = block.source_url;
-            
             document.getElementById('wHash').innerText = block.hash;
             document.getElementById('wPrevHash').innerText = block.prev_hash;
             
@@ -181,7 +178,7 @@
 
         function closeWatchView() {
             document.getElementById('watchContainer').style.display = 'none';
-            document.getElementById('wMedia').innerHTML = ''; // Stop video playback
+            document.getElementById('wMedia').innerHTML = ''; // Stops video audio
             document.getElementById('gridContainer').style.display = 'grid';
         }
 
@@ -190,7 +187,7 @@
             grid.innerHTML = '';
 
             if(data.length === 0) {
-                grid.innerHTML = `<div style="color:#555; grid-column:1/-1;">No sightings found for this criteria.</div>`;
+                grid.innerHTML = `<div style="color:#555; grid-column:1/-1;">No records found. Note: The engine filters for extremely strict high-quality UAP data only.</div>`;
                 return;
             }
 
@@ -199,20 +196,20 @@
                 card.className = 'card';
                 card.onclick = () => openWatchView(block.hash);
                 
-                // If it's a video, we try to use the video URL as a poster if possible, or fallback to CSS background.
-                // Images work natively as backgrounds.
-                const bgStyle = block.media_type === 'image' ? `background-image: url('${block.media_url}')` : 'background-color: #111';
+                // Fallback to media_url if thumbnail_url doesn't exist (for old blocks)
+                const thumbUrl = decodeEntities(block.thumbnail_url || block.media_url);
+                const bgStyle = `background-image: url('${thumbUrl}')`;
                 const typeIcon = block.media_type === 'video' ? '🎥 VIDEO' : '📸 IMAGE';
 
                 card.innerHTML = `
                     <div class="thumbnail" style="${bgStyle}">
-                        ${block.media_type === 'video' ? '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:40px; opacity:0.5;">▶</div>' : ''}
+                        ${block.media_type === 'video' ? '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:40px; opacity:0.6; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">▶</div>' : ''}
                         <button class="menu-btn" onclick="toggleSave(event, '${block.hash}')">⋮</button>
                         <div class="media-badge">${typeIcon}</div>
                     </div>
-                    <div class="card-title" title="${block.title}">${block.title}</div>
+                    <div class="card-title" title="${decodeEntities(block.title)}">${decodeEntities(block.title)}</div>
                     <div class="card-meta">
-                        <span>${block.source}</span>
+                        <span>${block.source.split(' ')[0]}</span>
                         <span>${new Date(block.timestamp).toLocaleDateString()}</span>
                     </div>
                 `;
@@ -236,7 +233,6 @@
                     b.description.toLowerCase().includes(query)
                 );
             }
-
             closeWatchView();
             renderGrid(filtered);
         }
