@@ -24,7 +24,7 @@ echo "[2/5] Validating internal file references..."
 # This looks for href="file.css" or src="file.js" and checks if those files exist
 links=$(grep -oE '(href|src)="([^"#]+)"' index.html | cut -d'"' -f2)
 for link in $links; do
-    if [[ $link == http* ]]; then continue; fi # Skip external URLs
+    if [[ $link == http* ]] || [[ $link == \$\{* ]]; then continue; fi # Skip external URLs
     if [ ! -f "$link" ]; then
         echo "❌ ERROR: index.html references '$link', but the file does not exist."
         exit 1
