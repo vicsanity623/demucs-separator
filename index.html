@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Axiom Engine | Hip Hop Ledger</title>
+    <title>Axiom Engine | Hip Hop Discography Ledger</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0f0f0f">
-    <link rel="apple-touch-icon" href="idle192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <!-- Using black-translucent allows us to control the area behind the icons via CSS -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
@@ -33,217 +31,91 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            /* Prevent bouncing on iOS which reveals white space */
             overflow: hidden; 
             position: fixed;
             width: 100%;
         }
         
-        /* --- THE NOTCH FIX --- */
         .status-bar-bg {
-            display: block;
-            width: 100%;
-            /* Sticky at 0 keeps this at the very top of the screen */
-            position: sticky;
-            top: 0;
+            display: block; width: 100%; position: sticky; top: 0;
             height: calc(env(safe-area-inset-top) + 30px);
-            background-color: #000000;
-            z-index: 100; 
+            background-color: #000000; z-index: 100; 
         }
 
         header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            /* Sticky below the expanded status-bar-bg */
-            position: sticky;
-            top: calc(env(safe-area-inset-top) + 30px);
-            height: 60px;
-            background-color: var(--bg-color);
-            z-index: 90;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 20px; position: sticky; top: calc(env(safe-area-inset-top) + 30px);
+            height: 60px; background-color: var(--bg-color); z-index: 90;
             border-bottom: 1px solid #1f1f1f;
         }
 
-        .logo {
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -1px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            cursor: pointer;
-        }
+        .logo { font-size: 20px; font-weight: 700; letter-spacing: -1px; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .logo-icon { width: 30px; height: 30px; background: linear-gradient(45deg, #8a2387, #e94057, #f27121); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
 
-        .logo-icon {
-            width: 30px;
-            height: 30px;
-            background: linear-gradient(45deg, #ff4500, #ff8c00);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
+        .search-bar { display: flex; flex: 0 1 600px; background-color: #121212; border: 1px solid #303030; border-radius: 40px; overflow: hidden; margin: 0 20px; }
+        .search-bar input { flex: 1; background: transparent; border: none; color: var(--text-primary); padding: 10px 20px; font-size: 16px; outline: none; }
+        .search-bar button { background-color: #222222; border: none; border-left: 1px solid #303030; padding: 0 20px; color: var(--text-primary); cursor: pointer; }
 
-        .search-bar {
-            display: flex;
-            flex: 0 1 600px;
-            background-color: #121212;
-            border: 1px solid #303030;
-            border-radius: 40px;
-            overflow: hidden;
-            margin: 0 20px;
-        }
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; margin-top: 0; }
 
-        .search-bar input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-primary);
-            padding: 10px 20px;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .search-bar button {
-            background-color: #222222;
-            border: none;
-            border-left: 1px solid #303030;
-            padding: 0 20px;
-            color: var(--text-primary);
-            cursor: pointer;
-        }
-
-        /* --- LAYOUTS --- */
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-            margin-top: 0; 
-        }
-
-        .sidebar {
-            width: 240px;
-            background-color: var(--bg-color);
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            overflow-y: auto;
-        }
-
-        .sidebar-item {
-            padding: 10px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
+        .sidebar { width: 240px; background-color: var(--bg-color); padding: 12px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; }
+        .sidebar-item { padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; transition: 0.2s; display: flex; align-items: center; gap: 15px; }
         .sidebar-item:hover, .sidebar-item.active { background-color: var(--surface-color); }
 
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            background-color: var(--bg-color);
-            padding: 20px;
-            /* Standard YouTube padding + iOS Home bar protection */
-            padding-bottom: calc(80px + env(safe-area-inset-bottom));
-        }
+        .content { flex: 1; overflow-y: auto; background-color: var(--bg-color); padding: 20px; padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
 
         /* --- HOME GRID VIEW --- */
         .filters { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
-        .filter-chip {
-            background-color: var(--surface-color); color: var(--text-primary); border: none;
-            padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap;
-        }
+        .filter-chip { background-color: var(--surface-color); color: var(--text-primary); border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; }
         .filter-chip.active { background-color: var(--text-primary); color: var(--bg-color); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
-
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { display: flex; flex-direction: column; gap: 12px; cursor: pointer; }
-        .thumbnail {
-            width: 100%; aspect-ratio: 16/9; border-radius: 12px; position: relative;
-            background-color: #222; background-size: cover; background-position: center top;
-            display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; transition: 0.2s;
-        }
-        .thumbnail-text { font-size: 22px; font-weight: 700; text-shadow: 2px 2px 8px rgba(0,0,0,1); z-index: 2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .thumbnail { width: 100%; aspect-ratio: 1/1; border-radius: 8px; position: relative; background-color: #222; background-size: cover; background-position: center; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .thumbnail:hover { transform: scale(1.02); }
         .source-badge { position: absolute; bottom: 8px; right: 8px; background-color: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; z-index: 2; }
+        
         .card-info { display: flex; gap: 12px; }
         .channel-icon { width: 36px; height: 36px; border-radius: 50%; background-color: var(--surface-color); display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; background-size: cover; background-position: center; }
         .meta { display: flex; flex-direction: column; }
         .fact-title { font-size: 16px; font-weight: 500; line-height: 1.4; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .fact-details { font-size: 14px; color: var(--text-secondary); }
 
-        /* --- YOUTUBE STYLE WATCH VIEW --- */
-        .watch-container {
-            display: none; /* Hidden by default */
-            flex-direction: row;
-            gap: 24px;
-            width: 100%;
-            max-width: 1600px;
-            margin: 0 auto;
-            animation: fadeIn 0.3s ease;
-        }
+        /* --- PLAYLIST WATCH VIEW --- */
+        .watch-container { display: none; flex-direction: row; gap: 24px; width: 100%; max-width: 1600px; margin: 0 auto; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
         .watch-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 15px; }
         .watch-sidebar { width: 400px; display: flex; flex-direction: column; gap: 15px; }
 
-        .watch-player {
-            width: 100%;
-            aspect-ratio: 16/9;
-            border-radius: 12px;
-            background-color: #000;
-            background-size: cover;
-            background-position: center 20%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            text-align: center;
-            position: relative;
-        }
-        .watch-player-text { font-size: 4vw; font-weight: 700; text-shadow: 0px 5px 20px rgba(0,0,0,1); z-index: 2; line-height: 1.2; }
-        .watch-title { font-size: 20px; font-weight: 700; line-height: 1.4; }
+        .watch-player { width: 100%; height: 350px; border-radius: 12px; background-color: #000; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .watch-player::after { content: ''; position: absolute; inset: 0; backdrop-filter: blur(20px); background: rgba(0,0,0,0.5); z-index: 1; }
+        .watch-player-art { height: 90%; aspect-ratio: 1/1; background-size: cover; background-position: center; z-index: 2; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        
+        .watch-title { font-size: 24px; font-weight: 700; line-height: 1.4; }
         
         .watch-channel-row { display: flex; justify-content: space-between; align-items: center; }
         .watch-channel-info { display: flex; align-items: center; gap: 15px; }
-        .watch-channel-name { font-weight: bold; font-size: 16px; }
-        .watch-channel-sub { font-size: 12px; color: var(--text-secondary); }
+        .watch-channel-name { font-weight: bold; font-size: 18px; }
+        .watch-channel-sub { font-size: 14px; color: var(--text-secondary); }
         
-        .watch-btn {
-            background-color: var(--surface-color); color: var(--text-primary); border: none;
-            padding: 10px 20px; border-radius: 20px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px;
-        }
+        .watch-btn { background-color: var(--surface-color); color: var(--text-primary); border: none; padding: 10px 20px; border-radius: 20px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 8px; }
         .watch-btn:hover { background-color: var(--hover-color); }
 
-        .watch-description {
-            background-color: var(--surface-color);
-            border-radius: 12px;
-            padding: 20px;
-            font-size: 14px;
-            line-height: 1.6;
-            color: var(--text-primary);
-        }
-        .watch-description a { color: var(--accent-color); text-decoration: none; }
-        .watch-description a:hover { text-decoration: underline; }
-        .crypto-box {
-            background-color: #121212; border-left: 3px solid var(--verified-color);
-            padding: 15px; border-radius: 0 8px 8px 0; margin-top: 15px; font-family: monospace; font-size: 12px; word-break: break-all;
-        }
+        .watch-description { background-color: var(--surface-color); border-radius: 12px; padding: 20px; font-size: 14px; line-height: 1.6; color: var(--text-primary); }
+        
+        .tracklist { margin-top: 15px; display: flex; flex-direction: column; }
+        .track-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #333; }
+        .track-item:last-child { border-bottom: none; }
+        .track-item:hover { background-color: rgba(255,255,255,0.05); border-radius: 6px; }
+        .track-num { width: 30px; color: var(--text-secondary); font-weight: bold; }
+        .track-name { flex: 1; font-size: 15px; }
 
-        /* Responsive */
+        .crypto-box { background-color: #121212; border-left: 3px solid var(--verified-color); padding: 15px; border-radius: 0 8px 8px 0; margin-top: 25px; font-family: monospace; font-size: 12px; word-break: break-all; }
+
         @media (max-width: 1000px) {
             .watch-container { flex-direction: column; }
             .watch-sidebar { width: 100%; }
-            .watch-player-text { font-size: 24px; }
         }
         @media (max-width: 768px) {
             .sidebar { display: none; }
@@ -254,78 +126,77 @@
     </style>
 </head>
 <body>
-    
-    <!-- This div creates the solid black bar behind the iPhone notch clock/battery -->
     <div class="status-bar-bg"></div>
 
     <header>
         <div class="logo" onclick="closeWatchView()">
-            <div class="logo-icon">v1</div>
-            <span class="logo-text-hide">NotGPT</span>
+            <div class="logo-icon">♬</div>
+            <span class="logo-text-hide">LedgerAmp</span>
         </div>
         
-        <!-- FIXED: Wrapped in a form with action prevented to trigger mobile search keyboard -->
         <form class="search-bar" action="javascript:void(0);" onsubmit="applyFilters(); return false;">
-            <input type="search" id="searchInput" placeholder="Search verified facts..." enterkeyhint="search">
+            <input type="search" id="searchInput" placeholder="Search artists, albums, or tracks..." enterkeyhint="search">
             <button type="submit">🔍</button>
         </form>
 
         <div class="logo logo-text-hide" style="font-size:12px; color:var(--text-secondary)">
-            Sync: <span id="syncStatus" style="color:var(--verified-color)">● Active</span>
+            Ledger: <span id="syncStatus" style="color:var(--verified-color)">● Synced</span>
         </div>
     </header>
 
     <div class="main-container">
-        <!-- Sidebar Navigation -->
         <aside class="sidebar" id="mainSidebar">
-            <div class="sidebar-item active" onclick="setCategory('All')">🏠 Home</div>
-            <div class="sidebar-item" onclick="setCategory('Eminem')">🎤 Eminem Facts</div>
-            <div class="sidebar-item" onclick="setCategory('Trending')">🔥 Trending News</div>
+            <div class="sidebar-item active" onclick="setCategory('All')">🏠 All Releases</div>
+            <div class="sidebar-item" onclick="setCategory('Eminem')">🎤 Eminem</div>
+            <div class="sidebar-item" onclick="setCategory('Kendrick Lamar')">👑 Kendrick Lamar</div>
+            <div class="sidebar-item" onclick="setCategory('2Pac')">🕊️ 2Pac</div>
+            <div class="sidebar-item" onclick="setCategory('Jay-Z')">🗽 Jay-Z</div>
             <div style="border-top: 1px solid var(--surface-color); margin: 10px 0;"></div>
-            <div class="sidebar-item" onclick="setCategory('Favorites')">⭐ Favorites</div>
-            <div class="sidebar-item" onclick="setCategory('History')">🕒 History</div>
+            <div class="sidebar-item" onclick="setCategory('Favorites')">⭐ Saved Albums</div>
         </aside>
 
         <main class="content" id="mainContent">
             
-            <!-- Default Grid View -->
             <div id="gridContainer">
                 <div class="filters" id="filterContainer">
                     <button class="filter-chip active" onclick="setCategory('All')">All</button>
                     <button class="filter-chip" onclick="setCategory('Eminem')">Eminem</button>
-                    <button class="filter-chip" onclick="setCategory('Hip Hop History')">Classics</button>
-                    <button class="filter-chip" onclick="setCategory('Trending')">Trending</button>
+                    <button class="filter-chip" onclick="setCategory('Dr. Dre')">Dr. Dre</button>
+                    <button class="filter-chip" onclick="setCategory('Kendrick Lamar')">Kendrick</button>
+                    <button class="filter-chip" onclick="setCategory('J. Cole')">J. Cole</button>
+                    <button class="filter-chip" onclick="setCategory('Drake')">Drake</button>
                 </div>
                 <div class="grid" id="videoGrid"></div>
             </div>
 
-            <!-- YouTube Style Watch View -->
             <div id="watchContainer" class="watch-container">
                 <div class="watch-main">
                     <div class="watch-player" id="wPlayer">
-                        <div class="watch-player-text" id="wPlayerText">Fact Text</div>
+                        <div class="watch-player-art" id="wPlayerArt"></div>
                     </div>
-                    <div class="watch-title" id="wTitle">Full Fact Description</div>
+                    <div class="watch-title" id="wTitle">Album Title</div>
                     
                     <div class="watch-channel-row">
                         <div class="watch-channel-info">
                             <div class="channel-icon" id="wChannelIcon" style="width:48px; height:48px;"></div>
                             <div>
-                                <div class="watch-channel-name" id="wChannelName">Source</div>
-                                <div class="watch-channel-sub">Axiom Engine <span style="color:var(--verified-color)">✔</span></div>
+                                <div class="watch-channel-name" id="wChannelName">Artist Name</div>
+                                <div class="watch-channel-sub" id="wReleaseDate">Release Date • <span style="color:var(--verified-color)">✔ Verified</span></div>
                             </div>
                         </div>
                         <div style="display:flex; gap:10px;">
                             <button class="watch-btn" id="wFavBtn">☆ Save</button>
-                            <a class="watch-btn" id="wSourceBtn" href="#" target="_blank" style="text-decoration:none;">🔗 Read Source</a>
                         </div>
                     </div>
 
                     <div class="watch-description">
-                        <p style="font-weight:bold; margin-bottom:10px;">Topic: <span id="wTopic" style="color:var(--accent-color)">Topic</span> • <span id="wTime">Time</span></p>
-                        <p>This block has been cryptographically sealed and verified by the Axiom Engine ledger.</p>
+                        <h3 style="margin-bottom: 10px; color: var(--accent-color);">Official Tracklist</h3>
+                        <div class="tracklist" id="wTracklist">
+                            <!-- Tracks injected here -->
+                        </div>
+
                         <div class="crypto-box">
-                            <strong style="color:var(--text-secondary)">Block Hash:</strong><br>
+                            <strong style="color:var(--text-secondary)">Immutable Block Hash:</strong><br>
                             <span id="wHash" style="color:var(--verified-color)">hash</span><br><br>
                             <strong style="color:var(--text-secondary)">Previous Hash:</strong><br>
                             <span id="wPrevHash">prev</span>
@@ -345,7 +216,6 @@
         let fullLedger = [];
         let currentCategory = 'All';
         let favorites = JSON.parse(localStorage.getItem('axiom_favs')) || [];
-        let history = JSON.parse(localStorage.getItem('axiom_history')) || [];
 
         function hashToGradient(hash) {
             const c1 = `#${hash.substring(0, 6)}`;
@@ -353,20 +223,9 @@
             return `linear-gradient(135deg, ${c1}, ${c2})`;
         }
 
-        function timeSince(dateString) {
-            const date = new Date(dateString);
-            const seconds = Math.floor((new Date() - date) / 1000);
-            let interval = seconds / 31536000;
-            if (interval > 1) return Math.floor(interval) + " yrs ago";
-            interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + " mos ago";
-            interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + " days ago";
-            interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + " hrs ago";
-            interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + " mins ago";
-            return "Just now";
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
         }
 
         function toggleFav(hash, event) {
@@ -378,7 +237,6 @@
             }
             localStorage.setItem('axiom_favs', JSON.stringify(favorites));
             
-            // Refresh UI state without reloading full grid if in watch view
             if(document.getElementById('watchContainer').style.display === 'flex') {
                 const btn = document.getElementById('wFavBtn');
                 btn.innerHTML = favorites.includes(hash) ? '⭐ Saved' : '☆ Save';
@@ -391,85 +249,67 @@
             const block = fullLedger.find(b => b.hash === hash);
             if(!block) return;
 
-            // Record history
-            if (!history.includes(hash)) {
-                history.unshift(hash);
-                if (history.length > 50) history.pop();
-                localStorage.setItem('axiom_history', JSON.stringify(history));
-            }
-
-            // Hide Grid, Show Watch Container
             document.getElementById('gridContainer').style.display = 'none';
             const watchContainer = document.getElementById('watchContainer');
             watchContainer.style.display = 'flex';
-            
-            // Scroll to top
             document.getElementById('mainContent').scrollTop = 0;
 
-            // Populate Main Player
-            const hasImage = block.image_url && block.image_url.length > 5;
+            const bgUrl = block.image_url || '';
             const player = document.getElementById('wPlayer');
-            player.style.background = hasImage 
-                ? `linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.9)), url('${block.image_url}')` 
-                : hashToGradient(block.hash);
-            player.style.backgroundSize = "cover";
-            player.style.backgroundPosition = "center 20%";
+            player.style.backgroundImage = `url('${bgUrl}')`;
             
-            document.getElementById('wPlayerText').innerText = block.topic;
-            document.getElementById('wTitle').innerText = block.fact;
+            const art = document.getElementById('wPlayerArt');
+            art.style.backgroundImage = `url('${bgUrl}')`;
             
-            // Populate Channel Info
+            document.getElementById('wTitle').innerText = block.album;
+            
             const cIcon = document.getElementById('wChannelIcon');
-            if (hasImage) {
-                cIcon.style.backgroundImage = `url('${block.image_url}')`;
-                cIcon.innerText = '';
-            } else {
-                cIcon.style.backgroundImage = 'none';
-                cIcon.innerText = block.source.charAt(0);
-            }
-            document.getElementById('wChannelName').innerText = block.source;
+            cIcon.style.backgroundImage = `url('${bgUrl}')`;
             
-            // Populate Description/Crypto
-            document.getElementById('wTopic').innerText = block.topic;
-            document.getElementById('wTime').innerText = timeSince(block.timestamp);
+            document.getElementById('wChannelName').innerText = block.artist;
+            document.getElementById('wReleaseDate').innerText = `Released: ${formatDate(block.release_date)}`;
+            
+            // Build Tracklist
+            const tContainer = document.getElementById('wTracklist');
+            tContainer.innerHTML = '';
+            if (block.tracks && block.tracks.length > 0) {
+                block.tracks.forEach((track, index) => {
+                    const el = document.createElement('div');
+                    el.className = 'track-item';
+                    el.innerHTML = `
+                        <span class="track-num">${index + 1}</span>
+                        <span class="track-name">${track}</span>
+                    `;
+                    tContainer.appendChild(el);
+                });
+            } else {
+                tContainer.innerHTML = '<p style="color:var(--text-secondary)">Tracklist data unavailable.</p>';
+            }
+
+            // Crypto Info
             document.getElementById('wHash').innerText = block.hash;
             document.getElementById('wPrevHash').innerText = block.prev_hash;
             
-            const srcBtn = document.getElementById('wSourceBtn');
-            if (block.source_url && block.source_url.length > 5) {
-                srcBtn.href = block.source_url;
-                srcBtn.style.display = 'flex';
-            } else {
-                srcBtn.style.display = 'none';
-            }
-
-            // Save Button
             const favBtn = document.getElementById('wFavBtn');
             favBtn.innerHTML = favorites.includes(block.hash) ? '⭐ Saved' : '☆ Save';
             favBtn.onclick = () => toggleFav(block.hash);
 
-            // Populate Sidebar (Related items from same topic)
             populateWatchSidebar(block);
         }
 
         function populateWatchSidebar(currentBlock) {
             const sidebar = document.getElementById('wSidebar');
-            sidebar.innerHTML = '<h3 style="font-size:16px; margin-bottom:10px;">Up Next</h3>';
+            sidebar.innerHTML = '<h3 style="font-size:16px; margin-bottom:10px;">More from this Artist</h3>';
             
-            let related = fullLedger.filter(b => b.topic === currentBlock.topic && b.hash !== currentBlock.hash);
-            if(related.length < 5) {
+            let related = fullLedger.filter(b => b.artist === currentBlock.artist && b.hash !== currentBlock.hash);
+            if(related.length < 3) {
                 const others = fullLedger.filter(b => b.hash !== currentBlock.hash);
-                related = related.concat(others).slice(0, 8);
-            } else {
-                related = related.slice(0, 8);
+                related = related.concat(others);
             }
+            related = related.slice(0, 8);
 
             related.forEach(block => {
-                const hasImage = block.image_url && block.image_url.length > 5;
-                const bgStyle = hasImage 
-                    ? `background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)), url('${block.image_url}');` 
-                    : `background: ${hashToGradient(block.hash)};`;
-
+                const bgStyle = `background-image: url('${block.image_url}');`;
                 const el = document.createElement('div');
                 el.style.display = 'flex';
                 el.style.gap = '10px';
@@ -477,12 +317,11 @@
                 el.onclick = () => openWatchView(block.hash);
 
                 el.innerHTML = `
-                    <div style="width:160px; height:90px; border-radius:8px; flex-shrink:0; background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; ${bgStyle}">
-                        <span style="font-size:12px; font-weight:bold; text-shadow:1px 1px 3px #000; text-align:center;">${block.topic}</span>
-                    </div>
-                    <div style="display:flex; flex-direction:column; justify-content:flex-start; overflow:hidden;">
-                        <span style="font-size:14px; font-weight:500; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3; margin-bottom:4px;">${block.fact}</span>
-                        <span style="font-size:12px; color:var(--text-secondary);">${block.source}</span>
+                    <div style="width:120px; height:120px; border-radius:8px; flex-shrink:0; background-size:cover; background-position:center; ${bgStyle}"></div>
+                    <div style="display:flex; flex-direction:column; justify-content:center; overflow:hidden;">
+                        <span style="font-size:14px; font-weight:bold; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3; margin-bottom:4px;">${block.album}</span>
+                        <span style="font-size:12px; color:var(--text-secondary);">${block.artist}</span>
+                        <span style="font-size:12px; color:var(--text-secondary); margin-top:4px;">${new Date(block.release_date).getFullYear()}</span>
                     </div>
                 `;
                 sidebar.appendChild(el);
@@ -492,10 +331,9 @@
         function closeWatchView() {
             document.getElementById('watchContainer').style.display = 'none';
             document.getElementById('gridContainer').style.display = 'block';
-            applyFilters(); // refresh grid to show read history
+            applyFilters(); 
         }
 
-        // --- GRID RENDERING ---
         function renderGrid(data) {
             const grid = document.getElementById('videoGrid');
             grid.innerHTML = '';
@@ -506,14 +344,8 @@
             }
 
             data.forEach(block => {
-                const hasImage = block.image_url && block.image_url.length > 5;
-                const bgStyle = hasImage 
-                    ? `background-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.9)), url('${block.image_url}');` 
-                    : `background: ${hashToGradient(block.hash)};`;
-                
-                const channelIcon = hasImage 
-                    ? `<div class="channel-icon" style="background-image: url('${block.image_url}')"></div>`
-                    : `<div class="channel-icon">${block.source.charAt(0)}</div>`;
+                const bgStyle = `background-image: url('${block.image_url}');`;
+                const year = new Date(block.release_date).getFullYear();
 
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -521,15 +353,15 @@
                 
                 card.innerHTML = `
                     <div class="thumbnail" style="${bgStyle}">
-                        <div class="thumbnail-text">${block.topic}</div>
-                        <div class="source-badge">${block.source}</div>
+                        <div class="source-badge">${block.tracks ? block.tracks.length : 0} Tracks</div>
                     </div>
                     <div class="card-info">
-                        ${channelIcon}
+                        <div class="channel-icon" style="background-image: url('${block.image_url}')"></div>
                         <div class="meta">
-                            <div class="fact-title">${block.fact}</div>
+                            <div class="fact-title" title="${block.album}">${block.album}</div>
                             <div class="fact-details">
-                                Axiom Engine <span class="verified-icon">✔</span> • ${timeSince(block.timestamp)}
+                                ${block.artist} <span class="verified-icon">✔</span><br>
+                                ${year}
                             </div>
                         </div>
                     </div>
@@ -541,22 +373,23 @@
         function applyFilters() {
             const input = document.getElementById('searchInput');
             const query = input.value.toLowerCase();
-            
             input.blur();
 
             let filtered = fullLedger;
 
             if (currentCategory === 'Favorites') {
                 filtered = filtered.filter(b => favorites.includes(b.hash));
-            } else if (currentCategory === 'History') {
-                filtered = history.map(h => fullLedger.find(b => b.hash === h)).filter(b => b);
             } else if (currentCategory !== 'All') {
-                filtered = filtered.filter(b => b.topic.includes(currentCategory));
+                filtered = filtered.filter(b => b.artist === currentCategory);
             }
 
             if (query) {
-                filtered = filtered.filter(b => b.fact.toLowerCase().includes(query) || b.topic.toLowerCase().includes(query));
-                closeWatchView(); // Close watch view on search
+                filtered = filtered.filter(b => 
+                    b.album.toLowerCase().includes(query) || 
+                    b.artist.toLowerCase().includes(query) ||
+                    (b.tracks && b.tracks.some(t => t.toLowerCase().includes(query)))
+                );
+                closeWatchView(); 
             }
 
             renderGrid(filtered);
@@ -567,7 +400,7 @@
             
             document.querySelectorAll('.sidebar-item').forEach(el => {
                 el.classList.remove('active');
-                if(el.innerText.includes(category) || (category === 'All' && el.innerText.includes('Home'))) {
+                if(el.innerText.includes(category) || (category === 'All' && el.innerText.includes('All Releases'))) {
                     el.classList.add('active');
                 }
             });
@@ -593,15 +426,6 @@
                 document.getElementById('syncStatus').innerText = 'Offline';
                 document.getElementById('syncStatus').style.color = 'red';
             }
-        }
-
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(error => {
-                    console.error('Axiom Engine SW registration failed:', error);
-                });
-            });
         }
 
         init();
