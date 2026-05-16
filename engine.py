@@ -64,6 +64,19 @@ def get_previous_hash(ledger: List[Dict[str, str]]) -> str:
 
 
 def interactive_ledger_view(ledger: List[Dict[str, str]]) -> None:
+    def display_block_details(block: Dict[str, str]) -> None:
+        """Print full block details in a readable format."""
+        print("\n" + "=" * shutil.get_terminal_size().columns)
+        print(f"Timestamp  : {block['timestamp']}")
+        print(f"Source     : {block['source']}")
+        print(f"Topic      : {block['topic']}")
+        print(f"Hash       : {block['hash']}")
+        print(f"Prev Hash  : {block['prev_hash']}")
+        print(f"Fact       : {block['fact']}")
+        print(f"Image URL  : {block['image_url']}")
+        print(f"Source URL : {block['source_url']}")
+        print("=" * shutil.get_terminal_size().columns + "\n")
+
     page_size = 10
     current_page = 0
     filter_by: Dict[str, str] = {}
@@ -102,7 +115,8 @@ def interactive_ledger_view(ledger: List[Dict[str, str]]) -> None:
         print("-" * cols)
         cmd = (
             input(
-                "Commands: [n] next, [p] prev, [f <k> <v>] filter, [d <hash>] delete, [q] quit\n=> "
+                "Commands: [n] next, [p] prev, [f <k> <v>] filter, [d <hash>] delete, "
+                "[search <term>] full block, [q] quit\n=> "
             )
             .strip()
             .lower()
@@ -125,6 +139,14 @@ def interactive_ledger_view(ledger: List[Dict[str, str]]) -> None:
             ledger[:] = [b for b in ledger if b["hash"] != to_del]
             refresh()
             current_page = min(current_page, max(0, (len(filtered) - 1) // page_size))
+        elif cmd.startswith("search "):
+            term = cmd[7:].strip().lower()
+            matches = [b for b in ledger if term in b["fact"].lower()]
+            if matches:
+                for m in matches:
+                    display_block_details(m)
+            else:
+                print(f'No blocks found containing "{term}".\n')
 
 
 def create_block(
