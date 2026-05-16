@@ -4,19 +4,16 @@ import json
 from datetime import datetime, timezone
 import time
 import re
+import random
 from typing import List, Dict, Any
 from ledger_manager import load_ledger, save_ledger
 
-HEADERS = {
-    "User-Agent": "linux:axiom.uap.tracker:v1.0.0 (by /u/axiom_uap)",
-    "Accept": "application/json"
-}
 
 REDDIT_SUBS = ["UFOs", "UAP", "UFObelievers", "UFOdocumentaries"]
 FOURCHAN_BOARD = "x"
 
 POSITIVE_KEYWORDS = ["ufo", "uap", "orb", "saucer", "tic tac", "tic-tac", "triangle", "sighting", "craft", "phenomenon"]
-NEGATIVE_KEYWORDS = ["furry", "ai", "ai generated", "generated", "psyop", "meme", "fake", "debunk", "cgi", "vfx", "blender", "movie", "game", "art", "drawing", "tattoo", "fiction", "joke", "project blue beam"]
+NEGATIVE_KEYWORDS = ["furry", "psyop", "meme", "fake", "debunk", "cgi", "vfx", "blender", "movie", "game", "art", "drawing", "tattoo", "fiction", "joke", "project blue beam"]
 
 def get_previous_hash(ledger: List[Dict[str, Any]]) -> str:
     if not ledger:
@@ -53,31 +50,48 @@ def is_high_quality(title: str, text: str) -> bool:
 
 def fetch_reddit_sightings() -> List[Dict[str, Any]]:
     results = []
+    
+    # Initialize a session
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Android 13; Mobile; rv:109.0) Gecko/114.0 Firefox/114.0",
+        "Accept": "application/json",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Referer": "https://www.google.com/",
+        "DNT": "1",
+    })
+
+    # Warm up: Hit the reddit home page to get session cookies
+    try:
+        session.get("https://www.reddit.com/", timeout=10)
+        time.sleep(random.uniform(2, 4))
+    except:
+        pass
+
     for sub in REDDIT_SUBS:
         print(f"Scraping Reddit: /r/{sub} (Hot)...")
         
-        url = f"https://www.reddit.com/r/{sub}/hot.json?limit=30&raw_json=1"
+        # We try the standard JSON endpoint but with a randomized cache-buster
+        url = f"https://www.reddit.com/r/{sub}/hot.json?limit=25&raw_json=1&t={int(time.time())}"
+        
         try:
-            res = requests.get(url, headers=HEADERS, timeout=10)
+            res = session.get(url, timeout=15)
+            
             if res.status_code != 200:
-                print(f"⚠️ Reddit blocked request for /r/{sub} (Status: {res.status_code}). Response: {res.text[:100]}")
-                time.sleep(3)
+                print(f"⚠️ Reddit blocked request for /r/{sub} (Status: {res.status_code})")
                 continue
 
-            posts = res.json().get("data", {}).get("children", [])
+            data = res.json()
+            posts = data.get("data", {}).get("children", [])
+            
             for post in posts:
                 p = post["data"]
                 title = p.get("title", "")
                 
-                if p.get("score", 0) < 50:
-                    continue
+                if p.get("score", 0) < 40: continue
+                if not is_high_quality(title, p.get("selftext", "")): continue
                 
-                if not is_high_quality(title, p.get("selftext", "")):
-                    continue
-                
-                media_url = ""
-                thumbnail_url = ""
-                media_type = ""
+                media_url, thumbnail_url, media_type = "", "", ""
                 
                 if p.get("is_video") and p.get("media") and p["media"].get("reddit_video"):
                     media_url = p["media"]["reddit_video"].get("fallback_url", "")
@@ -87,13 +101,8 @@ def fetch_reddit_sightings() -> List[Dict[str, Any]]:
                 elif p.get("preview") and p["preview"].get("images"):
                     img_data = p["preview"]["images"][0]
                     media_url = img_data["source"]["url"]
-                    
                     resolutions = img_data.get("resolutions", [])
-                    if len(resolutions) > 2:
-                        thumbnail_url = resolutions[2]["url"]
-                    else:
-                        thumbnail_url = media_url
-                    
+                    thumbnail_url = resolutions[2]["url"] if len(resolutions) > 2 else media_url
                     media_type = "image"
                     
                     if "variants" in img_data and "mp4" in img_data["variants"]:
@@ -117,14 +126,15 @@ def fetch_reddit_sightings() -> List[Dict[str, Any]]:
         except Exception as e:
             print(f"⚠️ Error parsing /r/{sub}: {e}")
         
-        time.sleep(6)
+        time.sleep(random.uniform(4, 7)) # Be extra polite to avoid IP flags
+        
     return results
 
 def fetch_4chan_sightings() -> List[Dict[str, Any]]:
     results = []
     print(f"Scraping 4chan: /{FOURCHAN_BOARD}/...")
     try:
-        res = requests.get(f"https://a.4cdn.org/{FOURCHAN_BOARD}/catalog.json", headers=HEADERS, timeout=10)
+        res = requests.get(f"https://a.4cdn.org/{FOURCHAN_BOARD}/catalog.json", timeout=10)
         if res.status_code != 200: return results
         
         for page in res.json():
@@ -132,13 +142,11 @@ def fetch_4chan_sightings() -> List[Dict[str, Any]]:
                 title = thread.get("sub", "")
                 comment = re.sub(r'<[^>]+>', ' ', thread.get("com", ""))
                 
-                if thread.get("replies", 0) < 5:
-                    continue
+                if thread.get("replies", 0) < 5: continue
 
                 if is_high_quality(title, comment) and "tim" in thread:
                     tim = thread["tim"]
                     ext = thread["ext"]
-                    
                     media_url = f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tim}{ext}"
                     thumbnail_url = f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tim}s.jpg"
                     media_type = "video" if ext in [".webm", ".mp4"] else "image"
