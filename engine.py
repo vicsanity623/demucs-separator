@@ -3,15 +3,19 @@ import requests
 import json
 from datetime import datetime, timezone
 import time
-from typing import List, Dict, Tuple, Any
+import re
+from typing import List, Dict, Any
 from ledger_manager import load_ledger, save_ledger
 
-ITUNES_BASE_URL = "https://itunes.apple.com"
+HEADERS = {
+    "User-Agent": "AxiomUAPTracker/1.0 (Educational OSINT Project)"
+}
 
-TARGET_ARTISTS = [
-    "Eminem", "Kendrick Lamar", "2Pac", "The Notorious B.I.G.",
-    "Jay-Z", "Nas", "Dr. Dre", "Snoop Dogg", "50 Cent", "NF", "J. Cole", "Tech N9ne"
-]
+# Target platforms
+REDDIT_SUBS = ["UFOs", "aliens", "HighStrangeness", "UAP"]
+FOURCHAN_BOARD = "x"
+
+KEYWORDS = ["ufo", "uap", "alien", "extraterrestrial", "area 51", "sighting", "craft", "orb", "saucer"]
 
 def get_previous_hash(ledger: List[Dict[str, Any]]) -> str:
     if not ledger:
@@ -19,126 +23,159 @@ def get_previous_hash(ledger: List[Dict[str, Any]]) -> str:
     return ledger[0]["hash"]
 
 def create_block(
-    artist: str, album: str, release_date: str, image_url: str,
-    tracks: List[Dict[str, str]], prev_hash: str,
+    source: str, author: str, title: str, description: str,
+    media_url: str, media_type: str, source_url: str, prev_hash: str
 ) -> Dict[str, Any]:
     timestamp = datetime.now(timezone.utc).isoformat()
-    # Create deterministic string of track names for the hash
-    tracks_str = "||".join([t["name"] for t in tracks])
-    
-    payload = f"{timestamp}|{artist}|{album}|{release_date}|{image_url}|{tracks_str}|{prev_hash}"
+    # Basic payload to hash
+    payload = f"{timestamp}|{source}|{author}|{title}|{media_url}|{prev_hash}"
     block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
     return {
         "timestamp": timestamp,
-        "artist": artist,
-        "album": album,
-        "release_date": release_date,
-        "image_url": image_url,
-        "tracks": tracks, # Now storing a dictionary with name and preview URL
+        "source": source,
+        "author": author,
+        "title": title,
+        "description": description[:1000], # Limit desc to avoid giant blocks
+        "media_url": media_url,
+        "media_type": media_type, # 'video' or 'image'
+        "source_url": source_url,
         "prev_hash": prev_hash,
         "hash": block_hash,
     }
 
-def fetch_artist_id(artist_name: str) -> str:
-    url = f"{ITUNES_BASE_URL}/search?term={artist_name}&entity=musicArtist&limit=1"
-    try:
-        response = requests.get(url, timeout=10)
-        data = response.json()
-        if data.get("resultCount", 0) > 0:
-            return str(data["results"][0]["artistId"])
-    except Exception as e:
-        print(f"⚠️ Error fetching ID for {artist_name}: {e}")
-    return ""
+def contains_keywords(text: str) -> bool:
+    text = text.lower()
+    return any(kw in text for kw in KEYWORDS)
 
-def fetch_artist_albums(artist_id: str) -> List[Dict[str, Any]]:
-    url = f"{ITUNES_BASE_URL}/lookup?id={artist_id}&entity=album"
-    albums, seen_names = [], set()
-    try:
-        response = requests.get(url, timeout=10)
-        data = response.json()
-        for item in data.get("results", []):
-            if item.get("wrapperType") == "collection":
-                raw_name = item.get("collectionName", "")
-                clean_name = raw_name.lower().replace(" (deluxe)", "").replace(" (explicit)", "").replace(" (clean)", "").strip()
-                if clean_name not in seen_names:
-                    seen_names.add(clean_name)
-                    img_url = item.get("artworkUrl100", "").replace("100x100bb", "600x600bb")
-                    albums.append({
-                        "id": str(item["collectionId"]),
-                        "artist": item.get("artistName", "Unknown"),
-                        "album": raw_name,
-                        "release_date": item.get("releaseDate", ""),
-                        "image_url": img_url
+def fetch_reddit_sightings() -> List[Dict[str, Any]]:
+    results = []
+    for sub in REDDIT_SUBS:
+        print(f"Scraping Reddit: /r/{sub}...")
+        url = f"https://www.reddit.com/r/{sub}/new.json?limit=50"
+        try:
+            res = requests.get(url, headers=HEADERS, timeout=10)
+            data = res.json()
+            posts = data.get("data", {}).get("children", [])
+            
+            for post in posts:
+                p_data = post["data"]
+                title = p_data.get("title", "")
+                
+                # Only care if it mentions our keywords
+                if not contains_keywords(title):
+                    continue
+                
+                media_url = ""
+                media_type = ""
+                
+                # Check for Reddit Video (.mp4 usually via fallback URL)
+                if p_data.get("is_video") and "media" in p_data and p_data["media"]:
+                    reddit_video = p_data["media"].get("reddit_video", {})
+                    media_url = reddit_video.get("fallback_url", "")
+                    media_type = "video"
+                # Check for Image (.jpg, .png)
+                elif "url_overridden_by_dest" in p_data:
+                    url_dest = p_data["url_overridden_by_dest"]
+                    if url_dest.endswith((".jpg", ".png", ".jpeg")):
+                        media_url = url_dest
+                        media_type = "image"
+                    elif url_dest.endswith((".gif", ".mp4")):
+                        media_url = url_dest
+                        media_type = "video"
+                        
+                if media_url:
+                    results.append({
+                        "source": f"Reddit (/r/{sub})",
+                        "author": p_data.get("author", "Anonymous"),
+                        "title": title,
+                        "description": p_data.get("selftext", ""),
+                        "media_url": media_url,
+                        "media_type": media_type,
+                        "source_url": f"https://reddit.com{p_data.get('permalink', '')}"
                     })
-    except Exception:
-        pass
-    return albums
+        except Exception as e:
+            print(f"⚠️ Error with /r/{sub}: {e}")
+        time.sleep(2) # Respect rate limits
+    return results
 
-def fetch_tracks_for_albums(album_ids: List[str]) -> Dict[str, List[Dict[str, str]]]:
-    if not album_ids: return {}
-    ids_str = ",".join(album_ids)
-    url = f"{ITUNES_BASE_URL}/lookup?id={ids_str}&entity=song"
-    track_map: Dict[str, List[Dict[str, str]]] = {aid: [] for aid in album_ids}
+def fetch_4chan_sightings() -> List[Dict[str, Any]]:
+    results = []
+    print(f"Scraping 4chan: /{FOURCHAN_BOARD}/...")
+    catalog_url = f"https://a.4cdn.org/{FOURCHAN_BOARD}/catalog.json"
     
     try:
-        response = requests.get(url, timeout=15)
-        data = response.json()
-        for item in data.get("results", []):
-            if item.get("wrapperType") == "track":
-                col_id = str(item.get("collectionId", ""))
-                track_name = item.get("trackName", "")
-                preview_url = item.get("previewUrl", "") # <--- GRABBING AUDIO URL
-                if col_id in track_map and track_name:
-                    track_map[col_id].append({"name": track_name, "preview": preview_url})
-    except Exception:
-        pass
-    return track_map
+        res = requests.get(catalog_url, headers=HEADERS, timeout=10)
+        catalog = res.json()
+        
+        for page in catalog:
+            for thread in page.get("threads", []):
+                title = thread.get("sub", "")
+                comment = thread.get("com", "")
+                
+                # Check keywords in title or comment
+                if contains_keywords(title) or contains_keywords(comment):
+                    # Check if thread has an image/video attached
+                    if "tim" in thread and "ext" in thread:
+                        tim = thread["tim"]
+                        ext = thread["ext"]
+                        media_url = f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tim}{ext}"
+                        
+                        media_type = "video" if ext in [".webm", ".mp4"] else "image"
+                        
+                        # Strip HTML tags from 4chan comments
+                        clean_desc = re.sub(r'<[^>]+>', ' ', comment)
+                        
+                        results.append({
+                            "source": f"4chan (/{FOURCHAN_BOARD}/)",
+                            "author": thread.get("name", "Anonymous"),
+                            "title": title if title else "UAP Thread (No Title)",
+                            "description": clean_desc,
+                            "media_url": media_url,
+                            "media_type": media_type,
+                            "source_url": f"https://boards.4channel.org/{FOURCHAN_BOARD}/thread/{thread.get('no')}"
+                        })
+    except Exception as e:
+        print(f"⚠️ Error with 4chan: {e}")
+        
+    return results
 
-def build_discography_ledger() -> None:
-    print("🚀 Starting Discography Ledger Engine...")
+def build_uap_ledger() -> None:
+    print("🛸 Initializing Axiom UAP Tracker...")
     ledger = load_ledger()
-    existing_records = { f"{b['artist'].lower()}||{b['album'].lower()}" for b in ledger }
+    
+    # Fast lookup to prevent duplicate URLs being sealed
+    existing_urls = { b["media_url"] for b in ledger }
     added_count = 0
 
-    for artist in TARGET_ARTISTS:
-        print(f"\n🔍 Processing Artist: {artist}")
-        artist_id = fetch_artist_id(artist)
-        if not artist_id: continue
+    # Fetch Intel
+    new_sightings = fetch_reddit_sightings() + fetch_4chan_sightings()
+    
+    for sighting in new_sightings:
+        if sighting["media_url"] in existing_urls:
+            continue
             
-        albums = fetch_artist_albums(artist_id)
-        albums.sort(key=lambda x: x["release_date"])
+        prev_hash = get_previous_hash(ledger)
+        block = create_block(
+            source=sighting["source"],
+            author=sighting["author"],
+            title=sighting["title"],
+            description=sighting["description"],
+            media_url=sighting["media_url"],
+            media_type=sighting["media_type"],
+            source_url=sighting["source_url"],
+            prev_hash=prev_hash
+        )
         
-        batch_size = 30
-        for i in range(0, len(albums), batch_size):
-            batch = albums[i:i+batch_size]
-            batch_ids = [a["id"] for a in batch]
-            track_data = fetch_tracks_for_albums(batch_ids)
-            time.sleep(2) 
-            
-            for album_info in batch:
-                record_key = f"{album_info['artist'].lower()}||{album_info['album'].lower()}"
-                if record_key in existing_records: continue
-                    
-                tracks = track_data.get(album_info["id"], [])
-                if not tracks: continue 
-                    
-                prev_hash = get_previous_hash(ledger)
-                block = create_block(
-                    artist=album_info["artist"], album=album_info["album"], release_date=album_info["release_date"],
-                    image_url=album_info["image_url"], tracks=tracks, prev_hash=prev_hash
-                )
-                ledger.insert(0, block)
-                existing_records.add(record_key)
-                added_count += 1
-                
-        print(f"✅ Finished {artist}")
+        ledger.insert(0, block)
+        existing_urls.add(sighting["media_url"])
+        added_count += 1
 
     if added_count > 0:
-        print(f"\n💾 Saving {added_count} new albums to ledger...")
+        print(f"\n💾 Encrypting {added_count} new sightings into ledger...")
         save_ledger(ledger)
     else:
-        print("\n📭 No new albums found. Ledger is up to date.")
+        print("\n📭 No new sightings verified. Ledger is up to date.")
 
 if __name__ == "__main__":
-    build_discography_ledger()
+    build_uap_ledger()
