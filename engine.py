@@ -21,15 +21,15 @@ def get_previous_hash(ledger: List[Dict[str, Any]]) -> str:
         return "0000000000000000000000000000000000000000000000000000000000000000"
     return ledger[0]["hash"]
 
-def create_block(source, author, title, description, media_url, thumbnail_url, media_type, source_url, prev_hash, score=0):
+def create_block(source, author, title, description, media_url, thumbnail_url, media_type, source_url, prev_hash, score=0, audio_url=""):
     timestamp = datetime.now(timezone.utc).isoformat()
     payload = f"{timestamp}|{source}|{title}|{media_url}|{score}|{prev_hash}"
     block_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
     return {
         "timestamp": timestamp, "source": source, "author": author, "title": title,
         "description": description[:800], "media_url": media_url, "thumbnail_url": thumbnail_url,
-        "media_type": media_type, "source_url": source_url, "prev_hash": prev_hash,
-        "hash": block_hash, "score": score
+        "media_type": media_type, "audio_url": audio_url, "source_url": source_url,
+        "prev_hash": prev_hash, "hash": block_hash, "score": score
     }
 
 def is_high_quality(title, text):
@@ -46,34 +46,41 @@ def process_reddit_data(data, source_label):
         min_score = 30 if "r/" in source_label else 10
         if p.get("score", 0) < min_score or not is_high_quality(title, p.get("selftext", "")): continue
         
-        media_url, thumbnail_url, media_type = "", "", ""
+        media_url, thumbnail_url, media_type, audio_url = "", "", "", ""
 
         if p.get("preview") and p["preview"].get("images"):
             img_data = p["preview"]["images"][0]
-            
-            if "variants" in img_data and "mp4" in img_data["variants"]:
-                media_url = img_data["variants"]["mp4"]["source"]["url"]
-                media_type = "video"
+
+            # variants.mp4 are silent GIF-previews — store as image instead
+            if "variants" in img_data and "mp4" in img_data["variants"] and not p.get("is_video"):
+                media_url = img_data["source"]["url"]
                 res = img_data.get("resolutions", [])
-                thumbnail_url = res[2]["url"] if len(res) > 2 else img_data["source"]["url"]
-            
+                thumbnail_url = res[2]["url"] if len(res) > 2 else media_url
+                media_type = "image"
+
             elif not p.get("is_video"):
                 media_url = img_data["source"]["url"]
                 res = img_data.get("resolutions", [])
                 thumbnail_url = res[2]["url"] if len(res) > 2 else media_url
                 media_type = "image"
 
-        if not media_url and p.get("is_video") and p.get("media") and p["media"].get("reddit_video"):
-            media_url = p["media"]["reddit_video"].get("fallback_url", "")
+        if p.get("is_video") and p.get("media") and p["media"].get("reddit_video"):
+            rv = p["media"]["reddit_video"]
+            media_url = rv.get("fallback_url", "")
             thumbnail_url = p.get("thumbnail", "")
             media_type = "video"
+            # Derive the separate audio track from the v.redd.it base URL
+            audio_match = re.match(r'(https://v\.redd\.it/[^/]+)', media_url)
+            if audio_match:
+                audio_url = audio_match.group(1) + "/DASH_audio.mp4"
 
         if media_url and (thumbnail_url not in ["self", "default", ""]):
             results.append({
                 "source": source_label, "author": p.get("author", "Anonymous"),
                 "title": title, "description": p.get("selftext", ""),
                 "media_url": media_url, "thumbnail_url": thumbnail_url,
-                "media_type": media_type, "source_url": f"https://reddit.com{p.get('permalink', '')}",
+                "media_type": media_type, "audio_url": audio_url,
+                "source_url": f"https://reddit.com{p.get('permalink', '')}",
                 "score": p.get("score", 0)
             })
     return results
@@ -121,6 +128,7 @@ def fetch_4chan_sightings():
                         "media_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{thread['tim']}{thread['ext']}",
                         "thumbnail_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{thread['tim']}s.jpg",
                         "media_type": "video" if thread['ext'] in [".webm", ".mp4"] else "image",
+                        "audio_url": "",
                         "source_url": f"https://boards.4channel.org/{FOURCHAN_BOARD}/thread/{thread['no']}",
                         "score": 0
                     })
@@ -135,7 +143,7 @@ def build_uap_ledger():
     added = 0
     for s in new_sightings:
         if s["media_url"] in existing_urls: continue
-        block = create_block(s["source"], s["author"], s["title"], s["description"], s["media_url"], s["thumbnail_url"], s["media_type"], s["source_url"], get_previous_hash(ledger), s["score"])
+        block = create_block(s["source"], s["author"], s["title"], s["description"], s["media_url"], s["thumbnail_url"], s["media_type"], s["source_url"], get_previous_hash(ledger), s["score"], s.get("audio_url", ""))
         ledger.insert(0, block)
         existing_urls.add(s["media_url"])
         added += 1

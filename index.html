@@ -544,7 +544,23 @@
             const safeThumbUrl = block.thumbnail_url ? decodeEntities(block.thumbnail_url) : '';
 
             if (block.media_type === 'video') {
-                mediaContainer.innerHTML = `<video src="${safeMediaUrl}" poster="${safeThumbUrl}" controls playsinline style="max-width:100%;"></video>`;
+                const safeAudioUrl = block.audio_url ? decodeEntities(block.audio_url) : '';
+                if (safeAudioUrl) {
+                    mediaContainer.innerHTML = `
+                        <div style="position:relative;width:100%;">
+                            <video id="mainVideo" src="${safeMediaUrl}" poster="${safeThumbUrl}" controls playsinline style="max-width:100%;display:block;"></video>
+                            <audio id="audioTrack" src="${safeAudioUrl}" preload="auto"></audio>
+                        </div>`;
+                    const video = document.getElementById('mainVideo');
+                    const audio = document.getElementById('audioTrack');
+                    video.addEventListener('play', () => { audio.currentTime = video.currentTime; audio.play().catch(() => {}); });
+                    video.addEventListener('pause', () => audio.pause());
+                    video.addEventListener('seeked', () => { audio.currentTime = video.currentTime; });
+                    video.addEventListener('volumechange', () => { audio.volume = video.volume; audio.muted = video.muted; });
+                    video.addEventListener('ratechange', () => { audio.playbackRate = video.playbackRate; });
+                } else {
+                    mediaContainer.innerHTML = `<video src="${safeMediaUrl}" poster="${safeThumbUrl}" controls playsinline style="max-width:100%;"></video>`;
+                }
             } else {
                 mediaContainer.innerHTML = `<img src="${safeMediaUrl}">`;
             }
