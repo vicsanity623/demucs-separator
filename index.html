@@ -3,74 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LedgerAmp | Local Storage Edition</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#0f0f0f">
+    <title>Axiom | UAP Disclosure Ledger</title>
+    <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-        :root { --bg-color: #0f0f0f; --surface-color: #212121; --hover-color: #3d3d3d; --text-primary: #f1f1f1; --text-secondary: #aaaaaa; --accent-color: #3ea6ff; --verified-color: #2ba640; --player-height: 80px; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Roboto', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap');
+        
+        :root { --bg-color: #050505; --surface-color: #141414; --hover-color: #222; --text-primary: #e0e0e0; --text-secondary: #888; --accent-color: #00ff88; --verified-color: #00ff88; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
         body { background-color: var(--bg-color); color: var(--text-primary); display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: fixed; width: 100%; }
         
-        .status-bar-bg { display: block; width: 100%; position: sticky; top: 0; height: calc(env(safe-area-inset-top) + 30px); background-color: #000000; z-index: 100; }
-        header { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: sticky; top: calc(env(safe-area-inset-top) + 30px); height: 60px; background-color: var(--bg-color); z-index: 90; border-bottom: 1px solid #1f1f1f; }
+        .status-bar-bg { display: block; width: 100%; position: sticky; top: 0; height: calc(env(safe-area-inset-top) + 20px); background-color: #000; z-index: 100; }
+        header { display: flex; align-items: center; justify-content: space-between; padding: 0 20px; position: sticky; top: calc(env(safe-area-inset-top) + 20px); height: 60px; background-color: var(--bg-color); z-index: 90; border-bottom: 1px solid #1f1f1f; }
         
-        .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .logo-icon { width: 30px; height: 30px; background: linear-gradient(45deg, #8a2387, #e94057, #f27121); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
+        .logo { font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; cursor: pointer; letter-spacing: 1px; }
+        .logo-icon { width: 30px; height: 30px; background: #111; border: 1px solid var(--accent-color); color: var(--accent-color); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px; }
         
-        .search-bar { display: flex; flex: 0 1 600px; background-color: #121212; border: 1px solid #303030; border-radius: 40px; overflow: hidden; margin: 0 20px; }
-        .search-bar input { flex: 1; background: transparent; border: none; color: var(--text-primary); padding: 10px 20px; font-size: 16px; outline: none; }
-        .search-bar button { background-color: #222222; border: none; border-left: 1px solid #303030; padding: 0 20px; color: var(--text-primary); cursor: pointer; }
+        .search-bar { display: flex; flex: 0 1 600px; background-color: #111; border: 1px solid #333; border-radius: 8px; overflow: hidden; margin: 0 20px; }
+        .search-bar input { flex: 1; background: transparent; border: none; color: var(--text-primary); padding: 10px 20px; font-size: 14px; outline: none; }
+        .search-bar button { background-color: #1a1a1a; border: none; border-left: 1px solid #333; padding: 0 20px; color: var(--accent-color); cursor: pointer; }
 
         .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
-        .sidebar { width: 240px; background-color: var(--bg-color); padding: 12px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; z-index: 10;}
-        .sidebar-item { padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 15px; }
-        .sidebar-item:hover, .sidebar-item.active { background-color: var(--surface-color); }
+        .sidebar { width: 240px; background-color: var(--bg-color); padding: 12px; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; border-right: 1px solid #111;}
+        .sidebar-item { padding: 10px 15px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 12px; transition: 0.2s;}
+        .sidebar-item:hover, .sidebar-item.active { background-color: var(--surface-color); color: var(--accent-color); }
         
-        .content { flex: 1; overflow-y: auto; background-color: var(--bg-color); padding: 20px; padding-bottom: calc(var(--player-height) + 40px + env(safe-area-inset-bottom)); }
+        .content { flex: 1; overflow-y: auto; background-color: var(--bg-color); padding: 20px; padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
 
-        .filters { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 10px; }
-        .filter-chip { background-color: var(--surface-color); color: var(--text-primary); border: none; padding: 8px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; white-space: nowrap; }
-        .filter-chip.active { background-color: var(--text-primary); color: var(--bg-color); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .card { display: flex; flex-direction: column; gap: 10px; cursor: pointer; position: relative; background: var(--surface-color); padding: 10px; border-radius: 8px; border: 1px solid #222; transition: border 0.2s;}
+        .card:hover { border-color: var(--accent-color); }
         
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
-        .card { display: flex; flex-direction: column; gap: 12px; cursor: pointer; }
-        .thumbnail { width: 100%; aspect-ratio: 1/1; border-radius: 8px; background-color: #222; background-size: cover; background-position: center; transition: 0.2s; position: relative; }
-        .thumbnail:hover { transform: scale(1.02); }
+        .thumbnail { width: 100%; aspect-ratio: 16/9; border-radius: 4px; background-color: #000; background-size: cover; background-position: center; position: relative; }
+        .media-badge { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.8); color: #fff; font-size: 10px; padding: 4px 8px; border-radius: 4px; border: 1px solid #333; text-transform: uppercase; }
         
-        .watch-container { display: none; flex-direction: row; gap: 24px; max-width: 1400px; margin: 0 auto; }
-        .watch-main { flex: 1; display: flex; flex-direction: column; gap: 15px; }
-        .watch-player { width: 100%; height: 350px; border-radius: 12px; background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
-        .watch-player::after { content: ''; position: absolute; inset: 0; backdrop-filter: blur(20px); background: rgba(0,0,0,0.5); z-index: 1; }
-        .watch-player-art { height: 90%; aspect-ratio: 1/1; background-size: cover; background-position: center; z-index: 2; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        /* 3-DOT MENU */
+        .menu-btn { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10; transition: 0.2s; }
+        .menu-btn:hover { background: var(--accent-color); color: black; }
         
-        .tracklist { margin-top: 15px; display: flex; flex-direction: column; }
-        .track-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #333; gap: 15px; }
-        .track-item:hover { background-color: rgba(255,255,255,0.05); border-radius: 6px; }
-        .track-num { width: 20px; color: var(--text-secondary); font-weight: bold; }
-        .track-name { flex: 1; font-size: 15px; }
-        
-        .action-btn { background: none; border: none; color: var(--text-primary); font-size: 18px; cursor: pointer; padding: 5px; opacity: 0.7; transition: 0.2s; }
-        .action-btn:hover { opacity: 1; transform: scale(1.1); }
-        .local-badge { font-size: 10px; background-color: var(--verified-color); color: white; padding: 2px 6px; border-radius: 10px; margin-left: 10px; vertical-align: middle;}
+        .card-title { font-weight: 700; font-size: 14px; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-meta { font-size: 12px; color: var(--text-secondary); display: flex; justify-content: space-between; }
 
-        /* --- BOTTOM MEDIA PLAYER --- */
-        .bottom-player { position: fixed; bottom: 0; left: 0; width: 100%; height: calc(var(--player-height) + env(safe-area-inset-bottom)); background-color: #181818; border-top: 1px solid #333; display: flex; align-items: center; padding: 0 20px; padding-bottom: env(safe-area-inset-bottom); z-index: 200; gap: 20px; transform: translateY(100%); transition: transform 0.3s ease; }
-        .bottom-player.active { transform: translateY(0); }
-        .player-art { width: 50px; height: 50px; border-radius: 4px; background-size: cover; background-color: #333; }
-        .player-info { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-        .player-title { font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .player-artist { font-size: 12px; color: var(--text-secondary); }
-        .player-controls { display: flex; align-items: center; gap: 20px; }
-        .play-pause-btn { width: 40px; height: 40px; border-radius: 50%; background-color: var(--text-primary); color: var(--bg-color); border: none; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        /* WATCH VIEW */
+        .watch-container { display: none; flex-direction: column; gap: 20px; max-width: 1000px; margin: 0 auto; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
+        .media-player-wrapper { width: 100%; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid #333; display: flex; align-items: center; justify-content: center; min-height: 300px; max-height: 70vh;}
+        .media-player-wrapper video, .media-player-wrapper img { max-width: 100%; max-height: 70vh; object-fit: contain; }
+        
+        .post-details { background: var(--surface-color); padding: 20px; border-radius: 8px; border: 1px solid #222; }
+        .post-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; color: var(--text-primary); }
+        .post-meta { font-size: 13px; color: var(--text-secondary); margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333; }
+        .post-body { font-size: 14px; line-height: 1.6; color: #ccc; white-space: pre-wrap; word-wrap: break-word; }
+        
+        .action-row { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { padding: 10px 20px; background: #111; border: 1px solid #333; color: white; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 13px; font-weight: bold; }
+        .btn:hover { background: #222; border-color: var(--accent-color); color: var(--accent-color); }
+        
+        .crypto-box { background: #0a0a0a; border-left: 2px solid var(--accent-color); padding: 15px; border-radius: 0 4px 4px 0; margin-top: 20px; font-family: monospace; font-size: 11px; word-break: break-all; color: #666; }
+
         @media (max-width: 768px) {
             .sidebar { display: none; }
-            .watch-container { flex-direction: column; }
-            .bottom-player { padding: 0 10px; padding-bottom: env(safe-area-inset-bottom); }
         }
     </style>
 </head>
@@ -79,273 +74,182 @@
 
     <header>
         <div class="logo" onclick="closeWatchView()">
-            <div class="logo-icon">♬</div>
-            <span class="logo-text-hide">LedgerAmp</span>
+            <div class="logo-icon">🛸</div>
+            <span>AXIOM <span style="font-weight:400; color:var(--text-secondary)">UAP</span></span>
         </div>
         <form class="search-bar" action="javascript:void(0);" onsubmit="applyFilters(); return false;">
-            <input type="search" id="searchInput" placeholder="Search artists, albums..." enterkeyhint="search">
-            <button type="submit">🔍</button>
+            <input type="search" id="searchInput" placeholder="Search sightings, locations, keywords..." enterkeyhint="search">
+            <button type="submit">SEARCH</button>
         </form>
     </header>
 
-    <!-- Hidden File Input for MP3 Uploads -->
-    <input type="file" id="audioUploader" accept="audio/*, audio/mpeg, audio/mp3, audio/wav, audio/m4a, audio/x-m4a, .mp3, .m4a, .wav, .flac, .ogg" style="display:none;">
-
     <div class="main-container">
         <aside class="sidebar">
-            <div class="sidebar-item active" onclick="setCategory('All')">🏠 Home</div>
-            <div style="border-top: 1px solid var(--surface-color); margin: 10px 0;"></div>
-            <div class="sidebar-item" onclick="setCategory('Eminem')">🎤 Eminem</div>
-            <div class="sidebar-item" onclick="setCategory('Kendrick Lamar')">👑 Kendrick Lamar</div>
-            <div class="sidebar-item" onclick="setCategory('2Pac')">🕊️ 2Pac</div>
-            <div class="sidebar-item" onclick="setCategory('Jay-Z')">🗽 Jay-Z</div>
-            <div class="sidebar-item" onclick="setCategory('Dr. Dre')">🎧 Dr. Dre</div>
+            <div class="sidebar-item active" onclick="setCategory('All')">🌐 Global Feed</div>
+            <div class="sidebar-item" onclick="setCategory('Reddit')">👽 Reddit Comm</div>
+            <div class="sidebar-item" onclick="setCategory('4chan')">🍀 4chan /x/</div>
+            <div style="border-top: 1px solid #222; margin: 10px 0;"></div>
+            <div class="sidebar-item" onclick="setCategory('Saved')">📁 Saved Files</div>
         </aside>
 
-        <main class="content" id="mainContent">
-            
-            <div id="gridContainer">
-                <div class="filters" id="filterContainer">
-                    <button class="filter-chip active" onclick="setCategory('All')">All</button>
-                    <button class="filter-chip" onclick="setCategory('Eminem')">Eminem</button>
-                    <button class="filter-chip" onclick="setCategory('Kendrick Lamar')">Kendrick</button>
-                </div>
-                <div class="grid" id="videoGrid"></div>
-            </div>
+        <main class="content">
+            <div id="gridContainer" class="grid"></div>
 
             <div id="watchContainer" class="watch-container">
-                <div class="watch-main">
-                    <div class="watch-player" id="wPlayer">
-                        <div class="watch-player-art" id="wPlayerArt"></div>
+                <div class="media-player-wrapper" id="wMedia">
+                    <!-- Video or Image injected here -->
+                </div>
+                
+                <div class="post-details">
+                    <div class="post-title" id="wTitle">Sighting Title</div>
+                    <div class="post-meta">
+                        Source: <span id="wSource" style="color:var(--accent-color);">Reddit</span> • 
+                        Author: <span id="wAuthor">User</span> • 
+                        <span id="wDate">Date</span>
                     </div>
-                    <div style="font-size: 24px; font-weight: bold;" id="wTitle">Album Title</div>
-                    <div style="color:var(--text-secondary)" id="wChannelName">Artist Name</div>
                     
-                    <div class="tracklist" id="wTracklist">
-                        <!-- Tracks Injected Here -->
+                    <div class="post-body" id="wDesc">No additional description provided.</div>
+                    
+                    <div class="action-row">
+                        <button class="btn" id="wSaveBtn">💾 Save to local</button>
+                        <a href="#" target="_blank" class="btn" id="wLinkBtn">🔗 View Original</a>
+                    </div>
+                    
+                    <div class="crypto-box">
+                        <strong style="color:var(--text-secondary)">IMMUTABLE HASH:</strong><br>
+                        <span id="wHash" style="color:var(--accent-color)">hash</span><br><br>
+                        <strong style="color:var(--text-secondary)">PREV HASH:</strong><br>
+                        <span id="wPrevHash">prev</span>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- GLOBAL AUDIO PLAYER -->
-    <div class="bottom-player" id="globalPlayerUI">
-        <div class="player-art" id="pArt"></div>
-        <div class="player-info">
-            <span class="player-title" id="pTitle">Select a track</span>
-            <span class="player-artist" id="pArtist">---</span>
-        </div>
-        <div class="player-controls">
-            <button class="play-pause-btn" id="pPlayBtn" onclick="togglePlayPause()">▶</button>
-        </div>
-        <audio id="audioElement"></audio>
-    </div>
-
     <script>
         let fullLedger = [];
         let currentCategory = 'All';
+        let savedSightings = JSON.parse(localStorage.getItem('axiom_uap_saved')) || [];
 
-        // --- INDEXED DB SETUP FOR LOCAL MP3 STORAGE ---
-        let db;
-        let ownedTracks = new Set(); // Keep track of keys we have saved
-        let currentUploadKey = null; // Track which song the user is currently uploading
-
-        const request = indexedDB.open("LedgerAmpDB", 1);
-        
-        request.onupgradeneeded = function(event) {
-            db = event.target.result;
-            db.createObjectStore("audioFiles", { keyPath: "trackKey" });
-        };
-
-        request.onsuccess = function(event) {
-            db = event.target.result;
-            loadOwnedTracks();
-        };
-
-        function loadOwnedTracks() {
-            const transaction = db.transaction(["audioFiles"], "readonly");
-            const objectStore = transaction.objectStore("audioFiles");
-            const req = objectStore.getAllKeys();
-            req.onsuccess = function() {
-                ownedTracks = new Set(req.result);
-            };
-        }
-
-        function saveLocalAudio(trackKey, fileBlob) {
-            const transaction = db.transaction(["audioFiles"], "readwrite");
-            const objectStore = transaction.objectStore("audioFiles");
-            const request = objectStore.put({ trackKey: trackKey, file: fileBlob });
+        function toggleSave(event, hash) {
+            event.stopPropagation(); // Prevent opening the card
+            if (savedSightings.includes(hash)) {
+                savedSightings = savedSightings.filter(h => h !== hash);
+                alert("Removed from Saved Files.");
+            } else {
+                savedSightings.push(hash);
+                alert("File Saved to Local Storage.");
+            }
+            localStorage.setItem('axiom_uap_saved', JSON.stringify(savedSightings));
             
-            request.onsuccess = function() {
-                ownedTracks.add(trackKey);
-                alert("File saved locally! This full track will now play instead of the preview.");
-                // Re-render tracklist if we are currently looking at it
-                if(document.getElementById('watchContainer').style.display === 'flex') {
-                    const currentHash = document.getElementById('watchContainer').getAttribute('data-hash');
-                    openWatchView(currentHash); 
-                }
-            };
-        }
-
-        function getLocalAudio(trackKey, callback) {
-            const transaction = db.transaction(["audioFiles"], "readonly");
-            const objectStore = transaction.objectStore("audioFiles");
-            const request = objectStore.get(trackKey);
-            request.onsuccess = function(event) {
-                if(request.result) callback(request.result.file);
-                else callback(null);
-            };
-        }
-
-        // Handle the hidden file input change
-        document.getElementById('audioUploader').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file || !currentUploadKey) return;
-            saveLocalAudio(currentUploadKey, file);
-            e.target.value = ''; // reset
-        });
-
-        function triggerUpload(trackKey) {
-            currentUploadKey = trackKey;
-            document.getElementById('audioUploader').click();
-        }
-
-        // --- AUDIO PLAYER LOGIC ---
-        const audio = document.getElementById('audioElement');
-        let currentPlayingUrl = "";
-        let currentLocalBlobUrl = null;
-
-        function playAudio(trackKey, previewUrl, trackName, artist, coverUrl) {
-            document.getElementById('globalPlayerUI').classList.add('active');
-            document.getElementById('pArt').style.backgroundImage = `url('${coverUrl}')`;
-            document.getElementById('pTitle').innerText = trackName;
-            document.getElementById('pArtist').innerText = artist;
-
-            // Check if we own this track locally
-            if (ownedTracks.has(trackKey)) {
-                getLocalAudio(trackKey, function(fileBlob) {
-                    if(fileBlob) {
-                        // Clean up old local blob to save memory
-                        if(currentLocalBlobUrl) URL.revokeObjectURL(currentLocalBlobUrl);
-                        
-                        currentLocalBlobUrl = URL.createObjectURL(fileBlob);
-                        audio.src = currentLocalBlobUrl;
-                        audio.play();
-                        document.getElementById('pPlayBtn').innerText = '⏸';
-                    }
-                });
-            } else {
-                // Play 30 sec preview fallback
-                if (!previewUrl) { alert("No preview available, please upload a local file."); return; }
-                if (currentPlayingUrl !== previewUrl) {
-                    audio.src = previewUrl;
-                    currentPlayingUrl = previewUrl;
-                }
-                audio.play();
-                document.getElementById('pPlayBtn').innerText = '⏸';
+            if(document.getElementById('watchContainer').style.display === 'flex') {
+                document.getElementById('wSaveBtn').innerText = savedSightings.includes(hash) ? '✅ Saved' : '💾 Save to local';
             }
+            if(currentCategory === 'Saved') applyFilters(); // refresh if in saved tab
         }
 
-        function togglePlayPause() {
-            if (audio.paused) {
-                audio.play();
-                document.getElementById('pPlayBtn').innerText = '⏸';
-            } else {
-                audio.pause();
-                document.getElementById('pPlayBtn').innerText = '▶';
-            }
-        }
-
-        audio.onended = () => { document.getElementById('pPlayBtn').innerText = '▶'; };
-
-        // --- UI LOGIC ---
         function openWatchView(hash) {
             const block = fullLedger.find(b => b.hash === hash);
             if(!block) return;
 
-            document.getElementById('watchContainer').setAttribute('data-hash', hash);
             document.getElementById('gridContainer').style.display = 'none';
             document.getElementById('watchContainer').style.display = 'flex';
             
-            const bgUrl = block.image_url || '';
-            document.getElementById('wPlayer').style.backgroundImage = `url('${bgUrl}')`;
-            document.getElementById('wPlayerArt').style.backgroundImage = `url('${bgUrl}')`;
-            document.getElementById('wTitle').innerText = block.album;
-            document.getElementById('wChannelName').innerText = block.artist;
-            
-            const tContainer = document.getElementById('wTracklist');
-            tContainer.innerHTML = '';
-            
-            if (block.tracks && block.tracks.length > 0) {
-                block.tracks.forEach((trackObj, index) => {
-                    const tName = typeof trackObj === 'string' ? trackObj : trackObj.name;
-                    const tAudio = typeof trackObj === 'string' ? null : trackObj.preview;
-                    
-                    // Generate unique key for this song based on Artist + Track Name
-                    const trackKey = `${block.artist}||${tName}`;
-                    const isOwned = ownedTracks.has(trackKey);
-                    
-                    const el = document.createElement('div');
-                    el.className = 'track-item';
-                    
-                    const playHtml = `<button class="action-btn" title="Play Track" onclick="playAudio('${trackKey.replace(/'/g, "\\'")}', '${tAudio}', '${tName.replace(/'/g, "\\'")}', '${block.artist.replace(/'/g, "\\'")}', '${bgUrl}')">▶️</button>`;
-                    
-                    // If they uploaded it, show green checkmark. Otherwise, show upload folder icon.
-                    const uploadHtml = isOwned 
-                        ? `<span class="action-btn" title="Locally Saved" style="cursor:default;">✅</span><span class="local-badge">FULL MP3</span>`
-                        : `<button class="action-btn" title="Upload Local MP3" onclick="triggerUpload('${trackKey.replace(/'/g, "\\'")}')">📁</button>`;
-
-                    el.innerHTML = `
-                        <span class="track-num">${index + 1}</span>
-                        <span class="track-name">${tName}</span>
-                        <div style="display:flex; gap:10px; align-items:center;">
-                            ${playHtml}
-                            ${uploadHtml}
-                        </div>
-                    `;
-                    tContainer.appendChild(el);
-                });
+            // Render Media
+            const mediaContainer = document.getElementById('wMedia');
+            if(block.media_type === 'video') {
+                mediaContainer.innerHTML = `<video src="${block.media_url}" controls autoplay loop playsinline></video>`;
+            } else {
+                mediaContainer.innerHTML = `<img src="${block.media_url}" alt="Sighting Image">`;
             }
+            
+            document.getElementById('wTitle').innerText = block.title;
+            document.getElementById('wSource').innerText = block.source;
+            document.getElementById('wAuthor').innerText = block.author;
+            document.getElementById('wDate').innerText = new Date(block.timestamp).toLocaleString();
+            
+            document.getElementById('wDesc').innerText = block.description || "No description provided.";
+            document.getElementById('wLinkBtn').href = block.source_url;
+            
+            document.getElementById('wHash').innerText = block.hash;
+            document.getElementById('wPrevHash').innerText = block.prev_hash;
+            
+            const saveBtn = document.getElementById('wSaveBtn');
+            saveBtn.innerText = savedSightings.includes(block.hash) ? '✅ Saved' : '💾 Save to local';
+            saveBtn.onclick = (e) => toggleSave(e, block.hash);
         }
 
         function closeWatchView() {
             document.getElementById('watchContainer').style.display = 'none';
-            document.getElementById('gridContainer').style.display = 'block';
-            applyFilters();
+            document.getElementById('wMedia').innerHTML = ''; // Stop video playback
+            document.getElementById('gridContainer').style.display = 'grid';
         }
 
         function renderGrid(data) {
-            const grid = document.getElementById('videoGrid');
+            const grid = document.getElementById('gridContainer');
             grid.innerHTML = '';
+
+            if(data.length === 0) {
+                grid.innerHTML = `<div style="color:#555; grid-column:1/-1;">No sightings found for this criteria.</div>`;
+                return;
+            }
+
             data.forEach(block => {
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.onclick = () => openWatchView(block.hash);
+                
+                // If it's a video, we try to use the video URL as a poster if possible, or fallback to CSS background.
+                // Images work natively as backgrounds.
+                const bgStyle = block.media_type === 'image' ? `background-image: url('${block.media_url}')` : 'background-color: #111';
+                const typeIcon = block.media_type === 'video' ? '🎥 VIDEO' : '📸 IMAGE';
+
                 card.innerHTML = `
-                    <div class="thumbnail" style="background-image: url('${block.image_url}')"></div>
-                    <div style="font-weight: 500; font-size: 14px; margin-top:5px;">${block.album}</div>
-                    <div style="color: var(--text-secondary); font-size: 13px;">${block.artist}</div>
+                    <div class="thumbnail" style="${bgStyle}">
+                        ${block.media_type === 'video' ? '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:40px; opacity:0.5;">▶</div>' : ''}
+                        <button class="menu-btn" onclick="toggleSave(event, '${block.hash}')">⋮</button>
+                        <div class="media-badge">${typeIcon}</div>
+                    </div>
+                    <div class="card-title" title="${block.title}">${block.title}</div>
+                    <div class="card-meta">
+                        <span>${block.source}</span>
+                        <span>${new Date(block.timestamp).toLocaleDateString()}</span>
+                    </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
         function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
             let filtered = fullLedger;
-            if (currentCategory !== 'All') {
-                filtered = filtered.filter(b => b.artist === currentCategory);
+
+            if (currentCategory === 'Saved') {
+                filtered = filtered.filter(b => savedSightings.includes(b.hash));
+            } else if (currentCategory !== 'All') {
+                filtered = filtered.filter(b => b.source.includes(currentCategory));
             }
+
+            if (query) {
+                filtered = filtered.filter(b => 
+                    b.title.toLowerCase().includes(query) || 
+                    b.description.toLowerCase().includes(query)
+                );
+            }
+
+            closeWatchView();
             renderGrid(filtered);
         }
 
         function setCategory(category) {
             currentCategory = category;
-            document.querySelectorAll('.sidebar-item, .filter-chip').forEach(el => {
+            document.querySelectorAll('.sidebar-item').forEach(el => {
                 el.classList.remove('active');
-                if(el.innerText.includes(category)) el.classList.add('active');
+                if(el.innerText.includes(category) || (category === 'All' && el.innerText.includes('Global'))) {
+                    el.classList.add('active');
+                }
             });
-            closeWatchView();
+            applyFilters();
         }
 
         async function init() {
@@ -355,7 +259,7 @@
                     fullLedger = await response.json();
                     applyFilters();
                 }
-            } catch (err) { console.error(err); }
+            } catch (err) { console.error("Error loading ledger", err); }
         }
 
         init();
