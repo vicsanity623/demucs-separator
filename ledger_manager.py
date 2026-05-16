@@ -1,11 +1,10 @@
 import json
 import os
-from typing import List, Dict
+from typing import List, Dict, Any
 
 LEDGER_FILE: str = "ledger.json"
 
-
-def load_ledger() -> List[Dict[str, str]]:
+def load_ledger() -> List[Dict[str, Any]]:
     if os.path.exists(LEDGER_FILE):
         try:
             with open(LEDGER_FILE, "r") as f:
@@ -17,15 +16,17 @@ def load_ledger() -> List[Dict[str, str]]:
     return []
 
 
-def save_ledger(ledger: List[Dict[str, str]]) -> None:
-    optimized_ledger = ledger[:1000]
+def save_ledger(ledger: List[Dict[str, Any]]) -> None:
+    # Expanded to hold 5000 records. Tracklists require slightly more space, 
+    # but 5000 albums is plenty to store the entire history of top hip-hop artists.
+    optimized_ledger = ledger[:5000]
     with open(LEDGER_FILE, "w") as f:
         json.dump(optimized_ledger, f, indent=2)
 
 
 def flag_block(block_hash: str, status: str) -> bool:
     """
-    Interactive Feature: Allows users to flag a block as 'verified' or 'disputed'.
+    Interactive Feature: Allows users to flag an album entry as 'verified' or 'disputed'.
     """
     ledger = load_ledger()
     for block in ledger:
