@@ -1,9 +1,9 @@
-name: Axiom Engine Ledger Fetch
+name: LedgerAmp Discography Fetch
 
 on:
   schedule:
-    - cron: '0 */4 * * *' # Runs automatically every 4 hours
-  workflow_dispatch: # Allows manual trigger
+    - cron: '0 0 * * *' # Runs automatically once a day at midnight UTC
+  workflow_dispatch: # Allows manual trigger whenever you click it
 
 permissions:
   contents: write
@@ -21,13 +21,12 @@ jobs:
           python-version: '3.10'
 
       - name: Install Dependencies
+        # Only 'requests' is needed now. Removed heavy NLP and RSS libraries.
         run: |
-          pip install requests beautifulsoup4 feedparser nltk
-          python -m nltk.downloader punkt
-          python -m nltk.downloader punkt_tab
+          pip install requests
 
-      - name: Run Axiom Engine (Scrape, NLP & Seal)
-        # This script will now run in a loop for ~2.8 hours before finishing
+      - name: Run Engine (Fetch APIs & Seal Blocks)
+        # This script runs through the artist arrays, builds tracklists, and exits
         run: python -u engine.py
 
       - name: Commit and Push Ledger
@@ -35,4 +34,4 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add ledger.json
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update cryptographically sealed ledger.json" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update ledger" && git push)
