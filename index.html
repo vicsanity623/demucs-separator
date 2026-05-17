@@ -7,6 +7,7 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Axiom | UAP Ledger</title>
     <meta name="theme-color" content="#0a0a0a">
+    <meta name="referrer" content="no-referrer">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -533,11 +534,14 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.onclick = () => openWatchView(block.hash);
+
+                // Use the archived thumbnail if it exists, otherwise fallback to original
                 const thumbUrl = decodeEntities(block.thumbnail_url || block.media_url);
+                const bgStyle = `background-image: url('${thumbUrl}')`;
                 const typeLabel = block.media_type === 'video' ? '🎥 VIDEO' : '📸 IMAGE';
 
                 card.innerHTML = `
-                    <div class="thumbnail" style="background-image: url('${thumbUrl}')">
+                    <div class="thumbnail" style="${bgStyle}">
                         ${block.media_type === 'video' ? '<div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:40px; opacity:0.6;">▶</div>' : ''}
                         <button class="menu-btn" onclick="toggleSave(event, '${block.hash}')">⋮</button>
                         <div class="media-badge">${typeLabel}</div>
@@ -559,94 +563,27 @@
             document.getElementById('gridContainer').style.display = 'none';
             document.getElementById('watchContainer').style.display = 'flex';
             const mediaContainer = document.getElementById('wMedia');
+
             const safeMediaUrl = decodeEntities(block.media_url);
             const safeThumbUrl = block.thumbnail_url ? decodeEntities(block.thumbnail_url) : '';
 
             if (block.media_type === 'video') {
-                const safeAudioUrl = (block.audio_url && block.audio_url.trim()) ? decodeEntities(block.audio_url) : '';
+                // Since engine.py NOW MERGES audio into the mp4, 
+                // we simply play the video file directly.
+                mediaContainer.innerHTML = `
+                    <video id="mainVideo"
+                           src="${safeMediaUrl}"
+                           poster="${safeThumbUrl}"
+                           controls 
+                           playsinline
+                           preload="auto"
+                           style="width:100%; max-height:65vh; background:#000;"></video>`;
 
-                if (safeAudioUrl) {
-                    // ── Dual-stream player: video (no sound) + synced hidden audio ──
-                    mediaContainer.innerHTML = `
-                        <div class="audio-status" id="audioStatus">🔇 AUDIO LOADING...</div>
-                        <video id="mainVideo"
-                               src="${safeMediaUrl}"
-                               poster="${safeThumbUrl}"
-                               controls playsinline
-                               style="width:100%; max-height:65vh;"></video>
-                        <audio id="audioTrack"
-                               src="${safeAudioUrl}"
-                               preload="auto"
-                               style="display:none;"></audio>`;
-
-                    const video = document.getElementById('mainVideo');
-                    const audio = document.getElementById('audioTrack');
-                    const statusEl = document.getElementById('audioStatus');
-
-                    // Mirror initial volume state as soon as audio is ready
-                    audio.addEventListener('canplay', () => {
-                        audio.volume = video.volume;
-                        audio.muted = video.muted;
-                        statusEl.textContent = '🔊 AUDIO READY';
-                        setTimeout(() => { statusEl.style.opacity = '0'; }, 2000);
-                    }, { once: true });
-
-                    audio.addEventListener('error', () => {
-                        statusEl.textContent = '⚠️ AUDIO UNAVAILABLE';
-                    }, { once: true });
-
-                    // ── Playback sync ──
-                    video.addEventListener('play', () => {
-                        audio.currentTime = video.currentTime;
-                        const playPromise = audio.play();
-                        if (playPromise !== undefined) {
-                            playPromise.catch(err => {
-                                // Autoplay blocked — will sync on next user interaction
-                                statusEl.style.opacity = '1';
-                                statusEl.textContent = '🔇 TAP SCREEN FOR AUDIO';
-                                // Re-attempt on the next user click anywhere
-                                const retry = () => {
-                                    audio.currentTime = video.currentTime;
-                                    audio.play().catch(() => { });
-                                    document.removeEventListener('click', retry);
-                                };
-                                document.addEventListener('click', retry);
-                            });
-                        }
-                    });
-
-                    video.addEventListener('pause', () => audio.pause());
-
-                    video.addEventListener('seeked', () => {
-                        audio.currentTime = video.currentTime;
-                        if (!video.paused) audio.play().catch(() => { });
-                    });
-
-                    // Keep volume/mute in sync — covers the native <video controls> slider
-                    video.addEventListener('volumechange', () => {
-                        audio.volume = video.volume;
-                        audio.muted = video.muted;
-                    });
-
-                    video.addEventListener('ratechange', () => {
-                        audio.playbackRate = video.playbackRate;
-                    });
-
-                    // Drift correction — keep audio within 0.3 s of video
-                    video.addEventListener('timeupdate', () => {
-                        if (!audio.paused && Math.abs(audio.currentTime - video.currentTime) > 0.3) {
-                            audio.currentTime = video.currentTime;
-                        }
-                    });
-
-                } else {
-                    // ── Single-stream: no separate audio track, play as-is ──
-                    mediaContainer.innerHTML = `
-                        <video src="${safeMediaUrl}"
-                               poster="${safeThumbUrl}"
-                               controls playsinline
-                               style="width:100%; max-height:65vh;"></video>`;
-                }
+                // Optional: Error handling
+                const video = document.getElementById('mainVideo');
+                video.onerror = function () {
+                    console.error("Video failed to load. It may be blocked by Reddit's CDN (403 Forbidden) or missing locally.");
+                };
             } else {
                 mediaContainer.innerHTML = `<img src="${safeMediaUrl}" style="max-width:100%; max-height:65vh; object-fit:contain;">`;
             }
