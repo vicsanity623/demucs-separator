@@ -6,6 +6,7 @@ import zipfile
 import shutil
 from datetime import datetime, timezone
 import random
+import praw
 import time
 import re
 from typing import List, Dict, Any
@@ -45,14 +46,16 @@ def merge_reddit_video(video_url, audio_url, final_path):
     v_temp = final_path + ".v.mp4"
     a_temp = final_path + ".a.mp4"
     try:
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
         # Download tracks
         for url, p in [(video_url, v_temp), (audio_url, a_temp)]:
-            r = requests.get(url, stream=True, timeout=20)
-            if r.status_code == 200:
-                with open(p, 'wb') as f:
-                    for chunk in r.iter_content(8192): f.write(chunk)
+            if url:
+                r = requests.get(url, stream=True, timeout=20, headers=headers)
+                if r.status_code == 200:
+                    with open(p, 'wb') as f:
+                        for chunk in r.iter_content(8192): f.write(chunk)
 
-        if os.path.exists(a_temp):
+        if os.path.exists(a_temp) and os.path.getsize(a_temp) > 0:
             # MOVIEPY v2.0 SYNTAX
             video_clip = VideoFileClip(v_temp)
             audio_clip = AudioFileClip(a_temp)
@@ -172,12 +175,15 @@ def fetch_all_sources():
                 comment = re.sub(r"<[^>]+>", " ", thread.get("com", ""))
                 if thread.get("replies", 0) > 8 and any(kw in (thread.get("sub","")+comment).lower() for kw in POSITIVE_KEYWORDS):
                     if "tim" in thread:
+                        ext = thread["ext"]
+                        if ext not in [".webm", ".mp4"]:
+                            continue
                         results.append({
                             "source": "4chan (/x/)", "author": thread.get("name", "Anonymous"),
                             "title": thread.get("sub") or "UAP Intel", "description": comment,
-                            "media_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{thread['tim']}{thread['ext']}",
+                            "media_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{thread['tim']}{ext}",
                             "thumbnail_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{thread['tim']}s.jpg",
-                            "media_type": "video" if thread["ext"] in [".webm", ".mp4"] else "image",
+                            "media_type": "video",
                             "audio_url": "", "source_url": f"https://boards.4channel.org/{FOURCHAN_BOARD}/thread/{thread['no']}", "score": 0
                         })
     except: pass
@@ -211,22 +217,31 @@ def build_ledger():
         if s["source_url"] in existing: continue
         
         file_id = hashlib.md5(s["media_url"].encode()).hexdigest()
-        ext = ".mp4" if s["media_type"] == "video" else ".jpg"
-        final_path = os.path.join(MEDIA_FOLDER, f"{file_id}{ext}")
-        thumb_path = os.path.join(MEDIA_FOLDER, f"{file_id}_thumb.jpg")
-
-        if not os.path.exists(final_path):
-            print(f"📦 Archiving: {s['title'][:40]}...")
-            if s["media_type"] == "video" and "v.redd.it" in s["media_url"]:
-                merge_reddit_video(s["media_url"], s["audio_url"], final_path)
-            else:
-                r = requests.get(s["media_url"], stream=True)
-                with open(final_path, 'wb') as f:
-                    for chunk in r.iter_content(8192): f.write(chunk)
+        
+        if s["media_type"] == "video":
+            ext = ".mp4"
+            final_path = os.path.join(MEDIA_FOLDER, f"{file_id}{ext}")
+            ledger_media_url = f"./media/{file_id}{ext}"
             
-            rt = requests.get(s["thumbnail_url"], stream=True)
-            with open(thumb_path, 'wb') as f:
-                for chunk in rt.iter_content(8192): f.write(chunk)
+            if not os.path.exists(final_path):
+                print(f"📦 Archiving Video: {s['title'][:40]}...")
+                if "v.redd.it" in s["media_url"]:
+                    merge_reddit_video(s["media_url"], s["audio_url"], final_path)
+                else:
+                    try:
+                        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+                        r = requests.get(s["media_url"], stream=True, timeout=20, headers=headers)
+                        if r.status_code == 200:
+                            with open(final_path, 'wb') as f:
+                                for chunk in r.iter_content(8192): f.write(chunk)
+                    except Exception as e:
+                        print(f"   ⚠️ Video Download Error: {e}")
+        else:
+            # We are not archiving jpegs
+            ledger_media_url = s["media_url"]
+            
+        # We are not archiving thumbnails
+        ledger_thumb_url = s["thumbnail_url"]
 
         timestamp = datetime.now(timezone.utc).isoformat()
         payload = f"{timestamp}|{s['source']}|{s['title']}|{s['media_url']}|{s['score']}"
@@ -234,8 +249,8 @@ def build_ledger():
         ledger.insert(0, {
             "timestamp": timestamp, "source": s["source"], "author": s["author"],
             "title": s["title"], "description": s["description"][:800],
-            "media_url": f"./media/{file_id}{ext}",
-            "thumbnail_url": f"./media/{file_id}_thumb.jpg",
+            "media_url": ledger_media_url,
+            "thumbnail_url": ledger_thumb_url,
             "media_type": s["media_type"], "source_url": s["source_url"],
             "hash": hashlib.sha256(payload.encode()).hexdigest(), "score": s["score"]
         })
