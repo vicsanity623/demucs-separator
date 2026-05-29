@@ -1486,6 +1486,42 @@ h2.section-title {
   color: var(--text-muted);
 }
 
+/* Queue item hover preview */
+#queue-list li {
+  position: relative;
+}
+
+#queue-list li:hover {
+  background: var(--bg-hover);
+  transition: all 0.2s ease;
+}
+
+/* Add play indicator on hover */
+.queue-hover-indicator {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--red);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 10;
+}
+
+#queue-list li:hover .queue-hover-indicator {
+  opacity: 1;
+}
+
+/* Optional: Add larger play preview on click */
+#queue-list li:active .queue-hover-indicator {
+  width: 36px;
+  height: 36px;
+}
+
 /* ── Modal ─────────────────────────────────────────────────── */
 #modal-overlay {
   position: fixed;
