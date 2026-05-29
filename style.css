@@ -1153,6 +1153,12 @@ h2.section-title {
   overflow: hidden;
 }
 
+.player-art svg, .player-art canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .player-art svg {
   width: 60%;
   height: 60%;
