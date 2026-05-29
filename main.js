@@ -514,6 +514,7 @@ function openAlbumDetail(album) {
 
 function renderTrackList(listId, tracks, albumName, playlistId) {
   const ul = $(listId);
+  if (!ul) return;
   ul.innerHTML = '';
   tracks.forEach((track, i) => {
     const li = document.createElement('li');
