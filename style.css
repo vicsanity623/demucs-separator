@@ -1172,6 +1172,28 @@ h2.section-title {
   justify-content: center;
   overflow: hidden;
   position: relative;
+  transition: transform var(--t-slow);
+}
+
+.player-art::before {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle, var(--glow-color, var(--red)) 0%, transparent 70%);
+  opacity: 0.15;
+  filter: blur(25px);
+  z-index: -1;
+  transition: background 0.8s ease, opacity 0.8s ease;
+  pointer-events: none;
+}
+
+.player-bar.playing .player-art::before {
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.05); }
 }
 
 .player-art::after {
