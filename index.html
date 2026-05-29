@@ -605,15 +605,14 @@
         }
 
         btn.addEventListener('click', (): void => {
-            const win: Window & typeof globalThis = window;
-            const queue: Array<Record<string, unknown>> = (win as any).queue || [];
+            const queue: Array<Record<string, unknown>> = (window as any).queue || [];
             if (queue.length === 0) return;
 
             let index: number = 0;
             const audio: HTMLAudioElement = document.getElementById('audio-engine') as HTMLAudioElement;
 
             const playNext = (): void => {
-                const engine: any = (win as any).audioEngine;
+                const engine: { playTrack: (track: Record<string, unknown>) => void } = (window as any).audioEngine;
                 if (index >= queue.length || !engine) {
                     audio.removeEventListener('ended', playNext);
                     return;
