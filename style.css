@@ -2223,6 +2223,7 @@ h2.section-title {
   width: 100%;
   max-width: min(85vw, 360px);
   margin: 0 auto;
+  --scroll-dist: 0px;
   overflow: hidden;
   white-space: nowrap;
   position: relative;
