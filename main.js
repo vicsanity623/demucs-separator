@@ -501,6 +501,15 @@ function makeAlbumCard(album, idx) {
 }
 
 // ── Album detail ──────────────────────────────────────────────
+/* Helper: reorder tracks in a playlist after drag-and-drop */
+function reorderPlaylistTracks(playlistId: string, fromIdx: number, toIdx: number): void {
+  const pl = state.playlists.find(p => p.id === playlistId);
+  if (!pl) return;
+  const [moved] = pl.tracks.splice(fromIdx, 1);
+  pl.tracks.splice(toIdx, 0, moved);
+  persist();
+}
+
 function openAlbumDetail(album) {
   state.albumView = album.name;
   $('detail-title').textContent = album.name;
@@ -522,6 +531,35 @@ function renderTrackList(listId, tracks, albumName, playlistId) {
     li.dataset.album = albumName || '';
     li.dataset.playlistId = playlistId || '';
     li.dataset.path = track.path;
+
+    /* --- DRAG-AND-DROP ENABLED ONLY FOR PLAYLISTS --- */
+    if (playlistId) {
+      li.draggable = true;
+      li.addEventListener('dragstart', (e: DragEvent) => {
+        if (e.dataTransfer) {
+          e.dataTransfer.setData('text/plain', i.toString());
+          e.dataTransfer.effectAllowed = 'move';
+        }
+        li.classList.add('dragging');
+      });
+      li.addEventListener('dragend', () => li.classList.remove('dragging'));
+      li.addEventListener('dragover', (e: DragEvent) => {
+        e.preventDefault();
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+        li.classList.add('drag-over');
+      });
+      li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
+      li.addEventListener('drop', (e: DragEvent) => {
+        e.preventDefault();
+        li.classList.remove('drag-over');
+        const fromIdx = parseInt(e.dataTransfer?.getData('text/plain') || '', 10);
+        if (!isNaN(fromIdx) && fromIdx !== i) {
+          reorderPlaylistTracks(playlistId, fromIdx, i);
+          const pl = state.playlists.find(p => p.id === playlistId);
+          if (pl) renderTrackList(listId, pl.tracks, null, playlistId);
+        }
+      });
+    }
 
     const isActive = state.currentTrack && state.currentTrack.path === track.path;
     li.className = isActive ? 'active' : '';
