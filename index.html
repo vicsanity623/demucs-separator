@@ -604,20 +604,22 @@
             if (queueList) panel.insertBefore(btn, queueList);
         }
 
-        btn.addEventListener('click', () => {
-            const queue: any[] = (window as any).queue || [];
+        btn.addEventListener('click', (): void => {
+            const queue: Array<Record<string, unknown>> = (window as any).queue || [];
             if (queue.length === 0) return;
 
             let index: number = 0;
-            function playNext(): void {
-                if (index >= queue.length) return;
-                const track: any = queue[index];
-                (window as any).audioEngine.playTrack(track);
-                setTimeout(() => {
-                    index++;
-                    playNext();
-                }, 500);
-            }
+            const audio: HTMLAudioElement = document.getElementById('audio-engine') as HTMLAudioElement;
+
+            const playNext = (): void => {
+                if (index >= queue.length) {
+                    audio.removeEventListener('ended', playNext);
+                    return;
+                }
+                (window as any).audioEngine.playTrack(queue[index++]);
+            };
+
+            audio.addEventListener('ended', playNext);
             playNext();
         });
     }
