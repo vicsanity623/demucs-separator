@@ -609,9 +609,15 @@ function loadAndPlay(track) {
   initVisualizer();
 }
 
+/** @returns {void} */
 function initVisualizer() {
   if (!state.audioCtx) {
     state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = state.audioCtx.createMediaElementSource(audio);
+  } else if (state.audioCtx.state === 'suspended') {
+    state.audioCtx.resume();
+  }
+  if (!state.analyser) {
     const source = state.audioCtx.createMediaElementSource(audio);
     const analyser = state.audioCtx.createAnalyser();
     analyser.fftSize = 256;
