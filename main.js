@@ -334,7 +334,11 @@ function renderAllSongs(filterText = '') {
   if (!state.library?.albums) return;
   const allTracks = [];
   state.library.albums.forEach(album => {
-    album.tracks.forEach(t => allTracks.push({ ...t, albumName: album.name }));
+    album.tracks.forEach(t => {
+      if (!state.deletedSongs.has(t.path)) {
+        allTracks.push({ ...t, albumName: album.name });
+      }
+    });
   });
   allTracks.sort((a, b) => a.title.localeCompare(b.title));
   const q = filterText.toLowerCase().trim();
