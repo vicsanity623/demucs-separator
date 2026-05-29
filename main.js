@@ -73,6 +73,51 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupMediaSession();
   await loadLibrary();
   renderAll();
+
+  // --- Back-to-Top button ------------------------------------------------
+  const backToTopBtn: HTMLButtonElement = document.createElement('button');
+  backToTopBtn.id = 'back-to-top';
+  backToTopBtn.title = 'Back to Top';
+  backToTopBtn.innerHTML = `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="12 5 5 12 12 19"/></svg>`;
+  backToTopBtn.style.display = 'none';
+  backToTopBtn.style.position = 'fixed';
+  backToTopBtn.style.bottom = '70px';
+  backToTopBtn.style.right = '30px';
+  backToTopBtn.style.width = '48px';
+  backToTopBtn.style.height = '48px';
+  backToTopBtn.style.background = 'var(--bg-active)';
+  backToTopBtn.style.border = 'none';
+  backToTopBtn.style.borderRadius = '50%';
+  backToTopBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,.2)';
+  backToTopBtn.style.cursor = 'pointer';
+  backToTopBtn.style.transition = 'opacity .3s, transform .3s';
+  backToTopBtn.style.zIndex = '999';
+  backToTopBtn.style.opacity = '0';
+
+  document.body.appendChild(backToTopBtn);
+
+  const toggleBackToTop = (): void => {
+    const visible: boolean = window.scrollY > window.innerHeight;
+    if (visible) {
+      backToTopBtn.style.display = 'block';
+      requestAnimationFrame(() => {
+        backToTopBtn.style.opacity = '1';
+        backToTopBtn.style.transform = 'translateY(0)';
+      });
+    } else {
+      backToTopBtn.style.opacity = '0';
+      backToTopBtn.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        if (window.scrollY <= window.innerHeight) backToTopBtn.style.display = 'none';
+      }, 300);
+    }
+  };
+
+  window.addEventListener('scroll', debounce(toggleBackToTop, 50));
+
+  backToTopBtn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
 });
 
 
