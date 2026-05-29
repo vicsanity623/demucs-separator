@@ -25,6 +25,7 @@ const state = {
   downloaded: new Set(), // paths cached for offline
   deletedSongs: new Set(), // local deleted song paths
   renamedSongs: {},       // local custom titles: path -> newTitle
+  crossfadeDuration: 0,   // seconds
   view: 'home',
   albumView: null,   // current album name in detail view
   artistView: null,  // current artist name in detail view
@@ -1069,6 +1070,10 @@ function setupEventListeners() {
 
   $('library-sort')?.addEventListener('change', renderLibraryAlbums);
 
+  $('crossfade-slider')?.addEventListener('input', (e) => {
+    state.crossfadeDuration = parseFloat((e.target as HTMLInputElement).value);
+  });
+
   $('btn-add-playlist-player')?.addEventListener('click', () => {
     if (state.currentTrack) {
       openAddToPlaylistModal([{ ...state.currentTrack, albumName: state.currentTrack.albumName }]);
@@ -1210,6 +1215,23 @@ function togglePlayPause() {
 
 function playNext() {
   if (!state.queue || state.queue.length === 0) return;
+
+  if (state.crossfadeDuration > 0 && !audio.paused) {
+    const fadeOut: number = setInterval(() => {
+      if (audio.volume > 0.1) {
+        audio.volume -= 0.1;
+      } else {
+        clearInterval(fadeOut);
+        audio.volume = 1;
+        performNext();
+      }
+    }, (state.crossfadeDuration * 1000) / 10);
+  } else {
+    performNext();
+  }
+}
+
+function performNext(): void {
   if (state.shuffle) {
     state.queueIndex = Math.floor(Math.random() * state.queue.length);
   } else {
