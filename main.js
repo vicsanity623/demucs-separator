@@ -606,6 +606,38 @@ function loadAndPlay(track) {
   audio.load();
   audio.play().catch(e => console.warn('Autoplay blocked:', e));
   state.isPlaying = true;
+  initVisualizer();
+}
+
+function initVisualizer() {
+  if (!state.audioCtx) {
+    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const source = state.audioCtx.createMediaElementSource(audio);
+    const analyser = state.audioCtx.createAnalyser();
+    analyser.fftSize = 256;
+    source.connect(analyser);
+    analyser.connect(state.audioCtx.destination);
+    state.analyser = analyser;
+    drawVisualizer();
+  }
+}
+
+function drawVisualizer() {
+  if (!state.isPlaying) return;
+  requestAnimationFrame(drawVisualizer);
+  const canvas = document.getElementById('visualizer');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dataArray = new Uint8Array(state.analyser.frequencyBinCount);
+  state.analyser.getByteFrequencyData(dataArray);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Simple bar visualization
+  const barWidth = (canvas.width / dataArray.length) * 2.5;
+  dataArray.forEach((val, i) => {
+    const barHeight = (val / 255) * canvas.height;
+    ctx.fillStyle = `rgb(255, 215, 0)`;
+    ctx.fillRect(i * (barWidth + 1), canvas.height - barHeight, barWidth, barHeight);
+  });
 }
 
 function updatePlayerUI(track) {
