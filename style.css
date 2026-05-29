@@ -1291,6 +1291,27 @@ h2.section-title {
   height: 6px;
 }
 
+.progress-tooltip {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  background: var(--bg-raised);
+  border: 1px solid var(--border-hi);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  color: var(--text-primary);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+  z-index: 101;
+}
+
+.progress-track:hover .progress-tooltip {
+  opacity: 1;
+}
+
 .progress-bar {
   height: 100%;
   background: var(--text-primary);
