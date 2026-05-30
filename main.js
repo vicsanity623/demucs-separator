@@ -66,6 +66,13 @@ function updateMarquee() {
 
 // -- Init -------------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
+  // Detect iOS / iPadOS touch devices
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    document.body.classList.add('is-ios');
+  }
+
   loadPersistedData();
   registerSW();
   setupGreeting();
@@ -96,28 +103,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.body.appendChild(backToTopBtn);
 
-  const toggleBackToTop = () => {
-    const visible = window.scrollY > window.innerHeight;
-    if (visible) {
-      backToTopBtn.style.display = 'block';
-      requestAnimationFrame(() => {
-        backToTopBtn.style.opacity = '1';
-        backToTopBtn.style.transform = 'translateY(0)';
-      });
-    } else {
-      backToTopBtn.style.opacity = '0';
-      backToTopBtn.style.transform = 'translateY(20px)';
-      setTimeout(() => {
-        if (window.scrollY <= window.innerHeight) backToTopBtn.style.display = 'none';
-      }, 300);
-    }
-  };
+  const mainContent = $('main-content');
+  if (mainContent) {
+    const toggleBackToTop = () => {
+      const visible = mainContent.scrollTop > window.innerHeight;
+      if (visible) {
+        backToTopBtn.style.display = 'block';
+        requestAnimationFrame(() => {
+          backToTopBtn.style.opacity = '1';
+          backToTopBtn.style.transform = 'translateY(0)';
+        });
+      } else {
+        backToTopBtn.style.opacity = '0';
+        backToTopBtn.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          if (mainContent.scrollTop <= window.innerHeight) backToTopBtn.style.display = 'none';
+        }, 300);
+      }
+    };
 
-  window.addEventListener('scroll', debounce(toggleBackToTop, 50));
+    mainContent.addEventListener('scroll', debounce(toggleBackToTop, 50));
 
-  backToTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
+    backToTopBtn.addEventListener('click', () => {
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 });
 
 
@@ -779,6 +789,7 @@ audio.addEventListener('pause', () => { state.isPlaying = false; setPlayPauseIco
 function setPlayPauseIcon(playing) {
   $('icon-play').classList.toggle('hidden', playing);
   $('icon-pause').classList.toggle('hidden', !playing);
+  $('player-bar').classList.toggle('playing', playing);
 }
 
 // ── Progress bar scrubbing ────────────────────────────────────

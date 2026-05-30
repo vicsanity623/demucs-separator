@@ -1170,7 +1170,7 @@ h2.section-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   transition: transform var(--t-slow);
 }
@@ -1187,7 +1187,7 @@ h2.section-title {
   pointer-events: none;
 }
 
-.player-bar.playing .player-art::before {
+#player-bar.playing .player-art::before {
   animation: glow-pulse 4s ease-in-out infinite;
 }
 
@@ -2355,4 +2355,9 @@ h2.section-title {
 
 #player-bar.fullscreen .player-top-controls {
   gap: 28px;
+}
+
+/* Hide volume wrapper on iOS devices where audio.volume is read-only */
+body.is-ios .volume-wrap {
+  display: none !important;
 }
