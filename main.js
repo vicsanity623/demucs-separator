@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const backToTopBtn = document.createElement('button');
   backToTopBtn.id = 'back-to-top';
   backToTopBtn.title = 'Back to Top';
-  backToTopBtn.innerHTML = `<svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="2"><polyline points="12 5 5 12 12 19"/></svg>`;
+  backToTopBtn.innerHTML = `<svg viewBox="0 0 24 24" stroke="var(--red)" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`;
   backToTopBtn.style.display = 'none';
   backToTopBtn.style.position = 'fixed';
   backToTopBtn.style.bottom = '70px';
@@ -97,6 +97,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   backToTopBtn.style.borderRadius = '50%';
   backToTopBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,.2)';
   backToTopBtn.style.cursor = 'pointer';
+  backToTopBtn.addEventListener('mouseenter', () => {
+    backToTopBtn.style.boxShadow = '0 0 15px var(--red-glow)';
+  });
+  backToTopBtn.addEventListener('mouseleave', () => {
+    backToTopBtn.style.boxShadow = '0 2px 8px rgba(0,0,0,.2)';
+  });
   backToTopBtn.style.transition = 'opacity .3s, transform .3s';
   backToTopBtn.style.zIndex = '999';
   backToTopBtn.style.opacity = '0';
