@@ -699,6 +699,7 @@ function playCurrentQueueItem() {
   updatePlayerUI(track);
   updateTrackListHighlight();
   renderQueuePanel();
+  renderQueuePreview();
   downloadForOffline(track);
 }
 
@@ -1107,12 +1108,114 @@ function setupEventListeners() {
 
   window.addEventListener('resize', updateMarquee);
 
+  // Inject CSS for Queue Preview
+  const style = document.createElement('style');
+  style.textContent = `
+    .queue-preview { margin-top: 16px; padding: 12px; background: var(--bg-raised); border-radius: 12px; max-height: 260px; overflow-y: auto; }
+    .queue-preview-item { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); transition: background 0.2s ease; }
+    .queue-preview-item:hover { background: var(--bg-active); }
+    .preview-thumb { flex: 0 0 48px; border-radius: 6px; overflow: hidden; }
+    .preview-info { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; }
+    .preview-title { font-weight: 600; font-size: 0.92rem; color: var(--text-primary); line-height: 1.2; }
+    .preview-album { font-size: 0.78rem; color: var(--text-muted); }
+    .preview-progress { position: relative; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .preview-fill { height: 100%; width: 0%; background: var(--red); transition: width 0.2s linear; }
+    .queue-preview.hidden { display: none; }
+  `;
+  document.head.appendChild(style);
+
   // Queue panel
   $('btn-queue').addEventListener('click', () => {
     $('queue-panel').classList.toggle('hidden');
-    if (!$('queue-panel').classList.contains('hidden')) renderQueuePanel();
+    if (!$('queue-panel').classList.contains('hidden')) {
+      renderQueuePanel();
+      renderQueuePreview();
+    }
   });
   $('btn-close-queue').addEventListener('click', () => $('queue-panel').classList.add('hidden'));
+
+  // Queue Preview Carousel
+  function createPreviewItem(track, index) {
+    const li = document.createElement('li');
+    li.className = 'queue-preview-item';
+    li.dataset.idx = index;
+    const artUrl = getAlbumArt(track.albumName) || `${BASE_URL}/default-cover.png`;
+    const title = getTrackTitle(track);
+    const album = track.albumName || '';
+    li.innerHTML = `
+      <div class="preview-thumb" style="background:#111118;overflow:hidden;border-radius:6px;">
+        ${artInnerHTML(artUrl, 0, '50%')}
+      </div>
+      <div class="preview-info">
+        <p class="preview-title">${escHtml(title)}</p>
+        <p class="preview-album">${escHtml(album)}</p>
+        <div class="preview-progress">
+          <div class="preview-bar"><div class="preview-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+    `;
+    li.draggable = true;
+    let dragSrcIdx = null;
+    li.addEventListener('dragstart', e => {
+      dragSrcIdx = index;
+      e.dataTransfer.effectAllowed = 'move';
+      li.classList.add('dragging');
+      e.dataTransfer.setData('text/plain', JSON.stringify({fromIdx: dragSrcIdx}));
+    });
+    li.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      const overIdx = parseInt(e.currentTarget.dataset.idx, 10);
+      if (!isNaN(overIdx)) li.classList.add('drag-over');
+    });
+    li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
+    li.addEventListener('drop', e => {
+      e.preventDefault();
+      li.classList.remove('drag-over');
+      const dropIdx = parseInt(li.dataset.idx, 10);
+      if (isNaN(dropIdx) || dragSrcIdx === dropIdx) return;
+      const newQueue = [...state.queue];
+      const [moved] = newQueue.splice(dragSrcIdx, 1);
+      newQueue.splice(dropIdx, 0, moved);
+      state.queue = newQueue;
+      if (state.queueIndex > Math.max(dragSrcIdx, dropIdx)) state.queueIndex++;
+      else if (state.queueIndex > Math.min(dragSrcIdx, dropIdx)) state.queueIndex--;
+      playCurrentQueueItem();
+      renderQueuePanel();
+      renderQueuePreview();
+    });
+    li.addEventListener('mouseup', () => li.classList.remove('dragging'));
+    li.addEventListener('mouseleave', () => li.classList.remove('drag-over'));
+    const progressFill = li.querySelector('.preview-fill');
+    const startProgress = () => {
+      if (!progressFill) return;
+      const startTime = Date.now();
+      const animate = () => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const pct = Math.min(100, (elapsed / 300) * 100);
+        progressFill.style.width = pct + '%';
+        requestAnimationFrame(animate);
+      };
+      requestAnimationFrame(animate);
+    };
+    if (state.currentTrack && state.currentTrack.path === track.path) startProgress();
+    return li;
+  }
+
+  function renderQueuePreview() {
+    const container = $('queue-preview-carousel');
+    if (!container) return;
+    container.classList.remove('hidden');
+    container.innerHTML = '';
+    if (!state.queue || state.queue.length === 0) {
+      container.classList.add('hidden');
+      return;
+    }
+    const previewCount = Math.min(5, state.queue.length);
+    for (let i = 0; i < previewCount; i++) {
+      container.appendChild(createPreviewItem(state.queue[i], i));
+    }
+  }
 
   // Modal
   $('modal-cancel').addEventListener('click', closeModal);
