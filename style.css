@@ -1339,6 +1339,7 @@ h2.section-title {
   font-variant-numeric: tabular-nums;
 }
 
+/* Enhanced progress bar with draggable thumb */
 .progress-track {
   flex: 1;
   height: 4px;
@@ -1346,31 +1347,41 @@ h2.section-title {
   border-radius: 2px;
   position: relative;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: height 0.2s ease;
 }
 
 .progress-track:hover {
   height: 6px;
 }
 
+.progress-track.dragging {
+  height: 8px;
+}
+
 .progress-tooltip {
   position: absolute;
   bottom: 100%;
-  margin-bottom: 8px;
-  padding: 4px 8px;
+  margin-bottom: 12px;
+  padding: 6px 12px;
   background: var(--bg-raised);
   border: 1px solid var(--border-hi);
-  border-radius: 4px;
-  font-size: 0.7rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
   color: var(--text-primary);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease;
   white-space: nowrap;
   z-index: 101;
+  transform: translateY(4px);
 }
 
-.progress-track:hover .progress-tooltip {
+.progress-track:hover .progress-tooltip,
+.progress-track.dragging .progress-tooltip {
   opacity: 1;
+  transform: translateY(0);
 }
 
 .progress-bar {
@@ -1390,16 +1401,80 @@ h2.section-title {
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%) scale(0);
-  width: 12px;
-  height: 12px;
+  width: 16px;
+  height: 16px;
   background: var(--text-primary);
+  border: 2px solid var(--bg-deep);
   border-radius: 50%;
-  transition: transform var(--t);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   pointer-events: none;
+  opacity: 0;
 }
 
 .progress-track:hover .progress-thumb {
   transform: translate(-50%, -50%) scale(1);
+  opacity: 1;
+}
+
+.progress-track.dragging .progress-thumb {
+  transform: translate(-50%, -50%) scale(1.2);
+  opacity: 1;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+/* Add ripple effect on click */
+.progress-track::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: var(--click-x, 0%);
+  transform: translate(-50%, -50%);
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: var(--red);
+  opacity: 0.3;
+  transition: width 0.4s ease, height 0.4s ease, opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.progress-track.clicked::after {
+  width: 40px;
+  height: 40px;
+  opacity: 0;
+}
+
+/* Touch-friendly area */
+.progress-track::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  bottom: -20px;
+  left: 0;
+  right: 0;
+  cursor: pointer;
+}
+
+/* Visual feedback for buffered progress */
+.progress-buffer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: var(--bg-hover);
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Accessibility: focus styles */
+.progress-track:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--red);
+}
+
+.progress-track:focus .progress-thumb {
+  transform: translate(-50%, -50%) scale(1.3);
 }
 
 /* Right controls */
