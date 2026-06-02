@@ -589,7 +589,7 @@ function renderTrackList(listId, tracks, albumName, playlistId) {
   tracks.forEach((track, i) => {
     const li = document.createElement('li');
     li.dataset.index = i;
-    li.dataset.album = albumName || '';
+    li.dataset.album = albumName || track.albumName || '';
     li.dataset.playlistId = playlistId || '';
     li.dataset.path = track.path;
 
