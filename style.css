@@ -1453,6 +1453,7 @@ h2.section-title {
   left: 0;
   right: 0;
   cursor: pointer;
+  z-index: 10;
 }
 
 /* Visual feedback for buffered progress */
