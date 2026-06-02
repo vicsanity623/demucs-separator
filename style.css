@@ -2221,7 +2221,11 @@ h2.section-title {
   font-size: 0.85rem;
   opacity: 0;
   transition: opacity 0.2s ease;
-  pointer-events: none;
+}
+
+.track-list li.swiping .swipe-bg,
+.songs-track-list li.swiping .swipe-bg {
+  opacity: 1;
 }
 
 .swipe-bg svg {
