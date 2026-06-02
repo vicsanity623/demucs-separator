@@ -1202,6 +1202,8 @@ function renderQueuePanel() {
   state.queue.forEach((track, i) => {
     const li = document.createElement('li');
     li.className = i === state.queueIndex ? 'current' : '';
+    li.dataset.index = i;
+    li.draggable = true;
     li.innerHTML = `
       <span class="q-num">${i + 1}</span>
       <div>
@@ -1209,6 +1211,36 @@ function renderQueuePanel() {
         <div class="q-album">${escHtml(track.albumName || '')}</div>
       </div>
     `;
+
+    li.addEventListener('dragstart', (e) => {
+      if (e.dataTransfer) {
+        e.dataTransfer.setData('text/plain', i.toString());
+        e.dataTransfer.effectAllowed = 'move';
+      }
+      li.classList.add('dragging');
+    });
+
+    li.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      li.classList.add('drag-over');
+    });
+
+    li.addEventListener('dragleave', () => li.classList.remove('drag-over'));
+
+    li.addEventListener('drop', (e) => {
+      e.preventDefault();
+      li.classList.remove('drag-over');
+      const fromIdx = parseInt(e.dataTransfer?.getData('text/plain') || '', 10);
+      if (!isNaN(fromIdx) && fromIdx !== i) {
+        const [moved] = state.queue.splice(fromIdx, 1);
+        state.queue.splice(i, 0, moved);
+        if (state.queueIndex === fromIdx) state.queueIndex = i;
+        else if (state.queueIndex === i) state.queueIndex = fromIdx;
+        renderQueuePanel();
+      }
+    });
+
     li.addEventListener('click', () => {
       state.queueIndex = i;
       playCurrentQueueItem();
