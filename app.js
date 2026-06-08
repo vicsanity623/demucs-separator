@@ -1552,7 +1552,18 @@ function getCompactGraphicHTML(comp) {
   }
 
   // 8. General Power Systems (USB Ports, Signal Generator, Bench PSU)
-  if (type === 'usb_power' || type === 'bench_psu' || type === 'signal_generator') {
+  if (type === 'usb_power' || type === 'bench_psu' || type === 'signal_generator' || type === 'solar_panel') {
+    if (type === 'solar_panel') {
+      return `
+        <svg viewBox="0 0 50 50" width="48" height="48">
+          <rect x="10" y="10" width="30" height="30" rx="4" fill="#0f172a" stroke="#eab308" stroke-width="2" />
+          <line x1="20" y1="10" x2="20" y2="40" stroke="#334155" stroke-width="1.5" />
+          <line x1="30" y1="10" x2="30" y2="40" stroke="#334155" stroke-width="1.5" />
+          <line x1="10" y1="20" x2="40" y2="20" stroke="#334155" stroke-width="1.5" />
+          <line x1="10" y1="30" x2="40" y2="30" stroke="#334155" stroke-width="1.5" />
+        </svg>
+      `;
+    }
     return `
       <svg viewBox="0 0 50 50" width="48" height="48">
         <rect x="10" y="10" width="30" height="30" rx="6" fill="#1e1b4b" stroke="#818cf8" stroke-width="2" />
@@ -1604,9 +1615,12 @@ function getCompactGraphicHTML(comp) {
     if (type === 'multimeter') {
       return `
         <svg viewBox="0 0 50 50" width="48" height="48">
-          <rect x="12" y="6" width="26" height="38" rx="4" fill="#f97316" stroke="#c2410c" stroke-width="2.5" />
-          <rect x="16" y="11" width="18" height="10" fill="#000" rx="1" />
-          <circle cx="25" cy="31" r="6" fill="#334155" stroke="#cbd5e1" stroke-width="1.5" />
+          <rect x="12" y="6" width="26" height="38" rx="4" fill="#ea580c" stroke="#9a3412" stroke-width="2" />
+          <rect x="16" y="10" width="18" height="11" fill="#000a04" stroke="#065f46" stroke-width="0.5" rx="1" />
+          <!-- Screen text nodes for dynamic updates in compact view -->
+          <text id="${comp.id}-compact-val" x="25" y="16" fill="#34d399" font-size="5.5" font-family="monospace" text-anchor="middle" font-weight="bold">0.00</text>
+          <text id="${comp.id}-compact-unit" x="25" y="20" fill="#059669" font-size="3.5" font-family="monospace" text-anchor="middle">V</text>
+          <circle cx="25" cy="31" r="5" fill="#1f2937" stroke="#9ca3af" stroke-width="1" />
         </svg>
       `;
     }
@@ -2275,10 +2289,19 @@ function simulationTick() {
     else if (type === 'multimeter') {
       const vR = tv('VΩ+'), vB = tv('COM-');
       const display = document.getElementById(`${id}-display`);
-      if (!display) return;
-      if (state.mode === 'voltage') display.innerText = (vR - vB).toFixed(2);
-      else if (state.mode === 'current') display.innerText = ((vR - vB) / 0.1 * 1000).toFixed(1);
-      else display.innerText = 'HI';
+      const compVal = document.getElementById(`${id}-compact-val`);
+      const compUnit = document.getElementById(`${id}-compact-unit`);
+
+      const calculatedVal = state.mode === 'voltage' ? (vR - vB).toFixed(2) :
+        state.mode === 'current' ? ((vR - vB) / 0.1 * 1000).toFixed(1) : 'HI';
+      const currentUnit = state.mode === 'voltage' ? 'V' : state.mode === 'current' ? 'mA' : 'Ω';
+
+      // Update default view
+      if (display) display.innerText = calculatedVal;
+
+      // Update compact view
+      if (compVal) compVal.textContent = calculatedVal;
+      if (compUnit) compUnit.textContent = currentUnit;
     }
     else if (type === 'oscilloscope') {
       if (!oscData[id]) oscData[id] = { ch1: [], ch2: [] };
