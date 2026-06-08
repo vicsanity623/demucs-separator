@@ -1,9 +1,9 @@
 // ============================================================
-//  BreadBoard — Service Worker  v0.0.1
+//  BreadBoard — Service Worker  v0.0.2
 // ============================================================
 
-const CACHE_NAME = 'breadboard-v0.0.1';
-const STATIC_ASSETS = ['./', './index.html', './manifest.json'];
+const CACHE_NAME = 'breadboard-v0.0.2';
+const STATIC_ASSETS = ['./', './index.html', './app.js', './style.css', './manifest.json'];
 const AUDIO_CACHE = 'soundvault-audio-v5.8';
 const MAX_AUDIO_CACHE_MB = 4096; // 4 GB limit for audio cache
 
