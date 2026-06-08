@@ -40,13 +40,13 @@
         }
     </style>
 </head>
-<body class="h-full bg-slate-955 text-slate-100 flex flex-col overflow-hidden">
+<body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
 
     <!-- Header Panel -->
     <header class="bg-slate-900 border-b border-slate-800 px-4 md:px-6 py-3 flex flex-shrink-0 justify-between items-center z-20">
         <div>
             <h1 class="text-md md:text-xl font-bold tracking-tight text-teal-400">DIY Workbench</h1>
-            <p class="hidden sm:block text-xs text-slate-400">Virtual design, prototyping, and electrochemical cell simulator</p>
+            <p class="hidden sm:block text-xs text-slate-400">Simulating chemistry, semiconductors, power systems, and analog audio</p>
         </div>
         <div class="flex items-center gap-2 md:gap-4">
             <button id="btn-play-pause" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded shadow transition-colors flex items-center gap-1.5">
@@ -76,63 +76,121 @@
         
         <!-- Left Sidebar: Component Bin -->
         <aside id="panel-parts" class="hidden md:flex w-full md:w-80 bg-slate-900 border-r border-slate-800 flex-col p-4 overflow-y-auto flex-shrink-0 z-10 absolute md:static inset-0">
-            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Component Bin</h2>
-            <p class="text-xs text-slate-400 mb-4">Select or tap a component to instantiate it onto the grid:</p>
+            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-2">Component Bin</h2>
+            <p class="text-xs text-slate-400 mb-4">Select a component to instantiate it onto the grid:</p>
             
-            <div class="space-y-3 pb-8">
-                <!-- USB Power Supply -->
-                <button onclick="addAndFocusComponent('usb_power')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-indigo-900/50 flex items-center justify-center border border-indigo-700 text-lg">🔌</div>
-                    <div>
-                        <div class="text-sm font-medium text-slate-200">5V USB Power Supply</div>
-                        <div class="text-xs text-slate-400">Provides 5.0V VBUS & Ground</div>
+            <div class="space-y-4 pb-8">
+                <!-- Group: Power & Sources -->
+                <div>
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Power Sources</h3>
+                    <div class="space-y-2">
+                        <button onclick="addAndFocusComponent('usb_power')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-indigo-900/50 flex items-center justify-center border border-indigo-700 text-base">🔌</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">5V USB Power Supply</div>
+                                <div class="text-[10px] text-slate-400">Fixed DC VBUS / GND rails</div>
+                            </div>
+                        </button>
+                        <button onclick="addAndFocusComponent('solar_panel')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-amber-900/40 flex items-center justify-center border border-amber-700 text-base">☀️</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">12V Solar Panel</div>
+                                <div class="text-[10px] text-slate-400">Voltage dependent on Sunlight slider</div>
+                            </div>
+                        </button>
+                        <button onclick="addAndFocusComponent('signal_generator')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-purple-900/40 flex items-center justify-center border border-purple-700 text-base">〰️</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">AC Signal Generator</div>
+                                <div class="text-[10px] text-slate-400">Outputs 0.5Hz Sine wave</div>
+                            </div>
+                        </button>
                     </div>
-                </button>
+                </div>
 
-                <!-- DIY Epsom-Salt Cell -->
-                <button onclick="addAndFocusComponent('diy_cell')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-teal-900/50 flex items-center justify-center border border-teal-700 text-lg">🧪</div>
-                    <div>
-                        <div class="text-sm font-medium text-slate-200">DIY Epsom-Salt Cell</div>
-                        <div class="text-xs text-slate-400">0.0V raw. Requires forming charge</div>
+                <!-- Group: Passive & Components -->
+                <div>
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Passives & Actuators</h3>
+                    <div class="space-y-2">
+                        <button onclick="addAndFocusComponent('resistor')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-amber-900/50 flex items-center justify-center border border-amber-700 text-base">⚙️</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">Variable Resistor</div>
+                                <div class="text-[10px] text-slate-400">Resistance limits current flow</div>
+                            </div>
+                        </button>
+                        <button onclick="addAndFocusComponent('capacitor')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-cyan-900/40 flex items-center justify-center border border-cyan-700 text-base">🔋</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">Capacitor (1000 µF)</div>
+                                <div class="text-[10px] text-slate-400">Stores energy. Dynamic companion model</div>
+                            </div>
+                        </button>
+                        <button onclick="addAndFocusComponent('led')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-emerald-900/50 flex items-center justify-center border border-emerald-700 text-base">💡</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">LED Indicator</div>
+                                <div class="text-[10px] text-slate-400">Visual indicator. Burns out above 45mA</div>
+                            </div>
+                        </button>
+                        <button onclick="addAndFocusComponent('spst_switch')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-slate-700/50 flex items-center justify-center border border-slate-600 text-base">🎛️</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">SPST Switch</div>
+                                <div class="text-[10px] text-slate-400">Toggles loop connection on or off</div>
+                            </div>
+                        </button>
                     </div>
-                </button>
+                </div>
 
-                <!-- Resistor -->
-                <button onclick="addAndFocusComponent('resistor')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-amber-900/50 flex items-center justify-center border border-amber-700 text-lg">⚙️</div>
-                    <div>
-                        <div class="text-sm font-medium text-slate-200">Variable Resistor</div>
-                        <div class="text-xs text-slate-400">Configurable (1Ω - 10kΩ)</div>
+                <!-- Group: Chemistry & Semiconductors -->
+                <div>
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Electrochemistry & Silicon</h3>
+                    <div class="space-y-2">
+                        <button onclick="addAndFocusComponent('diy_cell')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-teal-900/50 flex items-center justify-center border border-teal-700 text-base">🧪</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">DIY Epsom-Salt Cell</div>
+                                <div class="text-[10px] text-slate-400">Modified Planté lead battery chemistry</div>
+                            </div>
+                        </button>
+                        <button onclick="addAndFocusComponent('npn_transistor')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-rose-950/60 flex items-center justify-center border border-rose-900/50 text-base">📉</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">NPN Transistor (C2001)</div>
+                                <div class="text-[10px] text-slate-400">Bipolar semiconductor for amplification</div>
+                            </div>
+                        </button>
+                        <button onclick="addAndFocusComponent('pnp_transistor')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-rose-950/60 flex items-center justify-center border border-rose-900/50 text-base">📈</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">PNP Transistor</div>
+                                <div class="text-[10px] text-slate-400">Bipolar semiconductor (inverse bias)</div>
+                            </div>
+                        </button>
+                        <button onclick="addAndFocusComponent('mosfet_n')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-blue-950/60 flex items-center justify-center border border-blue-900/50 text-base">🧱</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">N-Channel MOSFET</div>
+                                <div class="text-[10px] text-slate-400">High-power switch / regulator element</div>
+                            </div>
+                        </button>
                     </div>
-                </button>
+                </div>
 
-                <!-- LED Indicator -->
-                <button onclick="addAndFocusComponent('led')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-emerald-900/50 flex items-center justify-center border border-emerald-700 text-lg">💡</div>
-                    <div>
-                        <div class="text-sm font-medium text-slate-200">LED Indicator</div>
-                        <div class="text-xs text-slate-400">Lights up, melts if current > 45mA</div>
+                <!-- Group: Measurement -->
+                <div>
+                    <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Instrumentation</h3>
+                    <div class="space-y-2">
+                        <button onclick="addAndFocusComponent('multimeter')" class="w-full text-left p-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                            <div class="w-9 h-9 rounded bg-rose-900/50 flex items-center justify-center border border-rose-700 text-base">📟</div>
+                            <div>
+                                <div class="text-xs font-semibold text-slate-200">Digital Multimeter</div>
+                                <div class="text-[10px] text-slate-400">Simulates real-time voltage/current paths</div>
+                            </div>
+                        </button>
                     </div>
-                </button>
-
-                <!-- Digital Multimeter -->
-                <button onclick="addAndFocusComponent('multimeter')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-rose-900/50 flex items-center justify-center border border-rose-700 text-lg">📟</div>
-                    <div>
-                        <div class="text-sm font-medium text-slate-200">Digital Multimeter</div>
-                        <div class="text-xs text-slate-400">Measures voltage or dynamic current</div>
-                    </div>
-                </button>
-
-                <!-- SPST Switch -->
-                <button onclick="addAndFocusComponent('spst_switch')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-slate-700/50 flex items-center justify-center border border-slate-600 text-lg">🎛️</div>
-                    <div>
-                        <div class="text-sm font-medium text-slate-200">SPST Switch</div>
-                        <div class="text-xs text-slate-400">Toggles loop conductivity On/Off</div>
-                    </div>
-                </button>
+                </div>
             </div>
         </aside>
 
@@ -148,67 +206,25 @@
         <!-- Right Sidebar: Interactive Tutorial Guide -->
         <aside id="panel-guide" class="hidden md:flex w-full md:w-96 bg-slate-900 border-l border-slate-800 flex-col overflow-y-auto flex-shrink-0 z-10 absolute md:static inset-0">
             <div class="p-4 border-b border-slate-800">
-                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Tutorial Companion</h2>
-                <p class="text-xs text-slate-400 mt-1">Simulating the 4.0V Epsom-Salt Lead-Acid Battery</p>
+                <label for="tutorial-select" class="text-[10px] font-bold text-teal-400 uppercase tracking-wider block mb-1">Select Guide Profile</label>
+                <select id="tutorial-select" onchange="switchTutorial(this.value)" class="w-full bg-slate-950 text-slate-200 text-xs rounded border border-slate-800 p-2 outline-none font-semibold focus:border-teal-500">
+                    <option value="lead_acid">1. DIY 4.0V Epsom-Salt Battery Pack</option>
+                    <option value="solar_charge">2. 12V Solar Panel Charging Regulator</option>
+                    <option value="class_a_amp">3. Single-Stage Class-A Audio Amplifier</option>
+                </select>
             </div>
 
             <div class="p-4 space-y-4 text-xs text-slate-300 pb-16">
                 <!-- Step Tracker list -->
                 <div class="space-y-3" id="step-tracker">
-                    <!-- Step 1 -->
-                    <div id="step-1" class="p-3 bg-slate-800/80 rounded border-l-4 border-amber-500 space-y-1">
-                        <div class="flex justify-between font-semibold text-slate-200">
-                            <span>Step 1: Placement</span>
-                            <span class="status-badge text-amber-500">In Progress</span>
-                        </div>
-                        <p class="text-slate-400">Add 1x USB Power Supply and 2x DIY Epsom-Salt Cells to the workspace.</p>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div id="step-2" class="p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60">
-                        <div class="flex justify-between font-semibold text-slate-400">
-                            <span>Step 2: Series Connection</span>
-                            <span class="status-badge text-slate-500">Locked</span>
-                        </div>
-                        <p class="text-slate-500">Wire the cells in series: Connect the Positive (+) terminal of Cell 1 to the Negative (-) terminal of Cell 2.</p>
-                    </div>
-
-                    <!-- Step 3 -->
-                    <div id="step-3" class="p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60">
-                        <div class="flex justify-between font-semibold text-slate-400">
-                            <span>Step 3: Current Protection</span>
-                            <span class="status-badge text-slate-500">Locked</span>
-                        </div>
-                        <p class="text-slate-500">Add a Resistor and set its value close to 81Ω to limit the initial forming current.</p>
-                    </div>
-
-                    <!-- Step 4 -->
-                    <div id="step-4" class="p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60">
-                        <div class="flex justify-between font-semibold text-slate-400">
-                            <span>Step 4: Forming Charge</span>
-                            <span class="status-badge text-slate-500">Locked</span>
-                        </div>
-                        <p class="text-slate-500">Connect the USB power through the resistor to charge and form the series cells up to 4.0V total.</p>
-                    </div>
-
-                    <!-- Step 5 -->
-                    <div id="step-5" class="p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60">
-                        <div class="flex justify-between font-semibold text-slate-400">
-                            <span>Step 5: Load Testing</span>
-                            <span class="status-badge text-slate-500">Locked</span>
-                        </div>
-                        <p class="text-slate-500">Disconnect the charger. Add a 330Ω Resistor and a Green LED to test the battery output discharge cycle.</p>
-                    </div>
+                    <!-- Dynamic Step list injected here by JS -->
                 </div>
 
-                <!-- Live Chemistry Status Card -->
+                <!-- Live Physical State Card -->
                 <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
-                    <h3 class="text-xs font-semibold uppercase tracking-wider text-teal-400">Electrochemical State</h3>
-                    <div class="space-y-1 text-slate-400">
-                        <div class="flex justify-between"><span>Active Ions:</span><span class="text-slate-200 font-mono">Mg2+ , SO42-</span></div>
-                        <div class="flex justify-between"><span>Anode Chemistry:</span><span class="text-slate-200 font-mono">PbO₂ (Formed) / Pb</span></div>
-                        <div class="flex justify-between"><span>Cathode Chemistry:</span><span class="text-slate-200 font-mono">Spongy Lead (Pb)</span></div>
-                        <div class="flex justify-between"><span>Safe Operating Max:</span><span class="text-slate-200 font-mono">~2.05 V per cell</span></div>
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-teal-400">Node Status & Metrics</h3>
+                    <div class="space-y-1 text-slate-400" id="live-metrics">
+                        <!-- Dynamic node parameter analysis -->
                     </div>
                 </div>
             </div>
@@ -227,6 +243,8 @@
         let dragOffset = { x: 0, y: 0 };
         let lastVoltages = [];
         let currentMobileTab = 'workspace';
+        let currentTutorial = 'lead_acid';
+        let simulationTime = 0.0;
 
         // Element Queries
         const workspace = document.getElementById('workspace');
@@ -235,50 +253,111 @@
         const playPauseBtn = document.getElementById('btn-play-pause');
         const clearBtn = document.getElementById('btn-clear');
 
+        // Tutorial Profiles
+        const tutorialGuides = {
+            lead_acid: {
+                title: "Simulating the 4.0V Epsom-Salt Lead-Acid Battery",
+                metricsTitle: "Electrochemical State",
+                steps: [
+                    { id: 'step-1', title: "Step 1: Placement", desc: "Place 1x USB Power Supply and 2x DIY Epsom-Salt Cells onto the workbench grid." },
+                    { id: 'step-2', title: "Step 2: Series Battery Connection", desc: "Connect the Positive (+) terminal of Cell 1 to the Negative (-) terminal of Cell 2 to build a series battery network." },
+                    { id: 'step-3', title: "Step 3: Current-Limiting Protection", desc: "Place a Resistor and adjust its resistance to 81Ω to prevent rapid thermal expansion or excessive charging current." },
+                    { id: 'step-4', title: "Step 4: Electrochemical Forming Charge", desc: "Connect USB 5V to Resistor Terminal A, Resistor Terminal B to Cell 2 (+), and USB GND to Cell 1 (-). Wait for the cells to reach 100% forming state." },
+                    { id: 'step-5', title: "Step 5: Safe Load Testing Loop", desc: "Disconnect charging wires. Change Resistor to 330Ω, add a Green LED. Connect Cell 2 (+) to Resistor Terminal A, Resistor Terminal B to LED Anode (+), and LED Cathode (-) to Cell 1 (-) to complete the closed discharge circuit." }
+                ],
+                liveMetrics: () => {
+                    const cells = components.filter(c => c.type === 'diy_cell');
+                    if (cells.length === 0) return `<div>No electrochemical cells on workbench.</div>`;
+                    return cells.map((c, i) => `
+                        <div class="border-b border-slate-800 pb-1.5 mb-1.5">
+                            <div class="font-bold text-slate-300">${c.state.name || 'Cell ' + (i+1)}</div>
+                            <div class="flex justify-between"><span>Forming Level:</span><span>${Math.round(c.state.forming)}%</span></div>
+                            <div class="flex justify-between"><span>Charge Level:</span><span>${Math.round(c.state.charge)}%</span></div>
+                            <div class="flex justify-between text-teal-400"><span>Open EMF:</span><span>${(c.state.voltage).toFixed(2)} V</span></div>
+                        </div>
+                    `).join('');
+                }
+            },
+            solar_charge: {
+                title: "12V Solar Charging Regulator System",
+                metricsTitle: "Power System Metrics",
+                steps: [
+                    { id: 'step-1', title: "Step 1: Place Charging System Components", desc: "Add 1x 12V Solar Panel, 1x Capacitor, and 1x SPST Switch to the workbench." },
+                    { id: 'step-2', title: "Step 2: Connect Storage Capacitor", desc: "Connect Solar Panel (+) to Switch Terminal 'In', Switch Terminal 'Out' to Capacitor (+), and complete the ground loop by linking Solar Panel (-) to Capacitor (-)." },
+                    { id: 'step-3', title: "Step 3: Adjust Environmental Sunlight", desc: "Drag the Solar Panel Sunlight Slider up to 100% to generate 12.0V open circuit voltage." },
+                    { id: 'step-4', title: "Step 4: Store Power (Transient Charge)", desc: "Click/tap the SPST switch to close the circuit (ON). Observe the dynamic charge curve of the capacitor storing charge up to 12.0V." }
+                ],
+                liveMetrics: () => {
+                    const caps = components.filter(c => c.type === 'capacitor');
+                    const solar = components.find(c => c.type === 'solar_panel');
+                    let html = '';
+                    if (solar) {
+                        html += `<div class="flex justify-between"><span>Solar Output:</span><span>${solar.state.voltage.toFixed(2)} V</span></div>`;
+                    }
+                    if (caps.length > 0) {
+                        html += caps.map((cap, i) => `
+                            <div class="mt-1 border-t border-slate-800 pt-1.5">
+                                <div class="flex justify-between"><span>Capacitor Stored Voltage:</span><span class="text-cyan-400">${cap.state.storedVoltage.toFixed(2)} V</span></div>
+                                <div class="flex justify-between"><span>Stored Charge (Q):</span><span>${(cap.state.storedVoltage * 0.001 * 1000).toFixed(1)} mC</span></div>
+                            </div>
+                        `).join('');
+                    } else {
+                        html += `<div class="text-slate-500 italic mt-1">No storage capacitors present.</div>`;
+                    }
+                    return html;
+                }
+            },
+            class_a_amp: {
+                title: "Class-A Common-Emitter BJT Amplifier",
+                metricsTitle: "Signal Analysis (0.5Hz)",
+                steps: [
+                    { id: 'step-1', title: "Step 1: Place Signal Components", desc: "Add 1x AC Signal Generator, 1x NPN Transistor (C2001), 2x Resistors, and 1x Multimeter." },
+                    { id: 'step-2', title: "Step 2: Pull-Up Collector Network", desc: "Add a USB Power Supply. Connect USB 5V to Resistor 1 Terminal A, and Resistor 1 Terminal B to Transistor Collector (C). Connect Emitter (E) to USB GND." },
+                    { id: 'step-3', title: "Step 3: Connect Signal Input", desc: "Connect Signal Generator Positive (+) to Transistor Base (B), and Negative (-) to USB GND." },
+                    { id: 'step-4', title: "Step 4: Connect Collector Scope Meter", desc: "Connect Multimeter Red (+) to Transistor Collector (C), and Black (-) to USB GND. Set Multimeter mode to Voltage (V)." },
+                    { id: 'step-5', title: "Step 5: Observe Signal Inversion", desc: "Set Resistor 1 to 1kΩ. Observe the Collector voltage swinging opposite to the Base voltage, showing phase inversion and gain." }
+                ],
+                liveMetrics: () => {
+                    const npn = components.find(c => c.type === 'npn_transistor');
+                    const gen = components.find(c => c.type === 'signal_generator');
+                    let html = '';
+                    if (gen) {
+                        html += `<div class="flex justify-between"><span>Input Signal:</span><span class="text-purple-400">${gen.state.outputVoltage.toFixed(2)} V</span></div>`;
+                    }
+                    if (npn) {
+                        const vB = npn.terminals.find(t => t.label === 'B').voltage;
+                        const vC = npn.terminals.find(t => t.label === 'C').voltage;
+                        const vE = npn.terminals.find(t => t.label === 'E').voltage;
+                        html += `
+                            <div class="mt-1 border-t border-slate-800 pt-1.5 space-y-0.5">
+                                <div class="flex justify-between"><span>Base Voltage (Vb):</span><span>${vB.toFixed(2)} V</span></div>
+                                <div class="flex justify-between"><span>Collector Voltage (Vc):</span><span class="text-rose-400">${vC.toFixed(2)} V</span></div>
+                                <div class="flex justify-between"><span>Emitter Voltage (Ve):</span><span>${vE.toFixed(2)} V</span></div>
+                                <div class="flex justify-between"><span>Base Current (Ib):</span><span>${(npn.state.current_b * 1000).toFixed(2)} mA</span></div>
+                            </div>
+                        `;
+                    } else {
+                        html += `<div class="text-slate-500 italic mt-1">No NPN Transistor detected.</div>`;
+                    }
+                    return html;
+                }
+            }
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
-            // Safe Layout Calculations
-            const wWidth = workspace.clientWidth || window.innerWidth;
-            const startX = wWidth < 768 ? 20 : 60;
-            
-            // Build Initial Starter Circuit
-            addComponent('usb_power', startX, 40);
-            addComponent('diy_cell', startX, 180);
-            addComponent('diy_cell', startX, 330);
-            
-            // Interaction Event Listeners
+            // Mouse & Touch bindings
             workspace.addEventListener('mousemove', handlePointerMove);
             workspace.addEventListener('touchmove', handlePointerMove, { passive: false });
             workspace.addEventListener('mouseup', handlePointerUp);
             workspace.addEventListener('touchend', handlePointerUp);
             window.addEventListener('resize', updateWires);
 
-            // Simulation Controls
-            playPauseBtn.addEventListener('click', () => {
-                simulationRunning = !simulationRunning;
-                if (simulationRunning) {
-                    playPauseBtn.className = "bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded shadow transition-colors flex items-center gap-1.5";
-                    document.getElementById('play-icon').innerText = "⏸";
-                    document.getElementById('play-text').innerText = "Pause";
-                } else {
-                    playPauseBtn.className = "bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded shadow transition-colors flex items-center gap-1.5";
-                    document.getElementById('play-icon').innerText = "▶";
-                    document.getElementById('play-text').innerText = "Resume";
-                }
-            });
-
-            clearBtn.addEventListener('click', () => {
-                components = [];
-                wires = [];
-                container.innerHTML = '';
-                updateWires();
-            });
-
-            // Start Solver Loop
-            setInterval(simulationTick, 100);
+            // Setup Layout Trigger
             switchMobileTab('workspace');
+            switchTutorial('lead_acid');
         });
 
-        // Responsive PWA Tab switcher
+        // Responsive Mobile Layout Controller
         function switchMobileTab(tab) {
             currentMobileTab = tab;
             const pWorkspace = document.getElementById('workspace');
@@ -314,14 +393,54 @@
             }
         }
 
-        // Handles Component Addition and mobile viewport updates
+        // Active Tutorial Switcher
+        function switchTutorial(tutorialKey) {
+            currentTutorial = tutorialKey;
+            const config = tutorialGuides[tutorialKey];
+            const tracker = document.getElementById('step-tracker');
+            
+            // Build tutorial checklist inside UI
+            tracker.innerHTML = config.steps.map((s, idx) => `
+                <div id="${s.id}" class="p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60">
+                    <div class="flex justify-between font-semibold text-slate-400">
+                        <span>${s.title}</span>
+                        <span class="status-badge text-slate-500">Locked</span>
+                    </div>
+                    <p class="text-slate-500">${s.desc}</p>
+                </div>
+            `).join('');
+
+            // Repopulate dynamic components for respective guides
+            components = [];
+            wires = [];
+            container.innerHTML = '';
+            lastVoltages = [];
+
+            const wWidth = workspace.clientWidth || window.innerWidth;
+            const startX = wWidth < 768 ? 20 : 60;
+
+            if (tutorialKey === 'lead_acid') {
+                addComponent('usb_power', startX, 40);
+                addComponent('diy_cell', startX, 170);
+                addComponent('diy_cell', startX, 320);
+            } else if (tutorialKey === 'solar_charge') {
+                addComponent('solar_panel', startX, 40);
+                addComponent('capacitor', startX, 180);
+                addComponent('spst_switch', startX, 320);
+            } else if (tutorialKey === 'class_a_amp') {
+                addComponent('usb_power', startX, 40);
+                addComponent('signal_generator', startX, 170);
+                addComponent('npn_transistor', startX, 310);
+            }
+
+            updateWires();
+        }
+
         function addAndFocusComponent(type) {
             const rect = workspace.getBoundingClientRect();
             const spawnX = Math.max(10, (rect.width / 2) - 96);
             const spawnY = Math.max(10, (rect.height / 2) - 80);
-            
             addComponent(type, spawnX, spawnY);
-            
             if (window.innerWidth < 768) {
                 switchMobileTab('workspace');
             }
@@ -345,6 +464,48 @@
                     ];
                     state = { name: "USB 5V Supply" };
                     break;
+                case 'solar_panel':
+                    terminals = [
+                        { id: id + '_t1', label: '+', relX: 180, relY: 35, voltage: 0.0 },
+                        { id: id + '_t2', label: '-', relX: 180, relY: 75, voltage: 0.0 }
+                    ];
+                    state = { sunlight: 50, voltage: 6.0 };
+                    break;
+                case 'signal_generator':
+                    terminals = [
+                        { id: id + '_t1', label: '+', relX: 180, relY: 55, voltage: 0.0 },
+                        { id: id + '_t2', label: '-', relX: 20, relY: 55, voltage: 0.0 }
+                    ];
+                    state = { frequency: 0.5, amplitude: 2.0, outputVoltage: 0.0 };
+                    break;
+                case 'resistor':
+                    terminals = [
+                        { id: id + '_t1', label: 'A', relX: 20, relY: 65, voltage: 0.0 },
+                        { id: id + '_t2', label: 'B', relX: 180, relY: 65, voltage: 0.0 }
+                    ];
+                    state = { resistance: 330 };
+                    break;
+                case 'capacitor':
+                    terminals = [
+                        { id: id + '_t1', label: '+', relX: 25, relY: 55, voltage: 0.0 },
+                        { id: id + '_t2', label: '-', relX: 155, relY: 55, voltage: 0.0 }
+                    ];
+                    state = { capacitance: 1000, storedVoltage: 0.0 };
+                    break;
+                case 'led':
+                    terminals = [
+                        { id: id + '_anode', label: '+', relX: 30, relY: 75, voltage: 0.0 },
+                        { id: id + '_cathode', label: '-', relX: 150, relY: 75, voltage: 0.0 }
+                    ];
+                    state = { blown: false, current: 0.0 };
+                    break;
+                case 'spst_switch':
+                    terminals = [
+                        { id: id + '_t1', label: 'In', relX: 25, relY: 55, voltage: 0.0 },
+                        { id: id + '_t2', label: 'Out', relX: 155, relY: 55, voltage: 0.0 }
+                    ];
+                    state = { closed: false };
+                    break;
                 case 'diy_cell':
                     terminals = [
                         { id: id + '_anode', label: '+', relX: 25, relY: 35, voltage: 0.0 },
@@ -358,19 +519,22 @@
                         name: components.filter(c => c.type === 'diy_cell').length === 0 ? "Cell 1" : "Cell 2"
                     };
                     break;
-                case 'resistor':
+                case 'npn_transistor':
+                case 'pnp_transistor':
                     terminals = [
-                        { id: id + '_t1', label: 'A', relX: 20, relY: 65, voltage: 0.0 },
-                        { id: id + '_t2', label: 'B', relX: 180, relY: 65, voltage: 0.0 }
+                        { id: id + '_c', label: 'C', relX: 96, relY: 25, voltage: 0.0 },
+                        { id: id + '_b', label: 'B', relX: 30, relY: 85, voltage: 0.0 },
+                        { id: id + '_e', label: 'E', relX: 162, relY: 85, voltage: 0.0 }
                     ];
-                    state = { resistance: 330 };
+                    state = { current_b: 0.0, beta: 100 };
                     break;
-                case 'led':
+                case 'mosfet_n':
                     terminals = [
-                        { id: id + '_anode', label: '+', relX: 30, relY: 75, voltage: 0.0 },
-                        { id: id + '_cathode', label: '-', relX: 150, relY: 75, voltage: 0.0 }
+                        { id: id + '_d', label: 'D', relX: 96, relY: 25, voltage: 0.0 },
+                        { id: id + '_g', label: 'G', relX: 30, relY: 85, voltage: 0.0 },
+                        { id: id + '_s', label: 'S', relX: 162, relY: 85, voltage: 0.0 }
                     ];
-                    state = { blown: false, current: 0.0, color: 'green' };
+                    state = { threshold: 2.0 };
                     break;
                 case 'multimeter':
                     terminals = [
@@ -378,13 +542,6 @@
                         { id: id + '_black', label: 'COM-', relX: 140, relY: 135, voltage: 0.0 }
                     ];
                     state = { mode: 'voltage', value: 0.0 };
-                    break;
-                case 'spst_switch':
-                    terminals = [
-                        { id: id + '_t1', label: 'In', relX: 25, relY: 55, voltage: 0.0 },
-                        { id: id + '_t2', label: 'Out', relX: 155, relY: 55, voltage: 0.0 }
-                    ];
-                    state = { closed: false };
                     break;
             }
 
@@ -406,6 +563,7 @@
             if (comp.type === 'usb_power') headerBg = "bg-indigo-950/40 border-b border-indigo-900/50";
             if (comp.type === 'diy_cell') headerBg = "bg-teal-950/40 border-b border-teal-900/50";
             if (comp.type === 'multimeter') headerBg = "bg-rose-950/40 border-b border-rose-900/50";
+            if (comp.type === 'solar_panel') headerBg = "bg-amber-950/40 border-b border-amber-900/50";
 
             let innerHtml = `
                 <div class="px-3 py-2 flex justify-between items-center cursor-move rounded-t-lg ${headerBg} touch-none" 
@@ -414,7 +572,7 @@
                     <span class="text-xs font-semibold tracking-wide text-slate-200 uppercase">${getComponentTitle(comp)}</span>
                     <button onclick="removeComponent('${comp.id}')" class="text-slate-400 hover:text-rose-400 text-xs px-1.5 py-0.5 rounded transition">✕</button>
                 </div>
-                <div class="p-3 flex flex-col relative flex-1 gap-2 min-h-[80px]">
+                <div class="p-3 flex flex-col relative flex-1 gap-2 min-h-[85px]">
             `;
 
             switch (comp.type) {
@@ -426,6 +584,23 @@
                         </div>
                     `;
                     break;
+                case 'solar_panel':
+                    innerHtml += `
+                        <div class="flex flex-col gap-1 text-[10px]">
+                            <div class="flex justify-between"><span>Sunlight:</span><span id="${comp.id}-sun-pct" class="font-bold text-amber-400">50%</span></div>
+                            <input type="range" min="0" max="100" value="${comp.state.sunlight}" class="w-full accent-amber-500 h-1 bg-slate-950 rounded-lg appearance-none cursor-pointer" oninput="updateSolarPanel('${comp.id}', this.value)">
+                            <div class="flex justify-between mt-1 text-slate-400"><span>Voltage:</span><span id="${comp.id}-readout" class="font-bold text-slate-200">6.00 V</span></div>
+                        </div>
+                    `;
+                    break;
+                case 'signal_generator':
+                    innerHtml += `
+                        <div class="flex flex-col items-center justify-center py-1">
+                            <div class="text-[9px] text-slate-400">0.5Hz Generator</div>
+                            <div class="digital-font text-purple-400 text-sm font-bold animate-pulse" id="${comp.id}-out">0.00 V</div>
+                        </div>
+                    `;
+                    break;
                 case 'diy_cell':
                     innerHtml += `
                         <div class="flex flex-col gap-1.5 text-[10px] text-slate-300">
@@ -433,16 +608,16 @@
                                 <span>Name:</span> 
                                 <input type="text" class="bg-transparent text-right outline-none text-slate-200 w-20 border border-transparent focus:border-slate-700 px-0.5 rounded" value="${comp.state.name}" oninput="comp.state.name = this.value">
                             </div>
-                            <div class="flex justify-between"><span>Electrode forming:</span> <span id="${comp.id}-forming" class="font-semibold text-amber-400">0%</span></div>
-                            <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
-                                <div id="${comp.id}-forming-bar" class="bg-amber-500 h-1.5 transition-all duration-300" style="width: 0%"></div>
+                            <div class="flex justify-between"><span>Forming Level:</span> <span id="${comp.id}-forming" class="font-semibold text-amber-400">0%</span></div>
+                            <div class="w-full bg-slate-900 rounded-full h-1 overflow-hidden">
+                                <div id="${comp.id}-forming-bar" class="bg-amber-500 h-1 transition-all duration-300" style="width: 0%"></div>
                             </div>
                             <div class="flex justify-between"><span>State of Charge:</span> <span id="${comp.id}-charge" class="font-semibold text-teal-400">0%</span></div>
-                            <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
-                                <div id="${comp.id}-charge-bar" class="bg-teal-500 h-1.5 transition-all duration-300" style="width: 0%"></div>
+                            <div class="w-full bg-slate-900 rounded-full h-1 overflow-hidden">
+                                <div id="${comp.id}-charge-bar" class="bg-teal-500 h-1 transition-all duration-300" style="width: 0%"></div>
                             </div>
-                            <div class="flex justify-between mt-1 text-slate-400"><span>Voltage:</span> <span id="${comp.id}-voltage" class="font-bold text-slate-200">0.00 V</span></div>
-                            <div class="flex justify-between text-slate-400"><span>Net Current:</span> <span id="${comp.id}-current" class="font-bold text-slate-200">0.0 mA</span></div>
+                            <div class="flex justify-between mt-1 text-slate-400"><span>EMF:</span> <span id="${comp.id}-voltage" class="font-bold text-slate-200">0.00 V</span></div>
+                            <div class="flex justify-between text-slate-400"><span>Net Loop:</span> <span id="${comp.id}-current" class="font-bold text-slate-200">0.0 mA</span></div>
                             <div id="${comp.id}-bubbling" class="hidden text-center text-[9px] bg-sky-950/50 border border-sky-800 text-sky-400 py-0.5 rounded animate-pulse mt-1">💨 Bubble Gassing Detected</div>
                         </div>
                     `;
@@ -454,14 +629,25 @@
                                 <span class="text-[10px] text-slate-400">Value (Ω):</span>
                                 <input type="number" id="${comp.id}-val-input" min="1" max="10000" class="w-20 bg-slate-950 border border-slate-700 rounded text-center text-xs text-slate-100 py-0.5 font-semibold" value="${comp.state.resistance}" onchange="updateResistorVal('${comp.id}', this.value)">
                             </div>
-                            <div class="h-6 w-full bg-orange-100/10 rounded flex items-center justify-around px-4 border border-slate-700 relative">
-                                <div class="absolute h-1 w-full bg-slate-600 left-0 z-0"></div>
+                            <div class="h-5 w-full bg-orange-100/10 rounded flex items-center justify-around px-4 border border-slate-700 relative">
+                                <div class="absolute h-0.5 w-full bg-slate-600 left-0 z-0"></div>
                                 <div class="w-4 h-4 bg-amber-200 rounded-sm z-10 flex justify-between px-0.5 relative">
                                     <div id="${comp.id}-band1" class="w-1 h-full bg-red-600"></div>
                                     <div id="${comp.id}-band2" class="w-1 h-full bg-purple-600"></div>
                                     <div id="${comp.id}-band3" class="w-1 h-full bg-orange-600"></div>
                                     <div class="w-1 h-full bg-amber-500"></div>
                                 </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'capacitor':
+                    innerHtml += `
+                        <div class="flex flex-col gap-1 text-[10px]">
+                            <div class="flex justify-between"><span>Stored EMF:</span><span id="${comp.id}-stored-emf" class="font-bold text-cyan-400">0.00 V</span></div>
+                            <div class="flex justify-between"><span>Value:</span><span class="text-slate-400">1000 µF</span></div>
+                            <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden mt-1">
+                                <div id="${comp.id}-charge-bar" class="bg-cyan-500 h-1.5 transition-all duration-300" style="width: 0%"></div>
                             </div>
                         </div>
                     `;
@@ -493,10 +679,27 @@
                 case 'spst_switch':
                     innerHtml += `
                         <div class="flex flex-col items-center gap-2 py-1">
-                            <div class="text-[10px] text-slate-400">Switch Toggle</div>
+                            <div class="text-[10px] text-slate-400">Manual Contact Switch</div>
                             <button id="${comp.id}-toggle" class="px-4 py-2 bg-rose-900/40 border border-rose-800 text-rose-400 rounded-md text-xs font-bold w-full transition" onclick="toggleSwitch('${comp.id}')">
                                 OPEN (OFF)
                             </button>
+                        </div>
+                    `;
+                    break;
+                case 'npn_transistor':
+                case 'pnp_transistor':
+                    innerHtml += `
+                        <div class="flex flex-col items-center py-1">
+                            <div class="text-[10px] text-slate-300 font-mono">BJT (TO-92 Package)</div>
+                            <div class="text-[9px] text-slate-500 mt-1">Emitters / Base control</div>
+                        </div>
+                    `;
+                    break;
+                case 'mosfet_n':
+                    innerHtml += `
+                        <div class="flex flex-col items-center py-1">
+                            <div class="text-[10px] text-slate-300 font-mono">TO-220 MOSFET</div>
+                            <div class="text-[9px] text-slate-500 mt-1">Threshold: Vgs > 2.0V</div>
                         </div>
                     `;
                     break;
@@ -535,6 +738,12 @@
                 case 'led': return "LED Indicator";
                 case 'multimeter': return "DMM Unit";
                 case 'spst_switch': return "Switch";
+                case 'solar_panel': return "Solar Panel";
+                case 'signal_generator': return "AC Signal Gen";
+                case 'capacitor': return "Capacitor";
+                case 'npn_transistor': return "NPN Transistor";
+                case 'pnp_transistor': return "PNP Transistor";
+                case 'mosfet_n': return "N-MOSFET";
             }
         }
 
@@ -544,6 +753,16 @@
             const el = document.getElementById(id);
             if (el) el.remove();
             updateWires();
+        }
+
+        function updateSolarPanel(id, value) {
+            const comp = components.find(c => c.id === id);
+            if (comp) {
+                comp.state.sunlight = parseInt(value);
+                comp.state.voltage = (12.0 * (comp.state.sunlight / 100));
+                document.getElementById(`${id}-sun-pct`).innerText = comp.state.sunlight + '%';
+                document.getElementById(`${id}-readout`).innerText = comp.state.voltage.toFixed(2) + ' V';
+            }
         }
 
         // Variable Resistor Helpers
@@ -825,9 +1044,11 @@
             return null;
         }
 
-        // Live Electrochemical Network Solver
+        // Simulation solver updates and dynamic calculations
         function simulationTick() {
             if (!simulationRunning) return;
+
+            simulationTime += 0.1; // Dynamic clock step
 
             const parent = {};
             function find(tId) {
@@ -866,13 +1087,18 @@
 
             if (nodeCount === 0) return;
 
+            // Pin ground reference
             let gndNodeIdx = -1;
             components.forEach(comp => {
                 if (comp.type === 'usb_power') {
                     const gndTerm = comp.terminals.find(t => t.label === 'GND');
-                    if (gndTerm) {
-                        gndNodeIdx = nodeMap[gndTerm.id];
-                    }
+                    if (gndTerm) gndNodeIdx = nodeMap[gndTerm.id];
+                } else if (comp.type === 'solar_panel' && gndNodeIdx === -1) {
+                    const gndTerm = comp.terminals.find(t => t.label === '-');
+                    if (gndTerm) gndNodeIdx = nodeMap[gndTerm.id];
+                } else if (comp.type === 'signal_generator' && gndNodeIdx === -1) {
+                    const gndTerm = comp.terminals.find(t => t.label === '-');
+                    if (gndTerm) gndNodeIdx = nodeMap[gndTerm.id];
                 }
             });
 
@@ -884,7 +1110,7 @@
             }
             V[gndNodeIdx] = 0.0;
 
-            const iterations = 100;
+            const iterations = 120;
             for (let iter = 0; iter < iterations; iter++) {
                 const nextV = [...V];
                 for (let i = 0; i < nodeCount; i++) {
@@ -917,6 +1143,59 @@
                                 } else {
                                     sumG += G;
                                     sumGV += G * (V[nVbus] - 5.0);
+                                }
+                            }
+                        }
+                        else if (comp.type === 'solar_panel') {
+                            const nPos = nodeMap[comp.terminals.find(t => t.label === '+').id];
+                            const nNeg = nodeMap[comp.terminals.find(t => t.label === '-').id];
+                            if (nPos === i || nNeg === i) {
+                                const R_src = 50.0; // Simulated solar panel load resistance
+                                const G = 1 / R_src;
+                                const solV = comp.state.voltage;
+                                if (nPos === i) {
+                                    sumG += G;
+                                    sumGV += G * (V[nNeg] + solV);
+                                } else {
+                                    sumG += G;
+                                    sumGV += G * (V[nPos] - solV);
+                                }
+                            }
+                        }
+                        else if (comp.type === 'signal_generator') {
+                            const nPos = nodeMap[comp.terminals.find(t => t.label === '+').id];
+                            const nNeg = nodeMap[comp.terminals.find(t => t.label === '-').id];
+                            if (nPos === i || nNeg === i) {
+                                const R_src = 10.0;
+                                const G = 1 / R_src;
+                                const genV = comp.state.amplitude * Math.sin(2 * Math.PI * comp.state.frequency * simulationTime);
+                                comp.state.outputVoltage = genV;
+                                if (nPos === i) {
+                                    sumG += G;
+                                    sumGV += G * (V[nNeg] + genV);
+                                } else {
+                                    sumG += G;
+                                    sumGV += G * (V[nPos] - genV);
+                                }
+                            }
+                        }
+                        else if (comp.type === 'capacitor') {
+                            const nPos = nodeMap[comp.terminals.find(t => t.label === '+').id];
+                            const nNeg = nodeMap[comp.terminals.find(t => t.label === '-').id];
+                            if (nPos === i || nNeg === i) {
+                                // Dynamic companion model: G = C / dt. C = 1000uF = 0.001F. dt = 0.1s. G = 0.001 / 0.1 = 0.01 (R = 100 ohms)
+                                const C = 0.001; 
+                                const dt = 0.1;
+                                const R_eq = dt / C;
+                                const G = 1 / R_eq;
+                                const capV = comp.state.storedVoltage;
+
+                                if (nPos === i) {
+                                    sumG += G;
+                                    sumGV += G * (V[nNeg] + capV);
+                                } else {
+                                    sumG += G;
+                                    sumGV += G * (V[nPos] - capV);
                                 }
                             }
                         }
@@ -980,6 +1259,86 @@
                                 sumGV += G * V[neighbor];
                             }
                         }
+                        else if (comp.type === 'npn_transistor') {
+                            const nC = nodeMap[comp.terminals.find(t => t.label === 'C').id];
+                            const nB = nodeMap[comp.terminals.find(t => t.label === 'B').id];
+                            const nE = nodeMap[comp.terminals.find(t => t.label === 'E').id];
+                            
+                            // Base-Emitter Diode Model
+                            if (nB === i || nE === i) {
+                                const neighbor = (nB === i) ? nE : nB;
+                                const vDiff = V[nB] - V[nE];
+                                const active = vDiff > 0.7;
+                                const G = active ? (1 / 50.0) : (1 / 1e6);
+                                const V_eff = (nB === i) ? (V[nE] + 0.7) : (V[nB] - 0.7);
+                                sumG += G;
+                                sumGV += G * (active ? V_eff : V[neighbor]);
+                            }
+
+                            // Collector-Emitter Controlled Channel
+                            if (nC === i || nE === i) {
+                                const neighbor = (nC === i) ? nE : nC;
+                                const vDiffBE = V[nB] - V[nE];
+                                const Ib = Math.max(0, (vDiffBE - 0.7) / 50.0);
+                                comp.state.current_b = Ib;
+                                const beta = comp.state.beta || 100;
+                                const R_ce = Math.max(2.0, 1 / (beta * Ib + 1e-6));
+                                const G = 1 / R_ce;
+                                sumG += G;
+                                sumGV += G * V[neighbor];
+                            }
+                        }
+                        else if (comp.type === 'pnp_transistor') {
+                            const nC = nodeMap[comp.terminals.find(t => t.label === 'C').id];
+                            const nB = nodeMap[comp.terminals.find(t => t.label === 'B').id];
+                            const nE = nodeMap[comp.terminals.find(t => t.label === 'E').id];
+                            
+                            // Emitter-Base Diode model (Active when Ve - Vb > 0.7)
+                            if (nB === i || nE === i) {
+                                const neighbor = (nE === i) ? nB : nE;
+                                const vDiff = V[nE] - V[nB];
+                                const active = vDiff > 0.7;
+                                const G = active ? (1 / 50.0) : (1 / 1e6);
+                                const V_eff = (nE === i) ? (V[nB] + 0.7) : (V[nE] - 0.7);
+                                sumG += G;
+                                sumGV += G * (active ? V_eff : V[neighbor]);
+                            }
+
+                            // Emitter-Collector regulated channel
+                            if (nC === i || nE === i) {
+                                const neighbor = (nE === i) ? nC : nE;
+                                const vDiffEB = V[nE] - V[nB];
+                                const Ib = Math.max(0, (vDiffEB - 0.7) / 50.0);
+                                comp.state.current_b = Ib;
+                                const beta = comp.state.beta || 100;
+                                const R_ec = Math.max(2.0, 1 / (beta * Ib + 1e-6));
+                                const G = 1 / R_ec;
+                                sumG += G;
+                                sumGV += G * V[neighbor];
+                            }
+                        }
+                        else if (comp.type === 'mosfet_n') {
+                            const nD = nodeMap[comp.terminals.find(t => t.label === 'D').id];
+                            const nG = nodeMap[comp.terminals.find(t => t.label === 'G').id];
+                            const nS = nodeMap[comp.terminals.find(t => t.label === 'S').id];
+
+                            // Gate isolation impedance
+                            if (nG === i) {
+                                sumG += 1 / 1e9;
+                                sumGV += (1 / 1e9) * V[nS];
+                            }
+
+                            // Drain-Source conductive state
+                            if (nD === i || nS === i) {
+                                const neighbor = (nD === i) ? nS : nD;
+                                const vgs = V[nG] - V[nS];
+                                const active = vgs > 2.0;
+                                const R_ds = active ? 0.5 : 1e6;
+                                const G = 1 / R_ds;
+                                sumG += G;
+                                sumGV += G * V[neighbor];
+                            }
+                        }
                     });
 
                     if (sumG > 0) {
@@ -995,12 +1354,40 @@
 
             lastVoltages = V;
 
+            // Update physical parameters
             components.forEach(comp => {
                 comp.terminals.forEach(term => {
                     term.voltage = V[nodeMap[term.id]] || 0.0;
                 });
 
-                if (comp.type === 'diy_cell') {
+                if (comp.type === 'signal_generator') {
+                    const disp = document.getElementById(`${comp.id}-out`);
+                    if (disp) disp.innerText = comp.state.outputVoltage.toFixed(2) + ' V';
+                }
+                else if (comp.type === 'capacitor') {
+                    const vPos = comp.terminals.find(t => t.label === '+').voltage;
+                    const vNeg = comp.terminals.find(t => t.label === '-').voltage;
+                    const dt = 0.1;
+                    const C = 0.001; 
+                    const R_eq = dt / C;
+                    
+                    // Trapezoidal differential state updates
+                    const current = (vPos - vNeg - comp.state.storedVoltage) / R_eq;
+                    comp.state.storedVoltage += (current * dt) / C;
+                    
+                    // Clamp bounds
+                    if (comp.state.storedVoltage < -15) comp.state.storedVoltage = -15;
+                    if (comp.state.storedVoltage > 15) comp.state.storedVoltage = 15;
+
+                    const emfDisp = document.getElementById(`${comp.id}-stored-emf`);
+                    const bar = document.getElementById(`${comp.id}-charge-bar`);
+                    if (emfDisp) emfDisp.innerText = comp.state.storedVoltage.toFixed(2) + ' V';
+                    if (bar) {
+                        const pct = Math.max(0, Math.min(100, (comp.state.storedVoltage / 12.0) * 100));
+                        bar.style.width = pct + '%';
+                    }
+                }
+                else if (comp.type === 'diy_cell') {
                     const vAnode = comp.terminals.find(t => t.label === '+').voltage;
                     const vCathode = comp.terminals.find(t => t.label === '-').voltage;
                     const formingRatio = comp.state.forming / 100;
@@ -1095,66 +1482,198 @@
                 }
             });
 
-            evaluateTutorialCompanion(nodeMap);
+            evaluateActiveTutorial(nodeMap);
+            
+            // Render side panel metrics
+            const metricsContainer = document.getElementById('live-metrics');
+            metricsContainer.innerHTML = tutorialGuides[currentTutorial].liveMetrics();
         }
 
         // Checklist Path and Connection Verification Logic
-        function evaluateTutorialCompanion(nodeMap) {
-            const step1 = document.getElementById('step-1');
-            const step2 = document.getElementById('step-2');
-            const step3 = document.getElementById('step-3');
-            const step4 = document.getElementById('step-4');
-            const step5 = document.getElementById('step-5');
+        function evaluateActiveTutorial(nodeMap) {
+            const steps = tutorialGuides[currentTutorial].steps;
 
-            const cells = components.filter(c => c.type === 'diy_cell');
-            const pwr = components.find(c => c.type === 'usb_power');
-            const resistors = components.filter(c => c.type === 'resistor');
-            const leds = components.filter(c => c.type === 'led');
+            if (currentTutorial === 'lead_acid') {
+                const step1 = document.getElementById('step-1');
+                const step2 = document.getElementById('step-2');
+                const step3 = document.getElementById('step-3');
+                const step4 = document.getElementById('step-4');
+                const step5 = document.getElementById('step-5');
 
-            const step1Passed = (cells.length >= 2 && pwr);
-            updateStepStyle(step1, step1Passed, "Step 1: Placement");
+                const cells = components.filter(c => c.type === 'diy_cell');
+                const pwr = components.find(c => c.type === 'usb_power');
+                const resistors = components.filter(c => c.type === 'resistor');
+                const leds = components.filter(c => c.type === 'led');
 
-            if (!step1Passed) return;
+                // Step 1: Placement
+                const step1Passed = (cells.length >= 2 && pwr);
+                updateStepStyle(step1, step1Passed, steps[0].title);
+                if (!step1Passed) return;
 
-            let seriesConnected = false;
-            let cell1 = cells[0];
-            let cell2 = cells[1];
-            if (cell1 && cell2) {
-                const a1 = nodeMap[cell1.terminals.find(t => t.label === '+').id];
-                const c1 = nodeMap[cell1.terminals.find(t => t.label === '-').id];
-                const a2 = nodeMap[cell2.terminals.find(t => t.label === '+').id];
-                const c2 = nodeMap[cell2.terminals.find(t => t.label === '-').id];
+                // Step 2: Series Battery Connection
+                let seriesConnected = false;
+                let c1_idx = -1, c2_idx = -1;
+                if (cells.length >= 2) {
+                    const c1A = nodeMap[cells[0].terminals.find(t => t.label === '+').id];
+                    const c1C = nodeMap[cells[0].terminals.find(t => t.label === '-').id];
+                    const c2A = nodeMap[cells[1].terminals.find(t => t.label === '+').id];
+                    const c2C = nodeMap[cells[1].terminals.find(t => t.label === '-').id];
 
-                if ((a1 === c2 && a1 !== undefined) || (a2 === c1 && a2 !== undefined)) {
-                    seriesConnected = true;
+                    if (c1C === c2A && c1C !== undefined && c1A !== c2C) {
+                        seriesConnected = true;
+                        c1_idx = 0; c2_idx = 1;
+                    } else if (c2C === c1A && c2C !== undefined && c2A !== c1C) {
+                        seriesConnected = true;
+                        c1_idx = 1; c2_idx = 0;
+                    }
                 }
+                updateStepStyle(step2, seriesConnected, steps[1].title, !step1Passed);
+                if (!seriesConnected) return;
+
+                // Step 3: Resistor Protection Value
+                const protectionResistor = resistors.find(r => r.state.resistance >= 75 && r.state.resistance <= 90);
+                const step3Passed = !!protectionResistor;
+                updateStepStyle(step3, step3Passed, steps[2].title, !seriesConnected);
+                if (!step3Passed) return;
+
+                // Step 4: Forming Charge Verification
+                const formingActive = cells.some(c => c.state.current > 0.005);
+                const bothFullyFormed = cells.every(c => c.state.forming >= 99 && c.state.charge > 5);
+                
+                let step4Label = steps[3].title;
+                if (formingActive && !bothFullyFormed) {
+                    step4Label += ` (${Math.round(cells[0].state.forming)}% Formed)`;
+                }
+                updateStepStyle(step4, bothFullyFormed, step4Label, !step3Passed);
+                if (!bothFullyFormed) return;
+
+                // Step 5: Safe Load Testing Loop
+                // Checks that the battery discharges through BOTH a resistor AND an LED.
+                let loadLoopIntact = false;
+                if (leds.length > 0 && resistors.length > 0) {
+                    const activeLed = leds.find(l => l.state.current > 0.001 && !l.state.blown);
+                    const activeRes = resistors.find(r => r.state.resistance >= 200 && r.state.resistance <= 400);
+                    if (activeLed && activeRes) {
+                        // Check if current is flowing through the LED without blowing it
+                        loadLoopIntact = true;
+                    }
+                }
+                updateStepStyle(step5, loadLoopIntact, steps[4].title, !bothFullyFormed);
             }
-            updateStepStyle(step2, seriesConnected, "Step 2: Series Connection", !step1Passed);
+            else if (currentTutorial === 'solar_charge') {
+                const step1 = document.getElementById('step-1');
+                const step2 = document.getElementById('step-2');
+                const step3 = document.getElementById('step-3');
+                const step4 = document.getElementById('step-4');
 
-            if (!seriesConnected) return;
+                const solar = components.find(c => c.type === 'solar_panel');
+                const caps = components.filter(c => c.type === 'capacitor');
+                const switches = components.filter(c => c.type === 'spst_switch');
 
-            const chargingResistor = resistors.find(r => r.state.resistance >= 70 && r.state.resistance <= 120);
-            const step3Passed = !!chargingResistor;
-            updateStepStyle(step3, step3Passed, "Step 3: Current Protection", !seriesConnected);
+                // Step 1: Placement
+                const step1Passed = (solar && caps.length > 0 && switches.length > 0);
+                updateStepStyle(step1, step1Passed, steps[0].title);
+                if (!step1Passed) return;
 
-            if (!step3Passed) return;
+                // Step 2: Storage Loop
+                let loopPassed = false;
+                if (step1Passed) {
+                    const sPos = nodeMap[solar.terminals.find(t => t.label === '+').id];
+                    const sNeg = nodeMap[solar.terminals.find(t => t.label === '-').id];
+                    const capPos = nodeMap[caps[0].terminals.find(t => t.label === '+').id];
+                    const capNeg = nodeMap[caps[0].terminals.find(t => t.label === '-').id];
+                    const swIn = nodeMap[switches[0].terminals.find(t => t.label === 'In').id];
+                    const swOut = nodeMap[switches[0].terminals.find(t => t.label === 'Out').id];
 
-            const formingActive = cells.some(c => c.state.current > 0.005);
-            const bothFullyFormed = cells.every(c => c.state.forming >= 99 && c.state.charge > 50);
-            
-            let step4Label = "Step 4: Forming Charge";
-            if (formingActive && !bothFullyFormed) {
-                step4Label += ` (${Math.round(cells[0].state.forming)}% Formed)`;
+                    const positiveTrack = (sPos === swIn && swOut === capPos) || (sPos === swOut && swIn === capPos);
+                    const groundTrack = (sNeg === capNeg && sNeg !== undefined);
+                    if (positiveTrack && groundTrack) loopPassed = true;
+                }
+                updateStepStyle(step2, loopPassed, steps[1].title, !step1Passed);
+                if (!loopPassed) return;
+
+                // Step 3: Sunlight Slider to 100%
+                const sunPassed = solar.state.sunlight >= 95;
+                updateStepStyle(step3, sunPassed, steps[2].title, !loopPassed);
+                if (!sunPassed) return;
+
+                // Step 4: Storage Charge Execution
+                const capCharged = caps.some(c => c.state.storedVoltage > 10.0);
+                updateStepStyle(step4, capCharged, steps[3].title, !sunPassed);
             }
-            updateStepStyle(step4, bothFullyFormed, step4Label, !step3Passed);
+            else if (currentTutorial === 'class_a_amp') {
+                const step1 = document.getElementById('step-1');
+                const step2 = document.getElementById('step-2');
+                const step3 = document.getElementById('step-3');
+                const step4 = document.getElementById('step-4');
+                const step5 = document.getElementById('step-5');
 
-            if (!bothFullyFormed) return;
+                const gen = components.find(c => c.type === 'signal_generator');
+                const npn = components.find(c => c.type === 'npn_transistor');
+                const resistors = components.filter(c => c.type === 'resistor');
+                const meters = components.filter(c => c.type === 'multimeter');
+                const pwr = components.find(c => c.type === 'usb_power');
 
-            const ledLit = leds.some(l => l.state.current > 0.005 && !l.state.blown);
-            updateStepStyle(step5, ledLit, "Step 5: Load Testing", !bothFullyFormed);
+                // Step 1: Placement
+                const step1Passed = (gen && npn && resistors.length >= 1 && meters.length >= 1);
+                updateStepStyle(step1, step1Passed, steps[0].title);
+                if (!step1Passed) return;
+
+                // Step 2: Collector Network Setup
+                let step2Passed = false;
+                if (pwr && resistors.length > 0) {
+                    const vbus = nodeMap[pwr.terminals.find(t => t.label === '5V').id];
+                    const gnd = nodeMap[pwr.terminals.find(t => t.label === 'GND').id];
+                    const r1A = nodeMap[resistors[0].terminals.find(t => t.label === 'A').id];
+                    const r1B = nodeMap[resistors[0].terminals.find(t => t.label === 'B').id];
+                    const coll = nodeMap[npn.terminals.find(t => t.label === 'C').id];
+                    const emit = nodeMap[npn.terminals.find(t => t.label === 'E').id];
+
+                    const pullUp = (vbus === r1A && r1B === coll) || (vbus === r1B && r1A === coll);
+                    const groundedEmit = (emit === gnd && emit !== undefined);
+                    if (pullUp && groundedEmit) step2Passed = true;
+                }
+                updateStepStyle(step2, step2Passed, steps[1].title, !step1Passed);
+                if (!step2Passed) return;
+
+                // Step 3: Base Driver
+                let step3Passed = false;
+                if (step2Passed) {
+                    const sigPos = nodeMap[gen.terminals.find(t => t.label === '+').id];
+                    const sigNeg = nodeMap[gen.terminals.find(t => t.label === '-').id];
+                    const base = nodeMap[npn.terminals.find(t => t.label === 'B').id];
+                    const gnd = nodeMap[pwr.terminals.find(t => t.label === 'GND').id];
+
+                    if (sigPos === base && sigNeg === gnd && sigPos !== undefined) step3Passed = true;
+                }
+                updateStepStyle(step3, step3Passed, steps[2].title, !step2Passed);
+                if (!step3Passed) return;
+
+                // Step 4: Collector Probe Setup
+                let step4Passed = false;
+                if (step3Passed) {
+                    const coll = nodeMap[npn.terminals.find(t => t.label === 'C').id];
+                    const gnd = nodeMap[pwr.terminals.find(t => t.label === 'GND').id];
+                    const mRed = nodeMap[meters[0].terminals.find(t => t.label === 'VΩ+').id];
+                    const mBlack = nodeMap[meters[0].terminals.find(t => t.label === 'COM-').id];
+
+                    if (mRed === coll && mBlack === gnd && mRed !== undefined) step4Passed = true;
+                }
+                updateStepStyle(step4, step4Passed, steps[3].title, !step3Passed);
+                if (!step4Passed) return;
+
+                // Step 5: Dynamic Amplification Performance
+                const r1 = resistors[0];
+                const rightResistance = r1.state.resistance >= 800 && r1.state.resistance <= 1200;
+                // Verify output voltage swing dynamics on the collector node are greater than base input
+                const vC = npn.terminals.find(t => t.label === 'C').voltage;
+                const amplifies = rightResistance && (vC > 0.5 && vC < 4.5);
+                updateStepStyle(step5, amplifies, steps[4].title, !step4Passed);
+            }
         }
 
         function updateStepStyle(el, passed, titleText, locked = false) {
+            if (!el) return;
             const badge = el.querySelector('.status-badge');
             const title = el.querySelector('span:first-child');
             title.innerText = titleText;
@@ -1174,16 +1693,5 @@
             badge.className = passed ? "status-badge text-emerald-400" : "status-badge text-amber-500";
         }
     </script>
-    
-    <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(reg => console.log('PWA Service Worker registered successfully.', reg.scope))
-                    .catch(err => console.log('PWA Service Worker registration failed:', err));
-            });
-        }
-    </script>
 </body>
-</html>
+</html
