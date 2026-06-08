@@ -750,7 +750,7 @@ function renderComponent(comp) {
     tDiv.dataset.termId = term.id;
     tDiv.dataset.compId = comp.id;
     tDiv.dataset.label = term.label;
-    tDiv.innerText = term.label;
+    tDiv.innerHTML = `<span>${term.label}</span>`;
     tDiv.style.left = (term.relX - 11) + 'px';
     tDiv.style.top = (term.relY - 11) + 'px';
     tDiv.style.setProperty('--rel-x', term.relX + 'px');
