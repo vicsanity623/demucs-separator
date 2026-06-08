@@ -544,7 +544,9 @@ body {
 .compact-view .comp-card {
   width: 100px !important;
   height: 100px !important;
-  border-radius: var(--radius-lg);
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
 }
 
 .compact-view .comp-header {
@@ -557,9 +559,21 @@ body {
   z-index: 15;
 }
 
-/* Hide header text and buttons to focus on the component shape */
+/* Hide standard layout properties in compact mode */
 .compact-view .comp-title {
   display: none !important;
+}
+
+/* Dim actions unless card is hovered */
+.compact-view .comp-rotate-btn,
+.compact-view .comp-remove-btn {
+  opacity: 0.15;
+  transition: opacity 0.15s;
+}
+
+.compact-view .comp-card:hover .comp-rotate-btn,
+.compact-view .comp-card:hover .comp-remove-btn {
+  opacity: 1;
 }
 
 /* 2D Graphic Visibility Rules */
@@ -576,8 +590,8 @@ body {
   position: absolute;
   inset: 0;
   z-index: 5;
-  background: #111b27;
-  border-radius: var(--radius-lg);
+  background: transparent !important;
+  border: none !important;
   padding: 6px;
 }
 
@@ -586,13 +600,49 @@ body {
   display: none !important;
 }
 
-/* Responsive scale formula for terminals (100px / 192px width ratio) */
+/* Responsive scale formula for standard terminals */
 .compact-view .term-node {
-  transform: scale(0.82);
+  transform: scale(0.85);
   background: var(--bg-deepest);
   border-color: var(--border-hi);
   left: calc((var(--rel-x) * 0.52) - 11px) !important;
   top: calc((var(--rel-y) * 0.75) - 11px) !important;
+}
+
+/* --- PHYSICAL 2D TERMINAL PLACEMENTS --- */
+
+/* 1. Batteries (Align + to top-center, - to bottom-center) */
+.compact-view .comp-card[data-type^="battery_"] .term-node[data-label="+"],
+.compact-view .comp-card[data-type="diy_cell"] .term-node[data-label="+"],
+.compact-view .comp-card[data-type="lemon_battery"] .term-node[data-label="+"] {
+  left: 50% !important;
+  top: -4px !important;
+  transform: translateX(-50%) scale(0.85) !important;
+}
+
+.compact-view .comp-card[data-type^="battery_"] .term-node[data-label="-"],
+.compact-view .comp-card[data-type="diy_cell"] .term-node[data-label="-"],
+.compact-view .comp-card[data-type="lemon_battery"] .term-node[data-label="-"] {
+  left: 50% !important;
+  top: auto !important;
+  bottom: -4px !important;
+  transform: translateX(-50%) scale(0.85) !important;
+}
+
+/* 2. USB & Bench Power Supplies (Align positive to left, negative to right) */
+.compact-view .comp-card[data-type="usb_power"] .term-node[data-label="5V"],
+.compact-view .comp-card[data-type="bench_psu"] .term-node[data-label="+"] {
+  left: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) scale(0.85) !important;
+}
+
+.compact-view .comp-card[data-type="usb_power"] .term-node[data-label="GND"],
+.compact-view .comp-card[data-type="bench_psu"] .term-node[data-label="GND"] {
+  left: auto !important;
+  right: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) scale(0.85) !important;
 }
 
 .comp-card:hover {
