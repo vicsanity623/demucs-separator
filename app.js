@@ -2723,20 +2723,25 @@ function simulationTick() {
       const isConnected = wires.some(w => w.from === termA || w.to === termA) &&
         wires.some(w => w.from === termB || w.to === termB);
 
-      // Damped resistance (min 0.5 ohms) for numerical integration stability
-      const R_safe = Math.max(0.5, state.internalR);
-      const I = isConnected ? ((emf - (vp - vn)) / R_safe) : 0.0;
+      // Calculate EXACT physical current using the battery's real internal resistance
+      const R_int = Math.max(0.01, state.internalR || 0.1);
+      const I = isConnected ? ((emf - (vp - vn)) / R_int) : 0.0;
 
       // True physical discharge equation: Delta % = (I * dt * 100) / (Capacity_mAh * 3.6)
-      const capacity = state.capacity || 2000; // Falls back to 2000mAh if not specified
-      const simSpeedMultiplier = 20;
-      const deltaCharge = ((I * 2.778) / capacity) * simSpeedMultiplier;
+      const capacity = state.capacity || 2000;
+
+      // 300X Time Dilation Factor (Adjust this value here to speed up or slow down visual drainage)
+      const simSpeedMultiplier = 300;
+      let deltaCharge = ((I * 2.778) / capacity) * simSpeedMultiplier;
+
+      // Clamp the maximum charge change per tick to prevent numerical oscillations in parallel networks
+      deltaCharge = Math.max(-0.5, Math.min(0.5, deltaCharge));
 
       if (I > 0.001) {
         // Discharging
         state.charge = Math.max(0, state.charge - deltaCharge);
       } else if (I < -0.001) {
-        // Charging
+        // Charging (replenishing SoC)
         state.charge = Math.min(100, state.charge - deltaCharge);
       }
 
