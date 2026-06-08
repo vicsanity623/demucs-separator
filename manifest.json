@@ -1,7 +1,7 @@
 {
-  "name": "SoundVault",
-  "short_name": "SoundVault",
-  "description": "Your local music library — albums, stems, playlists",
+  "name": "BreadBoard",
+  "short_name": "BreadBoard",
+  "description": "Digital Breadboard",
   "start_url": "./index.html",
   "scope": "/",
   "display": "standalone",
