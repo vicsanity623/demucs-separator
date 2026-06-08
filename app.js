@@ -20,7 +20,6 @@ let selectStart = { x: 0, y: 0 };
 let selectedComponents = new Set();
 let initialDragPositions = {};
 let currentProjectName = "Default Project";
-let selectModeActive = false;
 let activeWireStart = null;
 let mousePosition = { x: 0, y: 0 };
 let draggedComponent = null;
@@ -1026,14 +1025,11 @@ function getPointerCoords(e) {
 }
 
 function startDrag(e, compId) {
-     if (e.target.tagName.toLowerCase() === 'button' ||
-         e.target.tagName.toLowerCase() === 'input' ||
-         e.target.tagName.toLowerCase() === 'select' ||
-         e.target.tagName.toLowerCase() === 'canvas') return;
-     
-     e.stopPropagation(); // Prevents background canvas panning from firing
-     
-     const comp = components.find(c=>c.id===compId);
+  if (e.target.tagName.toLowerCase() === 'button' ||
+    e.target.tagName.toLowerCase() === 'input' ||
+    e.target.tagName.toLowerCase() === 'select' ||
+    e.target.tagName.toLowerCase() === 'canvas') return;
+  const comp = components.find(c => c.id === compId);
   if (!comp) return;
   isDragging = false;
   const rect = workspace.getBoundingClientRect();
@@ -1511,26 +1507,6 @@ function toggleSidebar(panelId) {
     panel.classList.toggle('collapsed');
     setTimeout(updateWires, 210);
   }
-}
-
-function toggleSelectMode() {
-  selectModeActive = !selectModeActive;
-  const btn = document.getElementById('btn-select-mode');
-  if (btn) {
-    btn.classList.toggle('btn-teal', selectModeActive);
-    btn.classList.toggle('btn-secondary', !selectModeActive);
-  }
-  
-  // Clear any existing active selection highlights when toggling off
-  if (!selectModeActive) {
-    selectedComponents.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.classList.remove('selected');
-    });
-    selectedComponents.clear();
-  }
-  
-  showToast(selectModeActive ? 'Select Mode Active: Drag empty space to select group.' : 'Pan Mode Active: Drag empty space with one finger to pan.', 'info');
 }
 
 // ─── TUTORIAL GUIDE ───────────────────────────────────────────────────────────
@@ -3372,25 +3348,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Canvas Navigation Listeners (Zoom & Pan)
   workspace.addEventListener('wheel', handleWorkspaceWheel, { passive: false });
-  
-  // Toggle between Panning or Selection-Box drawing depending on active mode
+
+  // Direct Left-click to select boxes, and Right/Middle clicks to pan
   workspace.addEventListener('mousedown', e => {
-    if (draggedComponent || activeWireStart) return;
-    if (e.button === 0) {
-      if (selectModeActive) startWorkspaceSelect(e);
-      else startWorkspacePan(e);
-    } else {
-      startWorkspacePan(e); // Right/Middle click always pans
-    }
+    if (e.button === 0) startWorkspaceSelect(e);
+    else startWorkspacePan(e);
   });
   workspace.addEventListener('touchstart', e => {
-    if (draggedComponent || isDragging || activeWireStart) return;
-    if (e.touches.length === 2) {
-      startWorkspacePan(e);
-    } else {
-      if (selectModeActive) startWorkspaceSelect(e);
-      else startWorkspacePan(e); // Single finger pans on empty space by default
-    }
+    if (e.touches.length === 2) startWorkspacePan(e);
+    else startWorkspaceSelect(e);
   }, { passive: false });
 
   document.addEventListener('mousemove', e => {
@@ -3442,10 +3408,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Inject clean floating workspace action buttons
   const workspaceControls = document.createElement('div');
-  workspaceControls.style = 'position: absolute; bottom: 16px; left: 16px; z-index: 40; display: flex; gap: 8px; flex-wrap: wrap;';
+  workspaceControls.style = 'position: absolute; bottom: 16px; left: 16px; z-index: 40; display: flex; gap: 8px;';
   workspaceControls.innerHTML = `
     <button id="btn-compact-toggle" class="btn btn-secondary" onclick="toggleCompactMode()">🏷️ Compact View</button>
-    <button id="btn-select-mode" class="btn btn-secondary" onclick="toggleSelectMode()">🔍 Select Mode</button>
     <button class="btn btn-secondary" onclick="toggleSidebar('panel-parts')">📁 Toggle Library</button>
     <button class="btn btn-secondary" onclick="toggleSidebar('panel-guide')">📖 Toggle Guide</button>
     <button class="btn btn-secondary" onclick="openProjectManager()">📁 Projects</button>
