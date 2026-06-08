@@ -1818,7 +1818,14 @@ function updateWorkspaceHUD() {
     const vA = comp.terminals[0]?.voltage || 0;
     const vC = comp.terminals[1]?.voltage || 0;
     const cellV = (comp.state.voltage || 1.5) * ((comp.state.charge || 100) / 100);
-    const cur = (vA - vC - cellV) / (comp.state.internalR || 1);
+
+    // Check if terminals are connected
+    const termA = comp.terminals[0]?.id;
+    const termB = comp.terminals[1]?.id;
+    const isConnected = wires.some(w => w.from === termA || w.to === termA) &&
+      wires.some(w => w.from === termB || w.to === termB);
+
+    const cur = isConnected ? ((cellV - (vA - vC)) / (comp.state.internalR || 1)) : 0.0;
     metricsHtml += `
       <div class="metric-row"><span>Soc (Charge)</span><span class="metric-val text-amber">${Math.round(comp.state.charge || 0)}%</span></div>
       <div class="metric-row"><span>EMF Voltage</span><span class="metric-val text-teal">${cellV.toFixed(2)} V</span></div>
@@ -2389,17 +2396,26 @@ function simulationTick() {
       const vp = tv('+'), vn = tv('-');
       const emf = state.voltage * (state.charge / 100);
 
-      // Use a damped resistance (min 0.5 ohms) for the charge integration step to prevent stiff overshoot oscillations
-      const R_safe = Math.max(0.5, state.internalR);
-      const I = (emf - (vp - vn)) / R_safe;
+      // Check if terminals are connected to active wires to prevent floating node calculations
+      const termA = comp.terminals[0]?.id;
+      const termB = comp.terminals[1]?.id;
+      const isConnected = wires.some(w => w.from === termA || w.to === termA) &&
+        wires.some(w => w.from === termB || w.to === termB);
 
-      const transferRate = 0.001; // Symmetrical rate for perfect energy conservation
+      // Damped resistance (min 0.5 ohms) for numerical integration stability
+      const R_safe = Math.max(0.5, state.internalR);
+      const I = isConnected ? ((emf - (vp - vn)) / R_safe) : 0.0;
+
+      // True physical discharge equation: Delta % = (I * dt * 100) / (Capacity_mAh * 3.6)
+      const capacity = state.capacity || 2000; // Falls back to 2000mAh if not specified
+      const deltaCharge = (I * 2.778) / capacity;
+
       if (I > 0.001) {
-        // Discharging: reduce charge
-        state.charge = Math.max(0, state.charge - I * transferRate);
+        // Discharging
+        state.charge = Math.max(0, state.charge - deltaCharge);
       } else if (I < -0.001) {
-        // Charging: increase charge
-        state.charge = Math.min(100, state.charge - I * transferRate);
+        // Charging
+        state.charge = Math.min(100, state.charge - deltaCharge);
       }
 
       const chg = document.getElementById(`${id}-chg`); if (chg) chg.innerText = Math.round(state.charge) + '%';
