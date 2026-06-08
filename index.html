@@ -1,588 +1,1087 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" class="h-full">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="SoundVault" />
-  <meta name="theme-color" content="#0a0a0f" />
-  <meta name="description" content="Your local music library — albums, stems, playlists" />
-
-  <title>SoundVault</title>
-
-  <!-- PWA -->
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <link rel="apple-touch-startup-image" href="icons/icon-512.png" />
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
-    rel="stylesheet" />
-
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIY Electronics & Electrochemical Workbench</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for digital readouts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .digital-font {
+            font-family: 'Orbitron', monospace;
+        }
+        /* Custom grid background */
+        .workspace-grid {
+            background-color: #0f172a;
+            background-image: radial-gradient(#334155 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
 </head>
+<body class="h-full bg-slate-955 text-slate-100 flex flex-col overflow-hidden">
 
-<body>
-
-  <!-- ── Sidebar ─────────────────────────────────────────────── -->
-  <aside id="sidebar">
-    <div class="sidebar-logo">
-      <svg viewBox="0 0 32 32" fill="none">
-        <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5" />
-        <circle cx="16" cy="16" r="5" fill="currentColor" />
-        <path d="M16 2 A14 14 0 0 1 30 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-      </svg>
-      <span>SoundVault</span>
-    </div>
-
-    <nav class="sidebar-nav">
-      <button class="nav-btn active" data-view="home">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1z" />
-          <path d="M9 21V12h6v9" />
-        </svg>
-        Home
-      </button>
-      <button class="nav-btn" data-view="search">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <circle cx="11" cy="11" r="8" />
-          <path d="M21 21l-4.35-4.35" />
-        </svg>
-        Search
-      </button>
-      <button class="nav-btn" data-view="library">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <rect x="3" y="3" width="7" height="7" rx="1" />
-          <rect x="14" y="3" width="7" height="7" rx="1" />
-          <rect x="3" y="14" width="7" height="7" rx="1" />
-          <rect x="14" y="14" width="7" height="7" rx="1" />
-        </svg>
-        Library
-      </button>
-    </nav>
-
-    <div class="sidebar-section">
-      <div class="section-header">
-        <span>Playlists</span>
-        <button id="btn-new-playlist" title="New playlist">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
-      </div>
-      <ul id="sidebar-playlists"></ul>
-    </div>
-  </aside>
-
-  <!-- ── Mobile bottom nav ───────────────────────────────────── -->
-  <nav id="mobile-nav">
-    <button class="mnav-btn active" data-view="home">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1z" />
-        <path d="M9 21V12h6v9" />
-      </svg>
-      Home
-    </button>
-    <button class="mnav-btn" data-view="search">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <circle cx="11" cy="11" r="8" />
-        <path d="M21 21l-4.35-4.35" />
-      </svg>
-      Search
-    </button>
-    <button class="mnav-btn" data-view="library">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <rect x="3" y="3" width="7" height="7" rx="1" />
-        <rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" />
-        <rect x="14" y="14" width="7" height="7" rx="1" />
-      </svg>
-      Library
-    </button>
-    <button class="mnav-btn" data-view="playlists">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <line x1="8" y1="6" x2="21" y2="6" />
-        <line x1="8" y1="12" x2="21" y2="12" />
-        <line x1="8" y1="18" x2="21" y2="18" />
-        <circle cx="3" cy="6" r="1.5" fill="currentColor" />
-        <circle cx="3" cy="12" r="1.5" fill="currentColor" />
-        <circle cx="3" cy="18" r="1.5" fill="currentColor" />
-      </svg>
-      Playlists
-    </button>
-  </nav>
-
-  <!-- ── Main content ────────────────────────────────────────── -->
-  <main id="main-content">
-
-    <!-- Home view -->
-    <section id="view-home" class="view active">
-      <div class="view-header">
-        <h1>Music<span id="greeting-time">Vault</span></h1>
-      </div>
-      <h2 class="section-title">All Albums</h2>
-      <div id="home-albums" class="card-grid"></div>
-    </section>
-
-    <!-- Search view -->
-    <section id="view-search" class="view">
-      <div class="search-bar-wrap">
-        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8" />
-          <path d="M21 21l-4.35-4.35" />
-        </svg>
-        <input type="search" id="search-input" placeholder="Artists, songs, albums…" autocomplete="off" />
-      </div>
-      <div id="search-results"></div>
-    </section>
-
-    <!-- Library view -->
-    <section id="view-library" class="view">
-
-      <!-- Library root: category menu like Apple Music -->
-      <div id="library-root">
-        <div class="view-header">
-          <h1 style="margin:0;">Your Library</h1>
+    <!-- Header Panel -->
+    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-shrink-0 justify-between items-center z-10">
+        <div>
+            <h1 class="text-xl font-bold tracking-tight text-teal-400">DIY Electronics & Electrochemical Simulator</h1>
+            <p class="text-xs text-slate-400 mt-0.5">Virtual design, prototyping, and safe electrochemical validation workspace</p>
         </div>
-        <ul class="library-category-list">
-          <li class="library-category-item" data-category="playlists">
-            <div class="lib-cat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <line x1="8" y1="6" x2="21" y2="6" />
-                <line x1="8" y1="12" x2="21" y2="12" />
-                <line x1="8" y1="18" x2="21" y2="18" />
-                <circle cx="3" cy="6" r="1.5" fill="currentColor" />
-                <circle cx="3" cy="12" r="1.5" fill="currentColor" />
-                <circle cx="3" cy="18" r="1.5" fill="currentColor" />
-              </svg>
-            </div>
-            <span class="lib-cat-label">Playlists</span>
-            <svg class="lib-cat-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </li>
-          <li class="library-category-item" data-category="artists">
-            <div class="lib-cat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </div>
-            <span class="lib-cat-label">Artists</span>
-            <svg class="lib-cat-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </li>
-          <li class="library-category-item" data-category="albums">
-            <div class="lib-cat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-              </svg>
-            </div>
-            <span class="lib-cat-label">Albums</span>
-            <svg class="lib-cat-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </li>
-          <li class="library-category-item" data-category="songs">
-            <div class="lib-cat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <path d="M9 18V5l12-2v13" />
-                <circle cx="6" cy="18" r="3" />
-                <circle cx="18" cy="16" r="3" />
-              </svg>
-            </div>
-            <span class="lib-cat-label">Songs</span>
-            <svg class="lib-cat-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </li>
-          <li class="library-category-item" data-category="downloaded">
-            <div class="lib-cat-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <circle cx="12" cy="12" r="10" />
-                <polyline points="8 12 12 16 16 12" />
-                <line x1="12" y1="8" x2="12" y2="16" />
-              </svg>
-            </div>
-            <span class="lib-cat-label">Downloaded</span>
-            <svg class="lib-cat-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </li>
-        </ul>
-
-        <!-- Recently Added -->
-        <h2 class="section-title" style="margin-top:32px;">Recently Added</h2>
-        <div id="library-albums-recent" class="card-grid"></div>
-      </div>
-
-      <!-- Albums sub-view -->
-      <div id="library-albums-view" class="hidden">
-        <div class="sub-view-header">
-          <button class="back-btn" id="btn-back-to-library-root">← Library</button>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <select id="library-sort"
-              style="background:var(--surface);color:var(--text);border:none;padding:6px 12px;border-radius:6px;font-family:'DM Sans',sans-serif;background:var(--bg-active);color:var(--text-primary);">
-              <option value="newest">Newest</option>
-              <option value="a-z">A - Z</option>
-              <option value="z-a">Z - A</option>
-            </select>
-          </div>
-        </div>
-        <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:800;margin-bottom:20px;">Albums</h1>
-        <div id="library-albums" class="card-grid"></div>
-      </div>
-
-      <!-- Artists sub-view -->
-      <div id="library-artists-view" class="hidden">
-        <div class="sub-view-header">
-          <button class="back-btn" id="btn-back-to-library-from-artists">← Library</button>
-        </div>
-        <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:800;margin-bottom:20px;">Artists</h1>
-        <div class="search-bar-wrap" style="margin-bottom: 16px;">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="M21 21l-4.35-4.35" />
-          </svg>
-          <input type="search" id="artists-search-input" placeholder="Search" autocomplete="off" />
-        </div>
-        <div style="display:flex;align-items:flex-start;position:relative;width:100%;">
-          <ul id="artists-list" class="artists-list" style="flex:1;min-width:0;"></ul>
-          <div id="artists-az-scroll" class="az-scroll-container"></div>
-        </div>
-      </div>
-
-      <!-- Artist detail sub-view -->
-      <div id="library-artist-detail" class="hidden">
-        <button class="back-btn" id="btn-back-to-artists">← Artists</button>
-        <div class="artist-hero">
-          <div class="artist-avatar" id="artist-avatar-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-          </div>
-          <div class="album-meta">
-            <p class="meta-label">Artist</p>
-            <h1 id="artist-detail-name"></h1>
-            <p id="artist-detail-count" class="meta-count"></p>
-            <div class="album-actions">
-              <button class="btn-play-all" id="btn-play-artist">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M5 3l14 9-14 9z" />
-                </svg>
-                Play
-              </button>
-              <button class="btn-shuffle" id="btn-shuffle-artist">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="16 3 21 3 21 8" />
-                  <line x1="4" y1="20" x2="21" y2="3" />
-                  <polyline points="21 16 21 21 16 21" />
-                  <line x1="15" y1="15" x2="21" y2="21" />
-                </svg>
-                Shuffle
-              </button>
-            </div>
-          </div>
-        </div>
-        <ul id="artist-track-list" class="track-list"></ul>
-      </div>
-
-      <!-- Songs sub-view -->
-      <div id="library-songs-view" class="hidden">
-        <div class="sub-view-header">
-          <button class="back-btn" id="btn-back-to-library-from-songs">← Library</button>
-        </div>
-        <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:800;margin-bottom:8px;">Songs</h1>
-        <div class="search-bar-wrap" style="margin-bottom: 16px;">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M21 21l-4.35-4.35"/>
-          </svg>
-          <input type="search" id="songs-search-input" placeholder="Search" autocomplete="off" />
-        </div>
-        <div class="songs-actions">
-          <button class="btn-play-all" id="btn-play-all-songs">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M5 3l14 9-14 9z" />
-            </svg>
-            Play
-          </button>
-          <button class="btn-shuffle" id="btn-shuffle-all-songs">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="16 3 21 3 21 8" />
-              <line x1="4" y1="20" x2="21" y2="3" />
-              <polyline points="21 16 21 21 16 21" />
-              <line x1="15" y1="15" x2="21" y2="21" />
-            </svg>
-            Shuffle
-          </button>
-        </div>
-        <ul id="all-songs-list" class="track-list songs-track-list"></ul>
-      </div>
-
-      <!-- Downloaded sub-view -->
-      <div id="library-downloaded-view" class="hidden">
-        <div class="sub-view-header">
-          <button class="back-btn" id="btn-back-to-library-from-downloaded">← Library</button>
-        </div>
-        <h1 style="font-family:var(--font-display);font-size:2rem;font-weight:800;margin-bottom:8px;">Downloaded</h1>
-        <div class="search-bar-wrap" style="margin-bottom: 16px;">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M21 21l-4.35-4.35"/>
-          </svg>
-          <input type="search" id="downloaded-search-input" placeholder="Search" autocomplete="off" />
-        </div>
-        <div class="songs-actions" id="downloaded-actions">
-          <button class="btn-play-all" id="btn-play-downloaded">
-            <svg viewBox="0 0 24 24" fill="currentColor">
-              <path d="M5 3l14 9-14 9z" />
-            </svg>
-            Play
-          </button>
-          <button class="btn-shuffle" id="btn-shuffle-downloaded">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polyline points="16 3 21 3 21 8" />
-              <line x1="4" y1="20" x2="21" y2="3" />
-              <polyline points="21 16 21 21 16 21" />
-              <line x1="15" y1="15" x2="21" y2="21" />
-            </svg>
-            Shuffle
-          </button>
-        </div>
-        <ul id="downloaded-songs-list" class="track-list songs-track-list"></ul>
-      </div>
-
-      <!-- Album detail sub-view -->
-      <div id="album-detail" class="hidden">
-        <button class="back-btn" id="btn-back-library">← Back</button>
-        <div class="album-hero">
-          <div class="album-art-lg" id="detail-art"></div>
-          <div class="album-meta">
-            <p class="meta-label">Album</p>
-            <h1 id="detail-title"></h1>
-            <div class="album-actions">
-              <button class="btn-play-all" id="btn-play-album">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M5 3l14 9-14 9z" />
-                </svg>
-                Play All
-              </button>
-              <button class="btn-shuffle" id="btn-shuffle-album">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="16 3 21 3 21 8" />
-                  <line x1="4" y1="20" x2="21" y2="3" />
-                  <polyline points="21 16 21 21 16 21" />
-                  <line x1="15" y1="15" x2="21" y2="21" />
-                </svg>
-                Shuffle
-              </button>
-              <button class="btn-add-playlist" id="btn-add-album-to-playlist">+ Playlist</button>
-            </div>
-          </div>
-        </div>
-        <ul id="track-list" class="track-list"></ul>
-      </div>
-
-    </section>
-
-    <!-- Playlists view (mobile) -->
-    <section id="view-playlists" class="view">
-      <div class="view-header">
-        <h1>Playlists</h1>
-        <button class="pill-btn" id="btn-new-playlist-mobile">+ New</button>
-      </div>
-      <ul id="playlist-list-mobile" class="playlist-list"></ul>
-    </section>
-
-    <!-- Playlist detail view -->
-    <section id="view-playlist-detail" class="view">
-      <button class="back-btn" id="btn-back-playlists">← Back</button>
-      <div class="album-hero">
-        <div class="album-art-lg playlist-art" id="pl-detail-art">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-            <line x1="8" y1="6" x2="21" y2="6" />
-            <line x1="8" y1="12" x2="21" y2="12" />
-            <line x1="8" y1="18" x2="21" y2="18" />
-          </svg>
-        </div>
-        <div class="album-meta">
-          <p class="meta-label">Playlist</p>
-          <h1 id="pl-detail-title" contenteditable="true" spellcheck="false"></h1>
-          <p id="pl-detail-count" class="meta-count"></p>
-          <div class="album-actions">
-            <button class="btn-play-all" id="btn-play-playlist">
-              <svg viewBox="0 0 24 24" fill="currentColor">
-                <path d="M5 3l14 9-14 9z" />
-              </svg>
-              Play All
+        <div class="flex items-center gap-4">
+            <button id="btn-play-pause" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-4 py-2 rounded shadow transition-colors flex items-center gap-2">
+                <span id="play-icon">⏸</span> <span id="play-text">Pause Simulation</span>
             </button>
-            <button class="btn-shuffle" id="btn-shuffle-playlist">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="16 3 21 3 21 8" />
-                <line x1="4" y1="20" x2="21" y2="3" />
-                <polyline points="21 16 21 21 16 21" />
-                <line x1="15" y1="15" x2="21" y2="21" />
-              </svg>
-              Shuffle
+            <button id="btn-clear" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium text-sm px-4 py-2 rounded transition-colors">
+                Clear Workspace
             </button>
-            <button class="btn-danger" id="btn-delete-playlist">Delete</button>
-          </div>
         </div>
-      </div>
-      <ul id="pl-track-list" class="track-list"></ul>
-    </section>
+    </header>
 
-  </main>
+    <!-- Main Container -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Left Sidebar: Component Bin -->
+        <aside class="w-80 bg-slate-900 border-r border-slate-800 flex flex-col p-4 overflow-y-auto flex-shrink-0 z-10">
+            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Component Bin</h2>
+            <p class="text-xs text-slate-400 mb-4">Click any component below to place it on the active workspace:</p>
+            
+            <div class="space-y-3">
+                <!-- USB Power Supply -->
+                <button onclick="addComponent('usb_power')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-indigo-900/50 flex items-center justify-center border border-indigo-700 text-indigo-400">🔌</div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-200">5V USB Power Supply</div>
+                        <div class="text-xs text-slate-400">Provides 5.0V VBUS & Ground reference</div>
+                    </div>
+                </button>
 
-  <!-- ── Now Playing Bar ─────────────────────────────────────── -->
-  <div id="player-bar" class="hidden">
-    <div class="player-track">
-      <div class="player-art" id="player-art">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-          <circle cx="12" cy="12" r="9" />
-          <circle cx="12" cy="12" r="3" fill="currentColor" />
-        </svg>
-      </div>
-      <div class="player-info">
-        <p id="player-title" class="player-title">—</p>
-        <p id="player-album" class="player-album"><span>—</span></p>
-      </div>
-      <button class="player-like" id="btn-like" title="Like">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path
-            d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-        </svg>
-      </button>
-      <button class="player-add" id="btn-add-playlist-player" title="Add to Playlist"
-        style="background:none;border:none;color:var(--text-muted);cursor:pointer;margin-left:8px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
-          <line x1="12" y1="5" x2="12" y2="19" />
-          <line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
-      </button>
+                <!-- DIY Epsom-Salt Cell -->
+                <button onclick="addComponent('diy_cell')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-teal-900/50 flex items-center justify-center border border-teal-700 text-teal-400">🧪</div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-200">DIY Epsom-Salt Cell</div>
+                        <div class="text-xs text-slate-400">0.0V raw. Requires electrochemical forming</div>
+                    </div>
+                </button>
+
+                <!-- Resistor -->
+                <button onclick="addComponent('resistor')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-amber-900/50 flex items-center justify-center border border-amber-700 text-amber-400">⚙️</div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-200">Variable Resistor</div>
+                        <div class="text-xs text-slate-400">Configurable resistance (1Ω - 10kΩ)</div>
+                    </div>
+                </button>
+
+                <!-- LED Indicator -->
+                <button onclick="addComponent('led')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-emerald-900/50 flex items-center justify-center border border-emerald-700 text-emerald-400">💡</div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-200">LED Indicator</div>
+                        <div class="text-xs text-slate-400">Lights up with current, blows over 45mA</div>
+                    </div>
+                </button>
+
+                <!-- Digital Multimeter -->
+                <button onclick="addComponent('multimeter')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-rose-900/50 flex items-center justify-center border border-rose-700 text-rose-400">📟</div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-200">Digital Multimeter</div>
+                        <div class="text-xs text-slate-400">Measures voltage or path current</div>
+                    </div>
+                </button>
+
+                <!-- SPST Switch -->
+                <button onclick="addComponent('spst_switch')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-slate-700/50 flex items-center justify-center border border-slate-600 text-slate-300">🎛️</div>
+                    <div>
+                        <div class="text-sm font-medium text-slate-200">SPST Switch</div>
+                        <div class="text-xs text-slate-400">Toggles path connectivity Open/Closed</div>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Guidelines and Info -->
+            <div class="mt-auto pt-6 border-t border-slate-800">
+                <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs text-slate-400 space-y-2">
+                    <p class="font-semibold text-slate-300 text-center">💡 Quick Guide</p>
+                    <p>• Click and drag component headers to move them around.</p>
+                    <p>• Click a connection port, then click another port to draw a wire.</p>
+                    <p>• Right-click a wire to remove it.</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Center Workspace -->
+        <main class="flex-1 relative workspace-grid overflow-hidden" id="workspace">
+            <!-- Connection SVG Layer -->
+            <svg id="wire-layer" class="absolute inset-0 pointer-events-none w-full h-full z-0"></svg>
+            
+            <!-- Component Containers live here -->
+            <div id="components-container" class="absolute inset-0 z-10 pointer-events-none"></div>
+        </main>
+
+        <!-- Right Sidebar: Interactive Tutorial Guide -->
+        <aside class="w-96 bg-slate-900 border-l border-slate-800 flex flex-col overflow-y-auto flex-shrink-0 z-10">
+            <div class="p-4 border-b border-slate-800">
+                <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Tutorial Companion</h2>
+                <p class="text-xs text-slate-400 mt-1">Simulating the 4.0V Epsom-Salt Lead-Acid Battery</p>
+            </div>
+
+            <div class="p-4 space-y-4 text-xs text-slate-300">
+                <!-- Step Tracker list -->
+                <div class="space-y-3" id="step-tracker">
+                    <!-- Step 1 -->
+                    <div id="step-1" class="p-3 bg-slate-800/80 rounded border-l-4 border-amber-500 space-y-1">
+                        <div class="flex justify-between font-semibold text-slate-200">
+                            <span>Step 1: Placement</span>
+                            <span class="status-badge text-amber-500">In Progress</span>
+                        </div>
+                        <p class="text-slate-400">Add 1x USB Power Supply and 2x DIY Epsom-Salt Cells to the workspace.</p>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div id="step-2" class="p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60">
+                        <div class="flex justify-between font-semibold text-slate-400">
+                            <span>Step 2: Series Connection</span>
+                            <span class="status-badge text-slate-500">Locked</span>
+                        </div>
+                        <p class="text-slate-500">Wire the cells in series: Connect the Positive (+) terminal of Cell 1 to the Negative (-) terminal of Cell 2.</p>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div id="step-3" class="p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60">
+                        <div class="flex justify-between font-semibold text-slate-400">
+                            <span>Step 3: Current Protection</span>
+                            <span class="status-badge text-slate-500">Locked</span>
+                        </div>
+                        <p class="text-slate-500">Add a Resistor and set its value close to 81Ω to limit the initial forming current.</p>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div id="step-4" class="p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60">
+                        <div class="flex justify-between font-semibold text-slate-400">
+                            <span>Step 4: Forming Charge</span>
+                            <span class="status-badge text-slate-500">Locked</span>
+                        </div>
+                        <p class="text-slate-500">Connect the USB power through the resistor to charge and form the series cells up to 4.0V total.</p>
+                    </div>
+
+                    <!-- Step 5 -->
+                    <div id="step-5" class="p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60">
+                        <div class="flex justify-between font-semibold text-slate-400">
+                            <span>Step 5: Load Testing</span>
+                            <span class="status-badge text-slate-500">Locked</span>
+                        </div>
+                        <p class="text-slate-500">Disconnect the charger. Add a 330Ω Resistor and a Green LED to test the battery output discharge cycle.</p>
+                    </div>
+                </div>
+
+                <!-- Live Chemistry Status Card -->
+                <div class="mt-6 bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-teal-400">Electrochemical State</h3>
+                    <div class="space-y-1 text-slate-400">
+                        <div class="flex justify-between"><span>Active Ions:</span><span class="text-slate-200 font-mono">Mg2+ , SO42-</span></div>
+                        <div class="flex justify-between"><span>Anode Chemistry:</span><span class="text-slate-200 font-mono">PbO₂ (Formed) / Pb</span></div>
+                        <div class="flex justify-between"><span>Cathode Chemistry:</span><span class="text-slate-200 font-mono">Spongy Lead (Pb)</span></div>
+                        <div class="flex justify-between"><span>Safe Operating Max:</span><span class="text-slate-200 font-mono">~2.05 V per cell</span></div>
+                    </div>
+                </div>
+            </div>
+        </aside>
     </div>
 
-    <div class="player-controls">
-      <div class="player-top-controls">
-        <button id="btn-shuffle" class="ctrl-btn" title="Shuffle">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="16 3 21 3 21 8" />
-            <line x1="4" y1="20" x2="21" y2="3" />
-            <polyline points="21 16 21 21 16 21" />
-            <line x1="15" y1="15" x2="21" y2="21" />
-          </svg>
-        </button>
-        <button id="btn-prev" class="ctrl-btn" title="Previous">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="19 20 9 12 19 4 19 20" />
-            <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="2" />
-          </svg>
-        </button>
-        <button id="btn-play-pause" class="ctrl-btn ctrl-play" title="Play/Pause">
-          <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M5 3l14 9-14 9z" />
-          </svg>
-          <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor" class="hidden">
-            <rect x="6" y="4" width="4" height="16" />
-            <rect x="14" y="4" width="4" height="16" />
-          </svg>
-        </button>
-        <button id="btn-next" class="ctrl-btn" title="Next">
-          <svg viewBox="0 0 24 24" fill="currentColor">
-            <polygon points="5 4 15 12 5 20 5 4" />
-            <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="2" />
-          </svg>
-        </button>
-        <button id="btn-repeat" class="ctrl-btn" title="Repeat">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="17 1 21 5 17 9" />
-            <path d="M3 11V9a4 4 0 014-4h14" />
-            <polyline points="7 23 3 19 7 15" />
-            <path d="M21 13v2a4 4 0 01-4 4H3" />
-          </svg>
-        </button>
-      </div>
-      <div class="player-progress-row">
-        <span id="time-current">0:00</span>
-        <div class="progress-track" id="progress-track">
-          <div class="progress-bar" id="progress-bar"></div>
-          <div class="progress-thumb" id="progress-thumb"></div>
-        </div>
-        <span id="time-total">0:00</span>
-      </div>
-    </div>
+    <!-- JavaScript Execution Engine -->
+    <script>
+        // Global Simulation States
+        let components = [];
+        let wires = [];
+        let simulationRunning = true;
+        let activeWireStart = null;
+        let mousePosition = { x: 0, y: 0 };
+        let draggedComponent = null;
+        let dragOffset = { x: 0, y: 0 };
+        let lastVoltages = [];
 
-    <div class="player-right">
-      <div class="volume-wrap">
-        <svg class="vol-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-          <path d="M15.54 8.46a5 5 0 010 7.07" />
-          <path d="M19.07 4.93a10 10 0 010 14.14" />
-        </svg>
-        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" />
-      </div>
-      <button id="btn-queue" class="ctrl-btn" title="Queue">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="8" y1="6" x2="21" y2="6" />
-          <line x1="8" y1="12" x2="21" y2="12" />
-          <line x1="8" y1="18" x2="21" y2="18" />
-          <circle cx="3" cy="6" r="1.5" fill="currentColor" />
-          <circle cx="3" cy="12" r="1.5" fill="currentColor" />
-          <circle cx="3" cy="18" r="1.5" fill="currentColor" />
-        </svg>
-      </button>
-    </div>
-  </div>
+        // Workspace elements
+        const workspace = document.getElementById('workspace');
+        const container = document.getElementById('components-container');
+        const wireLayer = document.getElementById('wire-layer');
+        const playPauseBtn = document.getElementById('btn-play-pause');
+        const clearBtn = document.getElementById('btn-clear');
 
+        // Initial setup on document load
+        window.addEventListener('DOMContentLoaded', () => {
+            // Setup default components to guide the user initially
+            addComponent('usb_power', 100, 100);
+            addComponent('diy_cell', 100, 260);
+            addComponent('diy_cell', 100, 420);
+            
+            // Event listeners
+            workspace.addEventListener('mousemove', handleMouseMove);
+            workspace.addEventListener('mouseup', handleMouseUp);
+            window.addEventListener('resize', updateWires);
 
-  <!-- ── Queue Panel ─────────────────────────────────────────── -->
-  <div id="queue-panel" class="panel hidden">
-    <div class="panel-header">
-      <h3>Up Next</h3>
-      <button class="panel-close" id="btn-close-queue">×</button>
-    </div>
-    <ul id="queue-list"></ul>
-  </div>
+            playPauseBtn.addEventListener('click', () => {
+                simulationRunning = !simulationRunning;
+                if (simulationRunning) {
+                    playPauseBtn.className = "bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-4 py-2 rounded shadow transition-colors flex items-center gap-2";
+                    document.getElementById('play-icon').innerText = "⏸";
+                    document.getElementById('play-text').innerText = "Pause Simulation";
+                } else {
+                    playPauseBtn.className = "bg-amber-600 hover:bg-amber-500 text-white font-medium text-sm px-4 py-2 rounded shadow transition-colors flex items-center gap-2";
+                    document.getElementById('play-icon').innerText = "▶";
+                    document.getElementById('play-text').innerText = "Resume Simulation";
+                }
+            });
 
-  <!-- ── Playlist Modal ─────────────────────────────────────── -->
-  <div id="modal-overlay" class="hidden">
-    <div id="modal">
-      <h3 id="modal-title">Add to Playlist</h3>
-      <div id="modal-body"></div>
-      <div class="modal-actions">
-        <button class="btn-secondary" id="modal-cancel">Cancel</button>
-      </div>
-    </div>
-  </div>
+            clearBtn.addEventListener('click', () => {
+                components = [];
+                wires = [];
+                container.innerHTML = '';
+                updateWires();
+            });
 
-  <!-- ── Context Menu ────────────────────────────────────────── -->
-  <ul id="context-menu" class="hidden">
-    <li id="ctx-play">Play now</li>
-    <li id="ctx-next">Play next</li>
-    <li id="ctx-add-queue">Add to queue</li>
-    <li class="separator"></li>
-    <li id="ctx-add-playlist">Add to playlist</li>
-    <li id="ctx-remove-playlist" class="hidden danger">Remove from playlist</li>
-    <li id="ctx-rename">Rename</li>
-  </ul>
+            // Start loop
+            setInterval(simulationTick, 100);
+        });
 
-  <!-- ── Hidden audio element ───────────────────────────────── -->
-  <audio id="audio-engine" preload="auto"></audio>
+        // Component Definitions & Creation
+        function addComponent(type, customX = null, customY = null) {
+            const id = type + '_' + Math.random().toString(36).substr(2, 9);
+            const rect = workspace.getBoundingClientRect();
+            const x = customX !== null ? customX : (rect.width / 2) - 100;
+            const y = customY !== null ? customY : (rect.height / 2) - 80;
 
-  <script src="main.js"></script>
+            let terminals = [];
+            let state = {};
+
+            switch (type) {
+                case 'usb_power':
+                    terminals = [
+                        { id: id + '_t1', label: '5V', relX: 180, relY: 35, voltage: 5.0 },
+                        { id: id + '_t2', label: 'GND', relX: 180, relY: 75, voltage: 0.0 }
+                    ];
+                    state = { name: "USB 5V Supply" };
+                    break;
+                case 'diy_cell':
+                    terminals = [
+                        { id: id + '_anode', label: '+', relX: 25, relY: 35, voltage: 0.0 },
+                        { id: id + '_cathode', label: '-', relX: 155, relY: 35, voltage: 0.0 }
+                    ];
+                    state = { 
+                        forming: 0, // 0 to 100%
+                        charge: 0,   // 0 to 100%
+                        voltage: 0.0,
+                        current: 0.0,
+                        name: components.filter(c => c.type === 'diy_cell').length === 0 ? "Cell 1" : "Cell 2"
+                    };
+                    break;
+                case 'resistor':
+                    terminals = [
+                        { id: id + '_t1', label: 'A', relX: 20, relY: 65, voltage: 0.0 },
+                        { id: id + '_t2', label: 'B', relX: 180, relY: 65, voltage: 0.0 }
+                    ];
+                    state = { resistance: 330 }; // Default 330 Ohms
+                    break;
+                case 'led':
+                    terminals = [
+                        { id: id + '_anode', label: '+', relX: 30, relY: 75, voltage: 0.0 },
+                        { id: id + '_cathode', label: '-', relX: 150, relY: 75, voltage: 0.0 }
+                    ];
+                    state = { blown: false, current: 0.0, color: 'green' };
+                    break;
+                case 'multimeter':
+                    terminals = [
+                        { id: id + '_red', label: 'VΩ+', relX: 40, relY: 135, voltage: 0.0 },
+                        { id: id + '_black', label: 'COM-', relX: 140, relY: 135, voltage: 0.0 }
+                    ];
+                    state = { mode: 'voltage', value: 0.0 };
+                    break;
+                case 'spst_switch':
+                    terminals = [
+                        { id: id + '_t1', label: 'In', relX: 25, relY: 55, voltage: 0.0 },
+                        { id: id + '_t2', label: 'Out', relX: 155, relY: 55, voltage: 0.0 }
+                    ];
+                    state = { closed: false };
+                    break;
+            }
+
+            const comp = { id, type, x, y, terminals, state };
+            components.push(comp);
+            renderComponent(comp);
+            updateWires();
+        }
+
+        // Render Component UI Element
+        function renderComponent(comp) {
+            const div = document.createElement('div');
+            div.id = comp.id;
+            div.style.left = comp.x + 'px';
+            div.style.top = comp.y + 'px';
+            div.className = "absolute pointer-events-auto bg-slate-800 border border-slate-700 rounded-lg shadow-xl flex flex-col select-none z-10 w-48";
+
+            let headerBg = "bg-slate-700/50 border-b border-slate-600";
+            if (comp.type === 'usb_power') headerBg = "bg-indigo-950/40 border-b border-indigo-900/50";
+            if (comp.type === 'diy_cell') headerBg = "bg-teal-950/40 border-b border-teal-900/50";
+            if (comp.type === 'multimeter') headerBg = "bg-rose-950/40 border-b border-rose-900/50";
+
+            let innerHtml = `
+                <div class="px-3 py-1.5 flex justify-between items-center cursor-move rounded-t-lg ${headerBg}" onmousedown="startDrag(event, '${comp.id}')">
+                    <span class="text-xs font-semibold tracking-wide text-slate-200 uppercase">${getComponentTitle(comp)}</span>
+                    <button onclick="removeComponent('${comp.id}')" class="text-slate-500 hover:text-rose-400 text-xs transition">✕</button>
+                </div>
+                <div class="p-3 flex flex-col relative flex-1 gap-2 min-h-[80px]">
+            `;
+
+            switch (comp.type) {
+                case 'usb_power':
+                    innerHtml += `
+                        <div class="flex flex-col items-center justify-center py-2">
+                            <div class="text-[10px] text-slate-400">USB Native Output</div>
+                            <div class="text-emerald-400 digital-font text-lg font-bold">5.00 V</div>
+                        </div>
+                    `;
+                    break;
+                case 'diy_cell':
+                    innerHtml += `
+                        <div class="flex flex-col gap-1.5 text-[10px] text-slate-300">
+                            <div class="font-medium text-slate-400 border-b border-slate-700 pb-1 flex justify-between">
+                                <span>Name:</span> 
+                                <input type="text" class="bg-transparent text-right outline-none text-slate-200 w-20" value="${comp.state.name}" oninput="comp.state.name = this.value">
+                            </div>
+                            <div class="flex justify-between"><span>Electrode forming:</span> <span id="${comp.id}-forming" class="font-semibold text-amber-400">0%</span></div>
+                            <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                                <div id="${comp.id}-forming-bar" class="bg-amber-500 h-1.5 transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between"><span>State of Charge:</span> <span id="${comp.id}-charge" class="font-semibold text-teal-400">0%</span></div>
+                            <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
+                                <div id="${comp.id}-charge-bar" class="bg-teal-500 h-1.5 transition-all duration-300" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-slate-400"><span>Voltage:</span> <span id="${comp.id}-voltage" class="font-bold text-slate-200">0.00 V</span></div>
+                            <div class="flex justify-between text-slate-400"><span>Net Current:</span> <span id="${comp.id}-current" class="font-bold text-slate-200">0.0 mA</span></div>
+                            <div id="${comp.id}-bubbling" class="hidden text-center text-[9px] bg-sky-950/50 border border-sky-800 text-sky-400 py-0.5 rounded animate-pulse mt-1">💨 Bubble Gassing Detected</div>
+                        </div>
+                    `;
+                    break;
+                case 'resistor':
+                    innerHtml += `
+                        <div class="flex flex-col gap-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[10px] text-slate-400">Value (Ω):</span>
+                                <input type="number" id="${comp.id}-val-input" min="1" max="10000" class="w-20 bg-slate-950 border border-slate-700 rounded text-center text-xs text-slate-100 py-0.5 font-semibold" value="${comp.state.resistance}" onchange="updateResistorVal('${comp.id}', this.value)">
+                            </div>
+                            <!-- Band Colors Visual -->
+                            <div class="h-6 w-full bg-orange-100/10 rounded flex items-center justify-around px-4 border border-slate-700 relative">
+                                <div class="absolute h-1 w-full bg-slate-600 left-0 z-0"></div>
+                                <div class="w-4 h-4 bg-amber-200 rounded-sm z-10 flex justify-between px-0.5 relative">
+                                    <div id="${comp.id}-band1" class="w-1 h-full bg-red-600"></div>
+                                    <div id="${comp.id}-band2" class="w-1 h-full bg-purple-600"></div>
+                                    <div id="${comp.id}-band3" class="w-1 h-full bg-orange-600"></div>
+                                    <div class="w-1 h-full bg-amber-500"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'led':
+                    innerHtml += `
+                        <div class="flex flex-col items-center gap-2 py-1">
+                            <div class="relative w-8 h-8 rounded-full border border-slate-700 flex items-center justify-center transition-all duration-300" id="${comp.id}-bulb">
+                                <div class="w-4 h-4 rounded-full bg-slate-600" id="${comp.id}-bulb-inner"></div>
+                            </div>
+                            <div class="text-[10px] text-center text-slate-400" id="${comp.id}-status">Off</div>
+                            <button id="${comp.id}-reset" class="hidden bg-slate-950 hover:bg-slate-900 border border-slate-700 text-rose-400 px-2 py-0.5 text-[9px] rounded" onclick="resetBlownLed('${comp.id}')">Replace Blown LED</button>
+                        </div>
+                    `;
+                    break;
+                case 'multimeter':
+                    innerHtml += `
+                        <div class="bg-rose-950 border border-rose-900 rounded p-2 flex flex-col items-center">
+                            <div class="text-[11px] text-teal-400 font-bold digital-font text-center bg-black/80 w-full rounded py-1 border border-teal-950/50 min-h-[28px]" id="${comp.id}-display">
+                                0.00 V
+                            </div>
+                            <div class="flex gap-2 mt-2 w-full justify-center">
+                                <button id="${comp.id}-mode-v" class="bg-slate-950 text-slate-300 text-[9px] px-2 py-0.5 rounded font-bold border border-emerald-600" onclick="setMultimeterMode('${comp.id}', 'voltage')">V</button>
+                                <button id="${comp.id}-mode-a" class="bg-slate-950 text-slate-500 text-[9px] px-2 py-0.5 rounded font-bold border border-transparent" onclick="setMultimeterMode('${comp.id}', 'current')">mA</button>
+                            </div>
+                        </div>
+                    `;
+                    break;
+                case 'spst_switch':
+                    innerHtml += `
+                        <div class="flex flex-col items-center gap-2 py-1">
+                            <div class="text-[10px] text-slate-400">Switch Toggle</div>
+                            <button id="${comp.id}-toggle" class="px-4 py-1.5 bg-rose-900/40 border border-rose-800 text-rose-400 rounded-md text-xs font-bold w-full transition" onclick="toggleSwitch('${comp.id}')">
+                                OPEN (OFF)
+                            </button>
+                        </div>
+                    `;
+                    break;
+            }
+
+            innerHtml += `</div>`; // Close content div
+
+            // Render Terminals (port connections)
+            comp.terminals.forEach((term, index) => {
+                innerHtml += `
+                    <div id="${term.id}" 
+                         data-comp-id="${comp.id}" 
+                         data-term-id="${term.id}" 
+                         class="absolute w-4.5 h-4.5 bg-slate-900 border-2 border-slate-600 rounded-full cursor-pointer hover:border-teal-400 flex items-center justify-center text-[8px] text-slate-300 z-20 pointer-events-auto"
+                         style="left: ${term.relX - 9}px; top: ${term.relY - 9}px;"
+                         onmousedown="startWire(event, '${term.id}')">
+                        ${term.label}
+                    </div>
+                `;
+            });
+
+            div.innerHTML = innerHtml;
+            container.appendChild(div);
+
+            // Update resistor band visual if initial load
+            if (comp.type === 'resistor') {
+                updateResistorBands(comp);
+            }
+        }
+
+        function getComponentTitle(comp) {
+            switch (comp.type) {
+                case 'usb_power': return "USB 5V Supply";
+                case 'diy_cell': return comp.state.name || "DIY Cell";
+                case 'resistor': return "Resistor";
+                case 'led': return "LED Indicator";
+                case 'multimeter': return "DMM Unit";
+                case 'spst_switch': return "Switch";
+            }
+        }
+
+        function removeComponent(id) {
+            components = components.filter(c => c.id !== id);
+            // Drop related wires
+            wires = wires.filter(w => !w.from.startsWith(id) && !w.to.startsWith(id));
+            const el = document.getElementById(id);
+            if (el) el.remove();
+            updateWires();
+        }
+
+        // Variable Resistor Helpers
+        function updateResistorVal(id, val) {
+            const comp = components.find(c => c.id === id);
+            if (comp) {
+                let r = parseInt(val);
+                if (isNaN(r) || r < 1) r = 1;
+                if (r > 10000) r = 10000;
+                comp.state.resistance = r;
+                document.getElementById(`${id}-val-input`).value = r;
+                updateResistorBands(comp);
+            }
+        }
+
+        function updateResistorBands(comp) {
+            const val = comp.state.resistance;
+            // Simplified dynamic bands calculation
+            const bands = getResistorColorBands(val);
+            const b1 = document.getElementById(`${comp.id}-band1`);
+            const b2 = document.getElementById(`${comp.id}-band2`);
+            const b3 = document.getElementById(`${comp.id}-band3`);
+            
+            if (b1 && b2 && b3) {
+                b1.style.backgroundColor = bands[0];
+                b2.style.backgroundColor = bands[1];
+                b3.style.backgroundColor = bands[2];
+            }
+        }
+
+        function getResistorColorBands(val) {
+            const colors = ["#000000", "#78350f", "#dc2626", "#ea580c", "#eab308", "#16a34a", "#2563eb", "#9333ea", "#4b5563", "#ffffff"];
+            if (val < 10) {
+                return [colors[val], colors[0], colors[0]]; // fallback
+            }
+            const str = val.toString();
+            const d1 = parseInt(str[0]);
+            const d2 = parseInt(str[1]);
+            const multiplier = str.length - 2;
+            return [colors[d1] || "#000", colors[d2] || "#000", colors[multiplier] || "#000"];
+        }
+
+        // Multimeter Helpers
+        function setMultimeterMode(id, mode) {
+            const comp = components.find(c => c.id === id);
+            if (comp) {
+                comp.state.mode = mode;
+                const bV = document.getElementById(`${id}-mode-v`);
+                const bA = document.getElementById(`${id}-mode-a`);
+                if (mode === 'voltage') {
+                    bV.className = "bg-slate-950 text-slate-300 text-[9px] px-2 py-0.5 rounded font-bold border border-emerald-600";
+                    bA.className = "bg-slate-950 text-slate-500 text-[9px] px-2 py-0.5 rounded font-bold border border-transparent";
+                } else {
+                    bA.className = "bg-slate-950 text-slate-300 text-[9px] px-2 py-0.5 rounded font-bold border border-emerald-600";
+                    bV.className = "bg-slate-950 text-slate-500 text-[9px] px-2 py-0.5 rounded font-bold border border-transparent";
+                }
+            }
+        }
+
+        // LED Switch toggles
+        function resetBlownLed(id) {
+            const comp = components.find(c => c.id === id);
+            if (comp) {
+                comp.state.blown = false;
+                document.getElementById(`${id}-reset`).classList.add('hidden');
+                document.getElementById(`${id}-status`).innerText = "Off";
+                document.getElementById(`${id}-status`).className = "text-[10px] text-center text-slate-400";
+            }
+        }
+
+        function toggleSwitch(id) {
+            const comp = components.find(c => c.id === id);
+            if (comp) {
+                comp.state.closed = !comp.state.closed;
+                const btn = document.getElementById(`${id}-toggle`);
+                if (comp.state.closed) {
+                    btn.innerText = "CLOSED (ON)";
+                    btn.className = "px-4 py-1.5 bg-emerald-900/40 border border-emerald-800 text-emerald-400 rounded-md text-xs font-bold w-full transition";
+                } else {
+                    btn.innerText = "OPEN (OFF)";
+                    btn.className = "px-4 py-1.5 bg-rose-900/40 border border-rose-800 text-rose-400 rounded-md text-xs font-bold w-full transition";
+                }
+            }
+        }
+
+        // Dragging Logic
+        function startDrag(e, compId) {
+            if (e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'input') return;
+            const comp = components.find(c => c.id === compId);
+            if (comp) {
+                draggedComponent = comp;
+                dragOffset.x = e.clientX - comp.x;
+                dragOffset.y = e.clientY - comp.y;
+                document.addEventListener('mousemove', handleDrag);
+                document.addEventListener('mouseup', endDrag);
+            }
+        }
+
+        function handleDrag(e) {
+            if (draggedComponent) {
+                const rect = workspace.getBoundingClientRect();
+                let newX = e.clientX - dragOffset.x;
+                let newY = e.clientY - dragOffset.y;
+                
+                // Constrain inside bounds
+                newX = Math.max(0, Math.min(newX, rect.width - 192));
+                newY = Math.max(0, Math.min(newY, rect.height - 150));
+
+                draggedComponent.x = newX;
+                draggedComponent.y = newY;
+
+                const el = document.getElementById(draggedComponent.id);
+                if (el) {
+                    el.style.left = newX + 'px';
+                    el.style.top = newY + 'px';
+                }
+                updateWires();
+            }
+        }
+
+        function endDrag() {
+            draggedComponent = null;
+            document.removeEventListener('mousemove', handleDrag);
+            document.removeEventListener('mouseup', endDrag);
+        }
+
+        // Connection/Wiring Handling
+        function startWire(e, termId) {
+            e.stopPropagation();
+            e.preventDefault();
+            activeWireStart = termId;
+            const rect = workspace.getBoundingClientRect();
+            mousePosition.x = e.clientX - rect.left;
+            mousePosition.y = e.clientY - rect.top;
+        }
+
+        function handleMouseMove(e) {
+            if (activeWireStart) {
+                const rect = workspace.getBoundingClientRect();
+                mousePosition.x = e.clientX - rect.left;
+                mousePosition.y = e.clientY - rect.top;
+                updateWires();
+            }
+        }
+
+        function handleMouseUp(e) {
+            if (activeWireStart) {
+                // Check if dropped over a valid terminal
+                const el = document.elementFromPoint(e.clientX, e.clientY);
+                if (el && el.dataset && el.dataset.termId) {
+                    const termId = el.dataset.termId;
+                    // Connect if terminals are different
+                    if (termId !== activeWireStart) {
+                        // Check if wire already exists
+                        const wireExists = wires.some(w => 
+                            (w.from === activeWireStart && w.to === termId) || 
+                            (w.from === termId && w.to === activeWireStart)
+                        );
+                        if (!wireExists) {
+                            wires.push({ from: activeWireStart, to: termId });
+                        }
+                    }
+                }
+                activeWireStart = null;
+                updateWires();
+            }
+        }
+
+        function updateWires() {
+            wireLayer.innerHTML = '';
+            const rect = workspace.getBoundingClientRect();
+
+            // Render existing permanent wires
+            wires.forEach((wire, index) => {
+                const elFrom = document.getElementById(wire.from);
+                const elTo = document.getElementById(wire.to);
+                if (elFrom && elTo) {
+                    const rFrom = elFrom.getBoundingClientRect();
+                    const rTo = elTo.getBoundingClientRect();
+                    
+                    const x1 = (rFrom.left + rFrom.width / 2) - rect.left;
+                    const y1 = (rFrom.top + rFrom.height / 2) - rect.top;
+                    const x2 = (rTo.left + rTo.width / 2) - rect.left;
+                    const y2 = (rTo.top + rTo.height / 2) - rect.top;
+
+                    // Assign color based on node state potential (visual enhancement)
+                    const termData = getTerminalObj(wire.from);
+                    let strokeColor = "#64748b"; // neutral slate-500
+                    if (termData) {
+                        if (termData.voltage > 4.5) strokeColor = "#ef4444"; // red 5V
+                        else if (termData.voltage <= 0.05) strokeColor = "#3b82f6"; // blue GND
+                        else if (termData.voltage > 1.5) strokeColor = "#f59e0b"; // yellow middle
+                    }
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const controlOffset = Math.abs(x1 - x2) * 0.5;
+                    path.setAttribute('d', `M ${x1} ${y1} C ${x1 + controlOffset} ${y1}, ${x2 - controlOffset} ${y2}, ${x2} ${y2}`);
+                    path.setAttribute('stroke', strokeColor);
+                    path.setAttribute('stroke-width', '3.5');
+                    path.setAttribute('fill', 'none');
+                    path.setAttribute('class', 'cursor-pointer hover:stroke-rose-500 pointer-events-auto transition-colors duration-150');
+                    path.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        wires.splice(index, 1);
+                        updateWires();
+                    });
+                    wireLayer.appendChild(path);
+                }
+            });
+
+            // Render active drag wire
+            if (activeWireStart) {
+                const elFrom = document.getElementById(activeWireStart);
+                if (elFrom) {
+                    const rFrom = elFrom.getBoundingClientRect();
+                    const x1 = (rFrom.left + rFrom.width / 2) - rect.left;
+                    const y1 = (rFrom.top + rFrom.height / 2) - rect.top;
+                    const x2 = mousePosition.x;
+                    const y2 = mousePosition.y;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const controlOffset = Math.abs(x1 - x2) * 0.5;
+                    path.setAttribute('d', `M ${x1} ${y1} C ${x1 + controlOffset} ${y1}, ${x2 - controlOffset} ${y2}, ${x2} ${y2}`);
+                    path.setAttribute('stroke', '#2dd4bf'); // teal active drawing
+                    path.setAttribute('stroke-width', '3');
+                    path.setAttribute('stroke-dasharray', '5,5');
+                    path.setAttribute('fill', 'none');
+                    wireLayer.appendChild(path);
+                }
+            }
+        }
+
+        function getTerminalObj(tId) {
+            for (let c of components) {
+                const t = c.terminals.find(term => term.id === tId);
+                if (t) return t;
+            }
+            return null;
+        }
+
+        // Real-Time Circuit Nodal relaxation Solver
+        function simulationTick() {
+            if (!simulationRunning) return;
+
+            // 1. Map Connections using Union-Find structure
+            const parent = {};
+            function find(tId) {
+                if (!parent[tId]) parent[tId] = tId;
+                if (parent[tId] === tId) return tId;
+                return parent[tId] = find(parent[tId]);
+            }
+            function union(tId1, tId2) {
+                const root1 = find(tId1);
+                const root2 = find(tId2);
+                if (root1 !== root2) {
+                    parent[root1] = root2;
+                }
+            }
+
+            // Populate base set of terminals
+            const allTerminals = [];
+            components.forEach(comp => {
+                comp.terminals.forEach(term => {
+                    allTerminals.push(term.id);
+                });
+            });
+
+            // Wire bindings translate to unions
+            wires.forEach(wire => {
+                union(wire.from, wire.to);
+            });
+
+            // Map terminal IDs to node indices
+            const nodeMap = {};
+            let nodeCount = 0;
+            allTerminals.forEach(tId => {
+                const root = find(tId);
+                if (nodeMap[root] === undefined) {
+                    nodeMap[root] = nodeCount++;
+                }
+                nodeMap[tId] = nodeMap[root];
+            });
+
+            if (nodeCount === 0) return;
+
+            // Identify default grounded/reference index (USB supply ground)
+            let gndNodeIdx = -1;
+            components.forEach(comp => {
+                if (comp.type === 'usb_power') {
+                    const gndTerm = comp.terminals.find(t => t.label === 'GND');
+                    if (gndTerm) {
+                        gndNodeIdx = nodeMap[gndTerm.id];
+                    }
+                }
+            });
+
+            if (gndNodeIdx === -1) gndNodeIdx = 0; // standard fallback
+
+            // Initial state node voltage vector
+            const V = new Array(nodeCount).fill(0.0);
+            if (lastVoltages && lastVoltages.length === nodeCount) {
+                for (let i = 0; i < nodeCount; i++) V[i] = lastVoltages[i];
+            }
+            V[gndNodeIdx] = 0.0;
+
+            // Relaxation Solver loop (Iterative approximation of node voltages)
+            const iterations = 100;
+            for (let iter = 0; iter < iterations; iter++) {
+                const nextV = [...V];
+                for (let i = 0; i < nodeCount; i++) {
+                    if (i === gndNodeIdx) continue;
+
+                    let sumG = 0.0;
+                    let sumGV = 0.0;
+
+                    components.forEach(comp => {
+                        if (comp.type === 'resistor') {
+                            const n1 = nodeMap[comp.terminals[0].id];
+                            const n2 = nodeMap[comp.terminals[1].id];
+                            if (n1 === i || n2 === i) {
+                                const neighbor = (n1 === i) ? n2 : n1;
+                                const R = comp.state.resistance || 330;
+                                const G = 1 / R;
+                                sumG += G;
+                                sumGV += G * V[neighbor];
+                            }
+                        }
+                        else if (comp.type === 'usb_power') {
+                            const nVbus = nodeMap[comp.terminals.find(t => t.label === '5V').id];
+                            const nGnd = nodeMap[comp.terminals.find(t => t.label === 'GND').id];
+                            if (nVbus === i || nGnd === i) {
+                                const R_src = 0.2; // small internal impedance
+                                const G = 1 / R_src;
+                                if (nVbus === i) {
+                                    sumG += G;
+                                    sumGV += G * (V[nGnd] + 5.0);
+                                } else {
+                                    sumG += G;
+                                    sumGV += G * (V[nVbus] - 5.0);
+                                }
+                            }
+                        }
+                        else if (comp.type === 'diy_cell') {
+                            const nAnode = nodeMap[comp.terminals.find(t => t.label === '+').id];
+                            const nCathode = nodeMap[comp.terminals.find(t => t.label === '-').id];
+                            if (nAnode === i || nCathode === i) {
+                                const formingRatio = comp.state.forming / 100;
+                                const chargeRatio = comp.state.charge / 100;
+                                
+                                // Open circuit potential matches actual chemical forming state
+                                const cellV = formingRatio * (1.5 + 0.5 * chargeRatio);
+                                
+                                // Internal resistance drops dramatically as plate surface forms
+                                const R_int = 150 - 146 * formingRatio; // Range: 150Ω down to 4Ω
+                                const G = 1 / R_int;
+
+                                if (nAnode === i) {
+                                    sumG += G;
+                                    sumGV += G * (V[nCathode] + cellV);
+                                } else {
+                                    sumG += G;
+                                    sumGV += G * (V[nAnode] - cellV);
+                                }
+                            }
+                        }
+                        else if (comp.type === 'led') {
+                            if (comp.state.blown) return;
+                            const nAnode = nodeMap[comp.terminals.find(t => t.label === '+').id];
+                            const nCathode = nodeMap[comp.terminals.find(t => t.label === '-').id];
+                            if (nAnode === i || nCathode === i) {
+                                const Vf = 2.0; // Green LED Forward Threshold
+                                const vDiff = V[nAnode] - V[nCathode];
+                                let G = 1 / 1e6; // Default dark leakage conductance
+                                let V_eff = (nAnode === i) ? V[nCathode] : V[nAnode];
+
+                                if (vDiff > Vf) {
+                                    G = 1 / 20; // forward dynamic resistance
+                                    if (nAnode === i) V_eff = V[nCathode] + Vf;
+                                    else V_eff = V[nAnode] - Vf;
+                                }
+                                sumG += G;
+                                sumGV += G * V_eff;
+                            }
+                        }
+                        else if (comp.type === 'multimeter') {
+                            const nRed = nodeMap[comp.terminals.find(t => t.label === 'VΩ+').id];
+                            const nBlack = nodeMap[comp.terminals.find(t => t.label === 'COM-').id];
+                            if (nRed === i || nBlack === i) {
+                                const neighbor = (nRed === i) ? nBlack : nRed;
+                                // In voltage mode, shunt is megohms. Current mode shunt is 0.1 ohm.
+                                const R = (comp.state.mode === 'voltage') ? 1e7 : 0.1;
+                                const G = 1 / R;
+                                sumG += G;
+                                sumGV += G * V[neighbor];
+                            }
+                        }
+                        else if (comp.type === 'spst_switch') {
+                            const n1 = nodeMap[comp.terminals[0].id];
+                            const n2 = nodeMap[comp.terminals[1].id];
+                            if (n1 === i || n2 === i) {
+                                const neighbor = (n1 === i) ? n2 : n1;
+                                const R = comp.state.closed ? 0.01 : 1e7;
+                                const G = 1 / R;
+                                sumG += G;
+                                sumGV += G * V[neighbor];
+                            }
+                        }
+                    });
+
+                    if (sumG > 0) {
+                        nextV[i] = sumGV / sumG;
+                    } else {
+                        nextV[i] = 0;
+                    }
+                }
+                V.forEach((val, idx) => {
+                    if (idx !== gndNodeIdx) V[idx] = nextV[idx];
+                });
+            }
+
+            lastVoltages = V;
+
+            // 2. Map voltages back to terminals and run chemical transformations
+            components.forEach(comp => {
+                comp.terminals.forEach(term => {
+                    term.voltage = V[nodeMap[term.id]] || 0.0;
+                });
+
+                // Type-specific dynamic simulation models
+                if (comp.type === 'diy_cell') {
+                    const vAnode = comp.terminals.find(t => t.label === '+').voltage;
+                    const vCathode = comp.terminals.find(t => t.label === '-').voltage;
+                    const formingRatio = comp.state.forming / 100;
+                    const chargeRatio = comp.state.charge / 100;
+                    const cellV = formingRatio * (1.5 + 0.5 * chargeRatio);
+                    const R_int = 150 - 146 * formingRatio;
+
+                    // Ohm's law calculates net loop flow
+                    const current = (vAnode - vCathode - cellV) / R_int;
+                    comp.state.current = current;
+
+                    // Chemical conversion dynamics
+                    const dt = 0.25; // accelerated clock step for simulation enjoyment
+                    if (current > 0) { // Charging direction
+                        if (comp.state.forming < 100) {
+                            comp.state.forming = Math.min(100, comp.state.forming + current * 40 * dt);
+                        } else {
+                            comp.state.charge = Math.min(100, comp.state.charge + current * 20 * dt);
+                        }
+                    } else if (current < 0) { // Discharging direction
+                        comp.state.charge = Math.max(0, comp.state.charge + current * 15 * dt);
+                    }
+
+                    // Update UI Readouts
+                    document.getElementById(`${comp.id}-forming`).innerText = Math.round(comp.state.forming) + '%';
+                    document.getElementById(`${comp.id}-forming-bar`).style.width = comp.state.forming + '%';
+                    document.getElementById(`${comp.id}-charge`).innerText = Math.round(comp.state.charge) + '%';
+                    document.getElementById(`${comp.id}-charge-bar`).style.width = comp.state.charge + '%';
+                    
+                    const activeV = (formingRatio * (1.5 + 0.5 * chargeRatio)).toFixed(2);
+                    document.getElementById(`${comp.id}-voltage`).innerText = activeV + ' V';
+                    document.getElementById(`${comp.id}-current`).innerText = (current * 1000).toFixed(1) + ' mA';
+
+                    // Gassing/Bubbling alert if forming current is excessive
+                    const bubbleAlert = document.getElementById(`${comp.id}-bubbling`);
+                    if (current > 0.012 && comp.state.forming >= 95) {
+                        bubbleAlert.classList.remove('hidden');
+                    } else {
+                        bubbleAlert.classList.add('hidden');
+                    }
+                }
+                else if (comp.type === 'led') {
+                    const bulb = document.getElementById(`${comp.id}-bulb`);
+                    const bulbInner = document.getElementById(`${comp.id}-bulb-inner`);
+                    const statusText = document.getElementById(`${comp.id}-status`);
+
+                    if (comp.state.blown) {
+                        bulb.className = "relative w-8 h-8 rounded-full border border-rose-950 flex items-center justify-center bg-slate-900";
+                        bulbInner.className = "w-4 h-4 rounded-full bg-rose-950/40 border border-rose-900";
+                        statusText.innerText = "💥 BLOWN (Fuse Melted)";
+                        statusText.className = "text-[9px] text-center text-rose-500 font-bold";
+                        document.getElementById(`${comp.id}-reset`).classList.remove('hidden');
+                        return;
+                    }
+
+                    const vAnode = comp.terminals.find(t => t.label === '+').voltage;
+                    const vCathode = comp.terminals.find(t => t.label === '-').voltage;
+                    const Vf = 2.0;
+                    const vDiff = vAnode - vCathode;
+                    let current = 0.0;
+                    if (vDiff > Vf) {
+                        current = (vDiff - Vf) / 20;
+                    }
+
+                    comp.state.current = current;
+
+                    if (current > 0.045) { // Fuse limit exceeded
+                        comp.state.blown = true;
+                    } else if (current > 0.001) {
+                        const intensity = Math.min(1, current / 0.02);
+                        bulb.style.borderColor = `rgba(16, 185, 129, ${0.4 + intensity * 0.6})`;
+                        bulb.style.boxShadow = `0 0 ${10 + intensity * 15}px rgba(16, 185, 129, ${0.3 + intensity * 0.7})`;
+                        bulbInner.style.backgroundColor = `rgba(16, 185, 129, ${0.7 + intensity * 0.3})`;
+                        statusText.innerText = `Active: ${(current * 1000).toFixed(1)} mA`;
+                        statusText.className = "text-[10px] text-center text-emerald-400 font-medium";
+                    } else {
+                        bulb.style.borderColor = '';
+                        bulb.style.boxShadow = '';
+                        bulbInner.style.backgroundColor = '';
+                        statusText.innerText = "Off";
+                        statusText.className = "text-[10px] text-center text-slate-400";
+                    }
+                }
+                else if (comp.type === 'multimeter') {
+                    const vRed = comp.terminals.find(t => t.label === 'VΩ+').voltage;
+                    const vBlack = comp.terminals.find(t => t.label === 'COM-').voltage;
+                    const display = document.getElementById(`${comp.id}-display`);
+                    
+                    if (comp.state.mode === 'voltage') {
+                        const measured = vRed - vBlack;
+                        display.innerText = measured.toFixed(2) + ' V';
+                    } else {
+                        // Current mode shunt measurement
+                        const measuredI = (vRed - vBlack) / 0.1;
+                        display.innerText = (measuredI * 1000).toFixed(1) + ' mA';
+                    }
+                }
+            });
+
+            // 3. Update the visual guides state
+            evaluateTutorialCompanion(nodeMap);
+        }
+
+        // Checklist Path and Connection Verification Logic
+        function evaluateTutorialCompanion(nodeMap) {
+            const step1 = document.getElementById('step-1');
+            const step2 = document.getElementById('step-2');
+            const step3 = document.getElementById('step-3');
+            const step4 = document.getElementById('step-4');
+            const step5 = document.getElementById('step-5');
+
+            // Find key objects
+            const cells = components.filter(c => c.type === 'diy_cell');
+            const pwr = components.find(c => c.type === 'usb_power');
+            const resistors = components.filter(c => c.type === 'resistor');
+            const leds = components.filter(c => c.type === 'led');
+
+            // Step 1: Placement check
+            const step1Passed = (cells.length >= 2 && pwr);
+            updateStepStyle(step1, step1Passed, "Step 1: Placement");
+
+            if (!step1Passed) return;
+
+            // Step 2: Series check (Anode of Cell A to Cathode of Cell B)
+            let seriesConnected = false;
+            let cell1 = cells[0];
+            let cell2 = cells[1];
+            if (cell1 && cell2) {
+                const a1 = nodeMap[cell1.terminals.find(t => t.label === '+').id];
+                const c1 = nodeMap[cell1.terminals.find(t => t.label === '-').id];
+                const a2 = nodeMap[cell2.terminals.find(t => t.label === '+').id];
+                const c2 = nodeMap[cell2.terminals.find(t => t.label === '-').id];
+
+                // Series link exists if Anode of one connects to Cathode of another, but they are not shorted
+                if ((a1 === c2 && a1 !== undefined) || (a2 === c1 && a2 !== undefined)) {
+                    seriesConnected = true;
+                }
+            }
+            updateStepStyle(step2, seriesConnected, "Step 2: Series Connection", !step1Passed);
+
+            if (!seriesConnected) return;
+
+            // Step 3: Resistor near 81 Ohms placed
+            const chargingResistor = resistors.find(r => r.state.resistance >= 70 && r.state.resistance <= 120);
+            const step3Passed = !!chargingResistor;
+            updateStepStyle(step3, step3Passed, "Step 3: Current Protection", !seriesConnected);
+
+            if (!step3Passed) return;
+
+            // Step 4: Forming charge check (Are batteries charging / forming?)
+            const formingActive = cells.some(c => c.state.current > 0.005);
+            const bothFullyFormed = cells.every(c => c.state.forming >= 99 && c.state.charge > 50);
+            
+            let step4Label = "Step 4: Forming Charge";
+            if (formingActive && !bothFullyFormed) {
+                step4Label += ` (${Math.round(cells[0].state.forming)}% Formed)`;
+            }
+            updateStepStyle(step4, bothFullyFormed, step4Label, !step3Passed);
+
+            if (!bothFullyFormed) return;
+
+            // Step 5: Load testing check
+            const ledLit = leds.some(l => l.state.current > 0.005 && !l.state.blown);
+            updateStepStyle(step5, ledLit, "Step 5: Load Testing", !bothFullyFormed);
+        }
+
+        function updateStepStyle(el, passed, titleText, locked = false) {
+            const badge = el.querySelector('.status-badge');
+            const title = el.querySelector('span:first-child');
+            title.innerText = titleText;
+
+            if (locked) {
+                el.className = "p-3 bg-slate-950 rounded border-l-4 border-slate-800 space-y-1 opacity-60";
+                badge.innerText = "Locked";
+                badge.className = "status-badge text-slate-500";
+                return;
+            }
+
+            el.className = passed 
+                ? "p-3 bg-emerald-950/30 rounded border-l-4 border-emerald-500 space-y-1" 
+                : "p-3 bg-slate-800/80 rounded border-l-4 border-amber-500 space-y-1";
+
+            badge.innerText = passed ? "Completed" : "In Progress";
+            badge.className = passed ? "status-badge text-emerald-400" : "status-badge text-amber-500";
+        }
+    </script>
 </body>
-
 </html>
