@@ -19,6 +19,7 @@ let isSelecting = false;
 let selectStart = { x: 0, y: 0 };
 let selectedComponents = new Set();
 let initialDragPositions = {};
+let currentProjectName = "Default Project";
 let activeWireStart = null;
 let mousePosition = { x: 0, y: 0 };
 let draggedComponent = null;
@@ -700,6 +701,7 @@ function addComponent(type, customX, customY) {
   renderComponent(comp);
   updateResistorBandsForComp(comp);
   updateWires();
+  saveWorkspaceToLocalStorage();
   return comp;
 }
 
@@ -971,6 +973,7 @@ function removeComponent(id) {
   const el = document.getElementById(id); if (el) el.remove();
   delete oscData[id];
   updateWires();
+  saveWorkspaceToLocalStorage();
   showToast('Component removed', 'info');
 }
 
@@ -1078,6 +1081,7 @@ function endDrag() {
       if (el) { el.style.left = snappedX + 'px'; el.style.top = snappedY + 'px'; }
     }
     updateWires();
+    saveWorkspaceToLocalStorage();
   }
 
   draggedComponent = null;
@@ -1098,6 +1102,7 @@ function startWire(e, termId) {
   if (activeWireStart === termId) {
     activeWireStart = null;
     updateWires();
+    saveWorkspaceToLocalStorage();
     return;
   }
 
@@ -1120,6 +1125,7 @@ function startWire(e, termId) {
 
     showToast('Wire detached. Drag to reconnect, or release in empty space to delete.', 'info');
     updateWires();
+    saveWorkspaceToLocalStorage();
     return;
   }
 
@@ -1434,6 +1440,7 @@ function rotateComponent(id) {
     el.style.setProperty('--rotation', `${comp.rotation}deg`);
   }
   updateWires();
+  saveWorkspaceToLocalStorage();
 }
 
 function toggleCompactMode() {
@@ -1447,6 +1454,7 @@ function toggleCompactMode() {
     btn.classList.toggle('btn-secondary', !compactMode);
   }
   setTimeout(updateWires, 150); // Give transitions time to complete
+  saveWorkspaceToLocalStorage();
 }
 
 function toggleSidebar(panelId) {
@@ -1917,6 +1925,185 @@ function updateWorkspaceHUD() {
   }
 
   hud.innerHTML = metricsHtml;
+}
+
+// ─── LOCAL STORAGE SAVE / LOAD ENGINE ──────────────────────────────────────────
+function saveWorkspaceToLocalStorage(name) {
+  const targetName = name || currentProjectName || "Default Project";
+
+  const projectData = {
+    components: components.map(c => ({
+      id: c.id,
+      type: c.type,
+      x: c.x,
+      y: c.y,
+      rotation: c.rotation || 0,
+      state: c.state
+    })),
+    wires: wires,
+    transformState: transformState,
+    compactMode: compactMode
+  };
+
+  let projects = JSON.parse(localStorage.getItem('workbench_projects') || '{}');
+  projects[targetName] = projectData;
+  localStorage.setItem('workbench_projects', JSON.stringify(projects));
+  localStorage.setItem('workbench_current_project_name', targetName);
+
+  currentProjectName = targetName;
+}
+
+function loadWorkspaceFromLocalStorage(name) {
+  let projects = JSON.parse(localStorage.getItem('workbench_projects') || '{}');
+  const projectData = projects[name];
+  if (!projectData) {
+    showToast(`Project "${name}" not found`, 'error');
+    return;
+  }
+
+  // Wipe current workspace completely
+  components = [];
+  wires = [];
+  container.innerHTML = '';
+  selectedComponents.clear();
+  selectedComponentId = null;
+
+  // Restore compact mode state
+  compactMode = projectData.compactMode || false;
+  const layer = document.getElementById('components-container');
+  if (layer) layer.classList.toggle('compact-view', compactMode);
+  const compactBtn = document.getElementById('btn-compact-toggle');
+  if (compactBtn) {
+    compactBtn.classList.toggle('btn-teal', compactMode);
+    compactBtn.classList.toggle('btn-secondary', !compactMode);
+  }
+
+  // Restore transform viewport positions
+  transformState = projectData.transformState || { scale: 1.0, x: 0, y: 0 };
+  applyWorkspaceTransform();
+
+  // Rebuild components from spec arrays
+  if (projectData.components) {
+    projectData.components.forEach(c => {
+      const { terminals, state } = buildComponent(c.type, c.id, components);
+      const mergedState = { ...state, ...c.state };
+      const comp = {
+        id: c.id,
+        type: c.type,
+        x: c.x,
+        y: c.y,
+        rotation: c.rotation || 0,
+        terminals,
+        state: mergedState
+      };
+      components.push(comp);
+      renderComponent(comp);
+    });
+  }
+
+  // Re-establish wiring layers
+  wires = projectData.wires || [];
+  updateWires();
+
+  currentProjectName = name;
+  localStorage.setItem('workbench_current_project_name', name);
+  showToast(`Loaded workspace: "${name}" ✓`, 'success');
+}
+
+// ─── PROJECTS MANAGEMENT MODAL GUI ─────────────────────────────────────────────
+function openProjectManager() {
+  let modal = document.getElementById('project-overlay');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'project-overlay';
+    modal.className = 'overlay hidden';
+    modal.onclick = (e) => { if (e.target.id === 'project-overlay') closeProjectManager(); };
+    document.body.appendChild(modal);
+  }
+  modal.classList.remove('hidden');
+  renderProjectList();
+}
+
+function closeProjectManager() {
+  const modal = document.getElementById('project-overlay');
+  if (modal) modal.classList.add('hidden');
+}
+
+function renderProjectList() {
+  const overlay = document.getElementById('project-overlay');
+  if (!overlay) return;
+
+  let projects = JSON.parse(localStorage.getItem('workbench_projects') || '{}');
+  const projectNames = Object.keys(projects);
+
+  overlay.innerHTML = `
+    <div class="modal" style="max-width: 400px; width: 92%; background: var(--bg-panel); border: 1px solid var(--border-hi); border-radius: var(--radius-lg); padding: 20px; margin: auto; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: var(--shadow-card); z-index: 10000; display:flex; flex-direction:column; gap:12px;">
+      <div class="modal-head" style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="modal-title" style="font-weight:700; color:var(--teal); font-family:var(--font-mono); font-size:13px;">📁 Projects Manager</span>
+        <button onclick="closeProjectManager()" class="modal-close" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:16px;">✕</button>
+      </div>
+      
+      <div style="display:flex; gap:8px;">
+        <input type="text" id="new-project-input" placeholder="New workspace name..." style="flex:1; padding:8px 12px; background:var(--bg-deepest); border:1px solid var(--border); color:#fff; border-radius:var(--radius); font-size:12px;">
+        <button class="btn btn-teal" onclick="createNewProjectFromUI()">Create</button>
+      </div>
+      
+      <div style="font-size:11px; color:var(--text-secondary); font-weight:600;">Saved Workspaces:</div>
+      <div id="saved-project-scroll" style="max-height:160px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;">
+        ${projectNames.map(name => `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius);">
+            <span style="font-family:var(--font-mono); font-size:11px; color:${name === currentProjectName ? 'var(--teal)' : 'var(--text-primary)'}; cursor:pointer; font-weight:600;" onclick="loadWorkspaceFromLocalStorage('${name}'); closeProjectManager();">
+              ${name === currentProjectName ? '● ' : ''}${name}
+            </span>
+            <button onclick="deleteProjectFromUI('${name}')" style="background:none; border:none; color:var(--rose); cursor:pointer; font-size:11px; font-weight:700;">Delete</button>
+          </div>
+        `).join('')}
+        ${projectNames.length === 0 ? '<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:11px;">No saved workspaces yet.</div>' : ''}
+      </div>
+      
+      <div class="modal-foot" style="display:flex; justify-content:space-between; margin-top:8px;">
+        <button class="btn btn-secondary" onclick="saveWorkspaceToLocalStorage(); closeProjectManager(); showToast('Saved!','success');">💾 Save Current</button>
+        <button class="btn btn-ghost" onclick="closeProjectManager()">Cancel</button>
+      </div>
+    </div>
+  `;
+}
+
+function createNewProjectFromUI() {
+  const input = document.getElementById('new-project-input');
+  const name = input ? input.value.trim() : "";
+  if (!name) {
+    showToast('Please enter a valid project name', 'error');
+    return;
+  }
+
+  components = [];
+  wires = [];
+  container.innerHTML = '';
+  selectedComponents.clear();
+  selectedComponentId = null;
+  updateWires();
+
+  currentProjectName = name;
+  saveWorkspaceToLocalStorage(name);
+  renderProjectList();
+  closeProjectManager();
+  showToast(`Created workspace: "${name}"`, 'success');
+}
+
+function deleteProjectFromUI(name) {
+  if (confirm(`Are you sure you want to delete "${name}"?`)) {
+    let projects = JSON.parse(localStorage.getItem('workbench_projects') || '{}');
+    delete projects[name];
+    localStorage.setItem('workbench_projects', JSON.stringify(projects));
+
+    if (currentProjectName === name) {
+      currentProjectName = "Default Project";
+      localStorage.setItem('workbench_current_project_name', currentProjectName);
+    }
+    renderProjectList();
+    showToast(`Deleted "${name}"`, 'warn');
+  }
 }
 
 function getCustomCircuitMetrics() {
@@ -3064,12 +3251,22 @@ window.addEventListener('DOMContentLoaded', () => {
     <button id="btn-compact-toggle" class="btn btn-secondary" onclick="toggleCompactMode()">🏷️ Compact View</button>
     <button class="btn btn-secondary" onclick="toggleSidebar('panel-parts')">📁 Toggle Library</button>
     <button class="btn btn-secondary" onclick="toggleSidebar('panel-guide')">📖 Toggle Guide</button>
+    <button class="btn btn-secondary" onclick="openProjectManager()">📁 Projects</button>
   `;
   workspace.appendChild(workspaceControls);
 
   initKeyboardShortcuts();
   switchMobileTab('workspace');
-  switchTutorial('lead_acid');
+
+  // Session Restore: Auto-loads last saved project or builds default workspace
+  const lastProj = localStorage.getItem('workbench_current_project_name');
+  if (lastProj) {
+    loadWorkspaceFromLocalStorage(lastProj);
+  } else {
+    currentProjectName = "Default Project";
+    switchTutorial('lead_acid'); // Build initial guide board
+    saveWorkspaceToLocalStorage("Default Project");
+  }
 
   // Simulation loop
   setInterval(simulationTick, 100);
