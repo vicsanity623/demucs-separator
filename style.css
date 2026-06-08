@@ -538,6 +538,9 @@ body {
 #wire-layer,
 #components-container {
   overflow: visible !important;
+  transform-origin: 0 0;
+  will-change: transform;
+  transform: translate3d(var(--pan-x, 0px), var(--pan-y, 0px), 0) scale(var(--scale, 1));
 }
 
 /* Collapse styling for the compact/2D breadboard look */
@@ -556,12 +559,14 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%; /* Stretch header to fill the card so it is draggable from anywhere */
-  z-index: 10;  /* Below terminals (z-index 20) but above graphics (z-index 5) */
+  height: 100%;
+  /* Stretch header to fill the card so it is draggable from anywhere */
+  z-index: 10;
+  /* Below terminals (z-index 20) but above graphics (z-index 5) */
 }
 
 /* Counter-rotate text layers to keep labels upright */
-.term-node span, 
+.term-node span,
 .compact-graphic text {
   display: inline-block;
   transform: rotate(calc(-1 * var(--rotation, 0deg))) !important;
