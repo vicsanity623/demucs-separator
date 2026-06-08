@@ -15,6 +15,10 @@ let panStart = { x: 0, y: 0 };
 let lastTouchDistance = 0;
 let compactMode = false;
 let selectedComponentId = null;
+let isSelecting = false;
+let selectStart = { x: 0, y: 0 };
+let selectedComponents = new Set();
+let initialDragPositions = {};
 let activeWireStart = null;
 let mousePosition = { x: 0, y: 0 };
 let draggedComponent = null;
@@ -103,6 +107,7 @@ const PARTS_CATALOGUE = [
       { type: 'diode', icon: '▶', iconClass: 'icon-passive', name: 'Diode 1N4007', desc: 'Rectifier, Vf 0.7V, 1A 1000V' },
       { type: 'zener', icon: '⇒', iconClass: 'icon-passive', name: 'Zener Diode 5.1V', desc: 'BZX55C5V1, Pzmax 500mW' },
       { type: 'transformer', icon: '⊘', iconClass: 'icon-passive', name: 'Transformer 1:10', desc: 'Step-up audio, 600Ω:60kΩ' },
+      { type: 'solder_joint', icon: '⚫', iconClass: 'icon-passive', name: 'Solder Joint', desc: 'Wiring junction point' },
     ]
   },
   // ── SEMICONDUCTORS ─────────────────────────────────────────────────────────
@@ -185,6 +190,10 @@ function makeTerminals(id, defs) {
 function buildComponent(type, id, existingComponents) {
   let terminals = [], state = {};
   switch (type) {
+    case 'solder_joint':
+      terminals = makeTerminals(id, [{ label: 'Node', x: 16, y: 16 }]);
+      state = { name: 'Solder Joint' };
+      break;
     case 'battery_18650':
       terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
       state = { voltage: 3.7, capacity: 2600, charge: 100, internalR: 0.04, name: '18650 Li-ion' };
@@ -774,6 +783,17 @@ function renderComponent(comp) {
   div.addEventListener('contextmenu', e => { e.preventDefault(); showComponentContextMenu(e, comp.id); });
 
   container.appendChild(div);
+
+  // Custom drag binding for Headerless components (like Solder Joint)
+  if (comp.type === 'solder_joint') {
+    div.addEventListener('mousedown', e => {
+      if (e.button === 0) startDrag(e, comp.id);
+    });
+    div.addEventListener('touchstart', e => {
+      startDrag(e, comp.id);
+    });
+  }
+
   updateResistorBandsForComp(comp);
 }
 
@@ -979,6 +999,18 @@ function startDrag(e, compId) {
   draggedComponent = comp;
   dragOffset.x = coords.clientX - (comp.x * transformState.scale + transformState.x + rect.left);
   dragOffset.y = coords.clientY - (comp.y * transformState.scale + transformState.y + rect.top);
+
+  // Store base positions for all selected cards to prevent drift
+  initialDragPositions = {};
+  if (selectedComponents.has(compId)) {
+    selectedComponents.forEach(id => {
+      const c = components.find(x => x.id === id);
+      if (c) initialDragPositions[id] = { x: c.x, y: c.y };
+    });
+  } else {
+    initialDragPositions[compId] = { x: comp.x, y: comp.y };
+  }
+
   document.addEventListener('mousemove', handleDrag);
   document.addEventListener('touchmove', handleDrag, { passive: false });
   document.addEventListener('mouseup', endDrag);
@@ -991,26 +1023,59 @@ function handleDrag(e) {
   isDragging = true;
   const rect = workspace.getBoundingClientRect();
   const coords = getPointerCoords(e);
+
   let nx = (coords.clientX - dragOffset.x - rect.left - transformState.x) / transformState.scale;
   let ny = (coords.clientY - dragOffset.y - rect.top - transformState.y) / transformState.scale;
-  draggedComponent.x = nx;
-  draggedComponent.y = ny;
-  const el = document.getElementById(draggedComponent.id);
-  if (el) { el.style.left = nx + 'px'; el.style.top = ny + 'px'; }
+
+  // Calculate delta relative offset
+  const baseInit = initialDragPositions[draggedComponent.id];
+  if (!baseInit) return;
+  const dx = nx - baseInit.x;
+  const dy = ny - baseInit.y;
+
+  if (selectedComponents.has(draggedComponent.id)) {
+    // Displace all active selections collectively
+    selectedComponents.forEach(id => {
+      const comp = components.find(c => c.id === id);
+      const init = initialDragPositions[id];
+      if (comp && init) {
+        comp.x = init.x + dx;
+        comp.y = init.y + dy;
+        const el = document.getElementById(comp.id);
+        if (el) { el.style.left = comp.x + 'px'; el.style.top = comp.y + 'px'; }
+      }
+    });
+  } else {
+    // Default drag
+    draggedComponent.x = nx;
+    draggedComponent.y = ny;
+    const el = document.getElementById(draggedComponent.id);
+    if (el) { el.style.left = nx + 'px'; el.style.top = ny + 'px'; }
+  }
   updateWires();
 }
 
 function endDrag() {
   if (draggedComponent) {
     const gridSize = 24;
-    const snappedX = Math.round(draggedComponent.x / gridSize) * gridSize;
-    const snappedY = Math.round(draggedComponent.y / gridSize) * gridSize;
-    draggedComponent.x = snappedX;
-    draggedComponent.y = snappedY;
-    const el = document.getElementById(draggedComponent.id);
-    if (el) {
-      el.style.left = snappedX + 'px';
-      el.style.top = snappedY + 'px';
+
+    if (selectedComponents.has(draggedComponent.id)) {
+      selectedComponents.forEach(id => {
+        const comp = components.find(c => c.id === id);
+        if (comp) {
+          comp.x = Math.round(comp.x / gridSize) * gridSize;
+          comp.y = Math.round(comp.y / gridSize) * gridSize;
+          const el = document.getElementById(comp.id);
+          if (el) { el.style.left = comp.x + 'px'; el.style.top = comp.y + 'px'; }
+        }
+      });
+    } else {
+      const snappedX = Math.round(draggedComponent.x / gridSize) * gridSize;
+      const snappedY = Math.round(draggedComponent.y / gridSize) * gridSize;
+      draggedComponent.x = snappedX;
+      draggedComponent.y = snappedY;
+      const el = document.getElementById(draggedComponent.id);
+      if (el) { el.style.left = snappedX + 'px'; el.style.top = snappedY + 'px'; }
     }
     updateWires();
   }
@@ -2703,6 +2768,76 @@ function getTouchDistance(e) {
   return Math.sqrt(dx * dx + dy * dy);
 }
 
+// ─── SELECTION BOX LOGIC ──────────────────────────────────────────────────────
+function startWorkspaceSelect(e) {
+  if (draggedComponent || activeWireStart || e.button !== 0 || e.shiftKey) return;
+
+  isSelecting = true;
+  const coords = getPointerCoords(e);
+  selectStart.x = coords.x;
+  selectStart.y = coords.y;
+
+  let box = document.getElementById('selection-box');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'selection-box';
+    workspace.appendChild(box);
+  }
+  box.style.left = (coords.x * transformState.scale + transformState.x) + 'px';
+  box.style.top = (coords.y * transformState.scale + transformState.y) + 'px';
+  box.style.width = '0px';
+  box.style.height = '0px';
+  box.style.display = 'block';
+
+  // Clear previous select state
+  selectedComponents.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('selected');
+  });
+  selectedComponents.clear();
+}
+
+function handleWorkspaceSelect(e) {
+  if (!isSelecting) return;
+  const coords = getPointerCoords(e);
+  const box = document.getElementById('selection-box');
+  if (!box) return;
+
+  const x1 = Math.min(selectStart.x, coords.x);
+  const y1 = Math.min(selectStart.y, coords.y);
+  const x2 = Math.max(selectStart.x, coords.x);
+  const y2 = Math.max(selectStart.y, coords.y);
+
+  box.style.left = (x1 * transformState.scale + transformState.x) + 'px';
+  box.style.top = (y1 * transformState.scale + transformState.y) + 'px';
+  box.style.width = ((x2 - x1) * transformState.scale) + 'px';
+  box.style.height = ((y2 - y1) * transformState.scale) + 'px';
+
+  components.forEach(comp => {
+    const cardEl = document.getElementById(comp.id);
+    if (!cardEl) return;
+    const w = compactMode ? 100 : 192;
+    const h = cardEl.clientHeight || 100;
+
+    // Check if the card lies within the box coordinates
+    const intersect = (comp.x < x2 && comp.x + w > x1 && comp.y < y2 && comp.y + h > y1);
+
+    if (intersect) {
+      selectedComponents.add(comp.id);
+      cardEl.classList.add('selected');
+    } else {
+      selectedComponents.delete(comp.id);
+      cardEl.classList.remove('selected');
+    }
+  });
+}
+
+function endWorkspaceSelect() {
+  isSelecting = false;
+  const box = document.getElementById('selection-box');
+  if (box) box.style.display = 'none';
+}
+
 // ─── WIRE COLOR SELECTOR UI ───────────────────────────────────────────────────
 function renderWireColorBar() {
   const bar = document.getElementById('wire-color-bar');
@@ -2864,14 +2999,34 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Canvas Navigation Listeners (Zoom & Pan)
   workspace.addEventListener('wheel', handleWorkspaceWheel, { passive: false });
-  workspace.addEventListener('mousedown', startWorkspacePan);
-  workspace.addEventListener('touchstart', startWorkspacePan, { passive: false });
 
-  document.addEventListener('mousemove', handleWorkspacePanAndZoom);
-  document.addEventListener('touchmove', handleWorkspacePanAndZoom, { passive: false });
+  // Direct Left-click to select boxes, and Right/Middle clicks to pan
+  workspace.addEventListener('mousedown', e => {
+    if (e.button === 0) startWorkspaceSelect(e);
+    else startWorkspacePan(e);
+  });
+  workspace.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) startWorkspacePan(e);
+    else startWorkspaceSelect(e);
+  }, { passive: false });
 
-  document.addEventListener('mouseup', stopWorkspacePan);
-  document.addEventListener('touchend', stopWorkspacePan);
+  document.addEventListener('mousemove', e => {
+    handleWorkspaceSelect(e);
+    handleWorkspacePanAndZoom(e);
+  });
+  document.addEventListener('touchmove', e => {
+    handleWorkspaceSelect(e);
+    handleWorkspacePanAndZoom(e);
+  }, { passive: false });
+
+  document.addEventListener('mouseup', () => {
+    endWorkspaceSelect();
+    stopWorkspacePan();
+  });
+  document.addEventListener('touchend', () => {
+    endWorkspaceSelect();
+    stopWorkspacePan();
+  });
 
   playPauseBtn.addEventListener('click', () => {
     simulationRunning = !simulationRunning;
