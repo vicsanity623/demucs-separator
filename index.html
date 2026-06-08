@@ -1,138 +1,158 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full select-none">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>DIY Electronics & Electrochemical Workbench</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="manifest.json">
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts for digital readouts -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         .digital-font {
             font-family: 'Orbitron', monospace;
         }
-        /* Custom grid background */
         .workspace-grid {
             background-color: #0f172a;
             background-image: radial-gradient(#334155 1px, transparent 1px);
             background-size: 20px 20px;
         }
+        /* Touch target enhancement for terminals on mobile */
+        .term-node::after {
+            content: '';
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: transparent;
+        }
     </style>
 </head>
-<body class="h-full bg-slate-955 text-slate-100 flex flex-col overflow-hidden">
+<body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
 
     <!-- Header Panel -->
-    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex flex-shrink-0 justify-between items-center z-10">
+    <header class="bg-slate-900 border-b border-slate-800 px-4 md:px-6 py-3 flex flex-shrink-0 justify-between items-center z-20">
         <div>
-            <h1 class="text-xl font-bold tracking-tight text-teal-400">DIY Electronics & Electrochemical Simulator</h1>
-            <p class="text-xs text-slate-400 mt-0.5">Virtual design, prototyping, and safe electrochemical validation workspace</p>
+            <h1 class="text-md md:text-xl font-bold tracking-tight text-teal-400">DIY Workbench</h1>
+            <p class="hidden sm:block text-xs text-slate-400">Virtual design, prototyping, and electrochemical cell simulator</p>
         </div>
-        <div class="flex items-center gap-4">
-            <button id="btn-play-pause" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-4 py-2 rounded shadow transition-colors flex items-center gap-2">
-                <span id="play-icon">⏸</span> <span id="play-text">Pause Simulation</span>
+        <div class="flex items-center gap-2 md:gap-4">
+            <button id="btn-play-pause" class="bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded shadow transition-colors flex items-center gap-1.5">
+                <span id="play-icon">⏸</span> <span id="play-text">Pause</span>
             </button>
-            <button id="btn-clear" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium text-sm px-4 py-2 rounded transition-colors">
-                Clear Workspace
+            <button id="btn-clear" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded transition-colors">
+                Clear
             </button>
         </div>
     </header>
 
+    <!-- Mobile Top Navigation Tab Bar (Hidden on Desktop) -->
+    <nav class="md:hidden bg-slate-900 border-b border-slate-800 flex justify-around items-center text-xs font-semibold h-11 flex-shrink-0 z-20">
+        <button onclick="switchMobileTab('workspace')" id="tab-workspace" class="flex-1 h-full text-center border-b-2 border-teal-500 text-teal-400">
+            Workspace
+        </button>
+        <button onclick="switchMobileTab('parts')" id="tab-parts" class="flex-1 h-full text-center border-b-2 border-transparent text-slate-400">
+            Parts Bin
+        </button>
+        <button onclick="switchMobileTab('guide')" id="tab-guide" class="flex-1 h-full text-center border-b-2 border-transparent text-slate-400">
+            Tutorial Guide
+        </button>
+    </nav>
+
     <!-- Main Container -->
-    <div class="flex flex-1 overflow-hidden">
+    <div class="flex flex-1 overflow-hidden relative">
         
         <!-- Left Sidebar: Component Bin -->
-        <aside class="w-80 bg-slate-900 border-r border-slate-800 flex flex-col p-4 overflow-y-auto flex-shrink-0 z-10">
-            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Component Bin</h2>
-            <p class="text-xs text-slate-400 mb-4">Click any component below to place it on the active workspace:</p>
+        <aside id="panel-parts" class="hidden md:flex w-full md:w-80 bg-slate-900 border-r border-slate-800 flex-col p-4 overflow-y-auto flex-shrink-0 z-10 absolute md:static inset-0">
+            <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-3">Component Bin</h2>
+            <p class="text-xs text-slate-400 mb-4">Select or tap a component to instantiate it onto the grid:</p>
             
-            <div class="space-y-3">
+            <div class="space-y-3 pb-8">
                 <!-- USB Power Supply -->
-                <button onclick="addComponent('usb_power')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-indigo-900/50 flex items-center justify-center border border-indigo-700 text-indigo-400">🔌</div>
+                <button onclick="addAndFocusComponent('usb_power')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-indigo-900/50 flex items-center justify-center border border-indigo-700 text-lg">🔌</div>
                     <div>
                         <div class="text-sm font-medium text-slate-200">5V USB Power Supply</div>
-                        <div class="text-xs text-slate-400">Provides 5.0V VBUS & Ground reference</div>
+                        <div class="text-xs text-slate-400">Provides 5.0V VBUS & Ground</div>
                     </div>
                 </button>
 
                 <!-- DIY Epsom-Salt Cell -->
-                <button onclick="addComponent('diy_cell')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-teal-900/50 flex items-center justify-center border border-teal-700 text-teal-400">🧪</div>
+                <button onclick="addAndFocusComponent('diy_cell')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-teal-900/50 flex items-center justify-center border border-teal-700 text-lg">🧪</div>
                     <div>
                         <div class="text-sm font-medium text-slate-200">DIY Epsom-Salt Cell</div>
-                        <div class="text-xs text-slate-400">0.0V raw. Requires electrochemical forming</div>
+                        <div class="text-xs text-slate-400">0.0V raw. Requires forming charge</div>
                     </div>
                 </button>
 
                 <!-- Resistor -->
-                <button onclick="addComponent('resistor')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-amber-900/50 flex items-center justify-center border border-amber-700 text-amber-400">⚙️</div>
+                <button onclick="addAndFocusComponent('resistor')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-amber-900/50 flex items-center justify-center border border-amber-700 text-lg">⚙️</div>
                     <div>
                         <div class="text-sm font-medium text-slate-200">Variable Resistor</div>
-                        <div class="text-xs text-slate-400">Configurable resistance (1Ω - 10kΩ)</div>
+                        <div class="text-xs text-slate-400">Configurable (1Ω - 10kΩ)</div>
                     </div>
                 </button>
 
                 <!-- LED Indicator -->
-                <button onclick="addComponent('led')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-emerald-900/50 flex items-center justify-center border border-emerald-700 text-emerald-400">💡</div>
+                <button onclick="addAndFocusComponent('led')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-emerald-900/50 flex items-center justify-center border border-emerald-700 text-lg">💡</div>
                     <div>
                         <div class="text-sm font-medium text-slate-200">LED Indicator</div>
-                        <div class="text-xs text-slate-400">Lights up with current, blows over 45mA</div>
+                        <div class="text-xs text-slate-400">Lights up, melts if current > 45mA</div>
                     </div>
                 </button>
 
                 <!-- Digital Multimeter -->
-                <button onclick="addComponent('multimeter')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-rose-900/50 flex items-center justify-center border border-rose-700 text-rose-400">📟</div>
+                <button onclick="addAndFocusComponent('multimeter')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-rose-900/50 flex items-center justify-center border border-rose-700 text-lg">📟</div>
                     <div>
                         <div class="text-sm font-medium text-slate-200">Digital Multimeter</div>
-                        <div class="text-xs text-slate-400">Measures voltage or path current</div>
+                        <div class="text-xs text-slate-400">Measures voltage or dynamic current</div>
                     </div>
                 </button>
 
                 <!-- SPST Switch -->
-                <button onclick="addComponent('spst_switch')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3">
-                    <div class="w-10 h-10 rounded bg-slate-700/50 flex items-center justify-center border border-slate-600 text-slate-300">🎛️</div>
+                <button onclick="addAndFocusComponent('spst_switch')" class="w-full text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 transition flex items-center gap-3">
+                    <div class="w-10 h-10 rounded bg-slate-700/50 flex items-center justify-center border border-slate-600 text-lg">🎛️</div>
                     <div>
                         <div class="text-sm font-medium text-slate-200">SPST Switch</div>
-                        <div class="text-xs text-slate-400">Toggles path connectivity Open/Closed</div>
+                        <div class="text-xs text-slate-400">Toggles loop conductivity On/Off</div>
                     </div>
                 </button>
             </div>
-
-            <!-- Guidelines and Info -->
-            <div class="mt-auto pt-6 border-t border-slate-800">
-                <div class="bg-slate-950 p-3 rounded border border-slate-800 text-xs text-slate-400 space-y-2">
-                    <p class="font-semibold text-slate-300 text-center">💡 Quick Guide</p>
-                    <p>• Click and drag component headers to move them around.</p>
-                    <p>• Click a connection port, then click another port to draw a wire.</p>
-                    <p>• Right-click a wire to remove it.</p>
-                </div>
-            </div>
         </aside>
 
-        <!-- Main Center Workspace -->
-        <main class="flex-1 relative workspace-grid overflow-hidden" id="workspace">
+        <!-- Main Center Workspace Canvas -->
+        <main id="panel-workspace" class="flex-1 relative workspace-grid overflow-hidden touch-none">
             <!-- Connection SVG Layer -->
             <svg id="wire-layer" class="absolute inset-0 pointer-events-none w-full h-full z-0"></svg>
             
-            <!-- Component Containers live here -->
+            <!-- Render Container -->
             <div id="components-container" class="absolute inset-0 z-10 pointer-events-none"></div>
         </main>
 
         <!-- Right Sidebar: Interactive Tutorial Guide -->
-        <aside class="w-96 bg-slate-900 border-l border-slate-800 flex flex-col overflow-y-auto flex-shrink-0 z-10">
+        <aside id="panel-guide" class="hidden md:flex w-full md:w-96 bg-slate-900 border-l border-slate-800 flex-col overflow-y-auto flex-shrink-0 z-10 absolute md:static inset-0">
             <div class="p-4 border-b border-slate-800">
                 <h2 class="text-sm font-semibold text-slate-300 uppercase tracking-wider">Tutorial Companion</h2>
                 <p class="text-xs text-slate-400 mt-1">Simulating the 4.0V Epsom-Salt Lead-Acid Battery</p>
             </div>
 
-            <div class="p-4 space-y-4 text-xs text-slate-300">
+            <div class="p-4 space-y-4 text-xs text-slate-300 pb-16">
                 <!-- Step Tracker list -->
                 <div class="space-y-3" id="step-tracker">
                     <!-- Step 1 -->
@@ -182,7 +202,7 @@
                 </div>
 
                 <!-- Live Chemistry Status Card -->
-                <div class="mt-6 bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
+                <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 space-y-2">
                     <h3 class="text-xs font-semibold uppercase tracking-wider text-teal-400">Electrochemical State</h3>
                     <div class="space-y-1 text-slate-400">
                         <div class="flex justify-between"><span>Active Ions:</span><span class="text-slate-200 font-mono">Mg2+ , SO42-</span></div>
@@ -195,9 +215,9 @@
         </aside>
     </div>
 
-    <!-- JavaScript Execution Engine -->
+    <!-- JavaScript Simulation Engine -->
     <script>
-        // Global Simulation States
+        // Global States
         let components = [];
         let wires = [];
         let simulationRunning = true;
@@ -206,36 +226,41 @@
         let draggedComponent = null;
         let dragOffset = { x: 0, y: 0 };
         let lastVoltages = [];
+        let currentMobileTab = 'workspace';
 
-        // Workspace elements
         const workspace = document.getElementById('workspace');
         const container = document.getElementById('components-container');
         const wireLayer = document.getElementById('wire-layer');
         const playPauseBtn = document.getElementById('btn-play-pause');
         const clearBtn = document.getElementById('btn-clear');
 
-        // Initial setup on document load
         window.addEventListener('DOMContentLoaded', () => {
-            // Setup default components to guide the user initially
-            addComponent('usb_power', 100, 100);
-            addComponent('diy_cell', 100, 260);
-            addComponent('diy_cell', 100, 420);
+            // Generate starter layout dynamically
+            const wWidth = workspace.clientWidth || window.innerWidth;
+            const startX = wWidth < 768 ? 20 : 60;
             
-            // Event listeners
-            workspace.addEventListener('mousemove', handleMouseMove);
-            workspace.addEventListener('mouseup', handleMouseUp);
+            addComponent('usb_power', startX, 40);
+            addComponent('diy_cell', startX, 180);
+            addComponent('diy_cell', startX, 330);
+            
+            // Mouse & Touch bindings
+            workspace.addEventListener('mousemove', handlePointerMove);
+            workspace.addEventListener('touchmove', handlePointerMove, { passive: false });
+            workspace.addEventListener('mouseup', handlePointerUp);
+            workspace.addEventListener('touchend', handlePointerUp);
             window.addEventListener('resize', updateWires);
 
+            // Play/Pause Action
             playPauseBtn.addEventListener('click', () => {
                 simulationRunning = !simulationRunning;
                 if (simulationRunning) {
-                    playPauseBtn.className = "bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-sm px-4 py-2 rounded shadow transition-colors flex items-center gap-2";
+                    playPauseBtn.className = "bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded shadow transition-colors flex items-center gap-1.5";
                     document.getElementById('play-icon').innerText = "⏸";
-                    document.getElementById('play-text').innerText = "Pause Simulation";
+                    document.getElementById('play-text').innerText = "Pause";
                 } else {
-                    playPauseBtn.className = "bg-amber-600 hover:bg-amber-500 text-white font-medium text-sm px-4 py-2 rounded shadow transition-colors flex items-center gap-2";
+                    playPauseBtn.className = "bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded shadow transition-colors flex items-center gap-1.5";
                     document.getElementById('play-icon').innerText = "▶";
-                    document.getElementById('play-text').innerText = "Resume Simulation";
+                    document.getElementById('play-text').innerText = "Resume";
                 }
             });
 
@@ -246,15 +271,68 @@
                 updateWires();
             });
 
-            // Start loop
+            // Initialize background clock loop
             setInterval(simulationTick, 100);
+            // Refresh styles for current sizing
+            switchMobileTab('workspace');
         });
+
+        // Responsive PWA Layout Controller
+        function switchMobileTab(tab) {
+            currentMobileTab = tab;
+            const pWorkspace = document.getElementById('panel-workspace');
+            const pParts = document.getElementById('panel-parts');
+            const pGuide = document.getElementById('panel-guide');
+
+            const tWorkspace = document.getElementById('tab-workspace');
+            const tParts = document.getElementById('tab-parts');
+            const tGuide = document.getElementById('tab-guide');
+
+            // Hide panels initially on mobile viewports
+            pWorkspace.classList.add('hidden');
+            pParts.classList.add('hidden');
+            pGuide.classList.add('hidden');
+
+            tWorkspace.className = "flex-1 h-full text-center border-b-2 border-transparent text-slate-400";
+            tParts.className = "flex-1 h-full text-center border-b-2 border-transparent text-slate-400";
+            tGuide.className = "flex-1 h-full text-center border-b-2 border-transparent text-slate-400";
+
+            if (tab === 'workspace') {
+                pWorkspace.classList.remove('hidden');
+                tWorkspace.className = "flex-1 h-full text-center border-b-2 border-teal-500 text-teal-400";
+                setTimeout(updateWires, 50);
+            } else if (tab === 'parts') {
+                pParts.classList.remove('hidden');
+                pParts.classList.remove('md:flex'); // overriding block styles
+                pParts.classList.add('flex');
+                tParts.className = "flex-1 h-full text-center border-b-2 border-teal-500 text-teal-400";
+            } else if (tab === 'guide') {
+                pGuide.classList.remove('hidden');
+                pGuide.classList.remove('md:flex');
+                pGuide.classList.add('flex');
+                tGuide.className = "flex-1 h-full text-center border-b-2 border-teal-500 text-teal-400";
+            }
+        }
+
+        // Add component and instantly move viewport to workspace on mobile
+        function addAndFocusComponent(type) {
+            const rect = workspace.getBoundingClientRect();
+            // Spawns near middle of the workspace area
+            const spawnX = Math.max(10, (rect.width / 2) - 96);
+            const spawnY = Math.max(10, (rect.height / 2) - 80);
+            
+            addComponent(type, spawnX, spawnY);
+            
+            if (window.innerWidth < 768) {
+                switchMobileTab('workspace');
+            }
+        }
 
         // Component Definitions & Creation
         function addComponent(type, customX = null, customY = null) {
             const id = type + '_' + Math.random().toString(36).substr(2, 9);
             const rect = workspace.getBoundingClientRect();
-            const x = customX !== null ? customX : (rect.width / 2) - 100;
+            const x = customX !== null ? customX : (rect.width / 2) - 96;
             const y = customY !== null ? customY : (rect.height / 2) - 80;
 
             let terminals = [];
@@ -274,8 +352,8 @@
                         { id: id + '_cathode', label: '-', relX: 155, relY: 35, voltage: 0.0 }
                     ];
                     state = { 
-                        forming: 0, // 0 to 100%
-                        charge: 0,   // 0 to 100%
+                        forming: 0,
+                        charge: 0,
                         voltage: 0.0,
                         current: 0.0,
                         name: components.filter(c => c.type === 'diy_cell').length === 0 ? "Cell 1" : "Cell 2"
@@ -286,7 +364,7 @@
                         { id: id + '_t1', label: 'A', relX: 20, relY: 65, voltage: 0.0 },
                         { id: id + '_t2', label: 'B', relX: 180, relY: 65, voltage: 0.0 }
                     ];
-                    state = { resistance: 330 }; // Default 330 Ohms
+                    state = { resistance: 330 };
                     break;
                 case 'led':
                     terminals = [
@@ -323,7 +401,7 @@
             div.id = comp.id;
             div.style.left = comp.x + 'px';
             div.style.top = comp.y + 'px';
-            div.className = "absolute pointer-events-auto bg-slate-800 border border-slate-700 rounded-lg shadow-xl flex flex-col select-none z-10 w-48";
+            div.className = "absolute pointer-events-auto bg-slate-800 border border-slate-700 rounded-lg shadow-xl flex flex-col select-none z-10 w-48 touch-none";
 
             let headerBg = "bg-slate-700/50 border-b border-slate-600";
             if (comp.type === 'usb_power') headerBg = "bg-indigo-950/40 border-b border-indigo-900/50";
@@ -331,9 +409,11 @@
             if (comp.type === 'multimeter') headerBg = "bg-rose-950/40 border-b border-rose-900/50";
 
             let innerHtml = `
-                <div class="px-3 py-1.5 flex justify-between items-center cursor-move rounded-t-lg ${headerBg}" onmousedown="startDrag(event, '${comp.id}')">
+                <div class="px-3 py-2 flex justify-between items-center cursor-move rounded-t-lg ${headerBg} touch-none" 
+                     onmousedown="startDrag(event, '${comp.id}')" 
+                     ontouchstart="startDrag(event, '${comp.id}')">
                     <span class="text-xs font-semibold tracking-wide text-slate-200 uppercase">${getComponentTitle(comp)}</span>
-                    <button onclick="removeComponent('${comp.id}')" class="text-slate-500 hover:text-rose-400 text-xs transition">✕</button>
+                    <button onclick="removeComponent('${comp.id}')" class="text-slate-400 hover:text-rose-400 text-xs px-1.5 py-0.5 rounded transition">✕</button>
                 </div>
                 <div class="p-3 flex flex-col relative flex-1 gap-2 min-h-[80px]">
             `;
@@ -352,7 +432,7 @@
                         <div class="flex flex-col gap-1.5 text-[10px] text-slate-300">
                             <div class="font-medium text-slate-400 border-b border-slate-700 pb-1 flex justify-between">
                                 <span>Name:</span> 
-                                <input type="text" class="bg-transparent text-right outline-none text-slate-200 w-20" value="${comp.state.name}" oninput="comp.state.name = this.value">
+                                <input type="text" class="bg-transparent text-right outline-none text-slate-200 w-20 border border-transparent focus:border-slate-700 px-0.5 rounded" value="${comp.state.name}" oninput="comp.state.name = this.value">
                             </div>
                             <div class="flex justify-between"><span>Electrode forming:</span> <span id="${comp.id}-forming" class="font-semibold text-amber-400">0%</span></div>
                             <div class="w-full bg-slate-900 rounded-full h-1.5 overflow-hidden">
@@ -395,7 +475,7 @@
                                 <div class="w-4 h-4 rounded-full bg-slate-600" id="${comp.id}-bulb-inner"></div>
                             </div>
                             <div class="text-[10px] text-center text-slate-400" id="${comp.id}-status">Off</div>
-                            <button id="${comp.id}-reset" class="hidden bg-slate-950 hover:bg-slate-900 border border-slate-700 text-rose-400 px-2 py-0.5 text-[9px] rounded" onclick="resetBlownLed('${comp.id}')">Replace Blown LED</button>
+                            <button id="${comp.id}-reset" class="hidden bg-slate-950 hover:bg-slate-900 border border-slate-700 text-rose-400 px-2 py-1 text-[9px] rounded" onclick="resetBlownLed('${comp.id}')">Replace LED</button>
                         </div>
                     `;
                     break;
@@ -406,8 +486,8 @@
                                 0.00 V
                             </div>
                             <div class="flex gap-2 mt-2 w-full justify-center">
-                                <button id="${comp.id}-mode-v" class="bg-slate-950 text-slate-300 text-[9px] px-2 py-0.5 rounded font-bold border border-emerald-600" onclick="setMultimeterMode('${comp.id}', 'voltage')">V</button>
-                                <button id="${comp.id}-mode-a" class="bg-slate-950 text-slate-500 text-[9px] px-2 py-0.5 rounded font-bold border border-transparent" onclick="setMultimeterMode('${comp.id}', 'current')">mA</button>
+                                <button id="${comp.id}-mode-v" class="bg-slate-950 text-slate-300 text-[10px] px-2.5 py-1 rounded font-bold border border-emerald-600" onclick="setMultimeterMode('${comp.id}', 'voltage')">V</button>
+                                <button id="${comp.id}-mode-a" class="bg-slate-950 text-slate-500 text-[10px] px-2.5 py-1 rounded font-bold border border-transparent" onclick="setMultimeterMode('${comp.id}', 'current')">mA</button>
                             </div>
                         </div>
                     `;
@@ -416,7 +496,7 @@
                     innerHtml += `
                         <div class="flex flex-col items-center gap-2 py-1">
                             <div class="text-[10px] text-slate-400">Switch Toggle</div>
-                            <button id="${comp.id}-toggle" class="px-4 py-1.5 bg-rose-900/40 border border-rose-800 text-rose-400 rounded-md text-xs font-bold w-full transition" onclick="toggleSwitch('${comp.id}')">
+                            <button id="${comp.id}-toggle" class="px-4 py-2 bg-rose-900/40 border border-rose-800 text-rose-400 rounded-md text-xs font-bold w-full transition" onclick="toggleSwitch('${comp.id}')">
                                 OPEN (OFF)
                             </button>
                         </div>
@@ -424,17 +504,18 @@
                     break;
             }
 
-            innerHtml += `</div>`; // Close content div
+            innerHtml += `</div>`;
 
             // Render Terminals (port connections)
-            comp.terminals.forEach((term, index) => {
+            comp.terminals.forEach((term) => {
                 innerHtml += `
                     <div id="${term.id}" 
                          data-comp-id="${comp.id}" 
                          data-term-id="${term.id}" 
-                         class="absolute w-4.5 h-4.5 bg-slate-900 border-2 border-slate-600 rounded-full cursor-pointer hover:border-teal-400 flex items-center justify-center text-[8px] text-slate-300 z-20 pointer-events-auto"
-                         style="left: ${term.relX - 9}px; top: ${term.relY - 9}px;"
-                         onmousedown="startWire(event, '${term.id}')">
+                         class="term-node absolute w-5 h-5 bg-slate-900 border-2 border-slate-600 rounded-full cursor-pointer hover:border-teal-400 flex items-center justify-center text-[8px] text-slate-300 z-20 pointer-events-auto"
+                         style="left: ${term.relX - 10}px; top: ${term.relY - 10}px;"
+                         onmousedown="startWire(event, '${term.id}')"
+                         ontouchstart="startWire(event, '${term.id}')">
                         ${term.label}
                     </div>
                 `;
@@ -443,7 +524,6 @@
             div.innerHTML = innerHtml;
             container.appendChild(div);
 
-            // Update resistor band visual if initial load
             if (comp.type === 'resistor') {
                 updateResistorBands(comp);
             }
@@ -462,7 +542,6 @@
 
         function removeComponent(id) {
             components = components.filter(c => c.id !== id);
-            // Drop related wires
             wires = wires.filter(w => !w.from.startsWith(id) && !w.to.startsWith(id));
             const el = document.getElementById(id);
             if (el) el.remove();
@@ -484,7 +563,6 @@
 
         function updateResistorBands(comp) {
             const val = comp.state.resistance;
-            // Simplified dynamic bands calculation
             const bands = getResistorColorBands(val);
             const b1 = document.getElementById(`${comp.id}-band1`);
             const b2 = document.getElementById(`${comp.id}-band2`);
@@ -500,7 +578,7 @@
         function getResistorColorBands(val) {
             const colors = ["#000000", "#78350f", "#dc2626", "#ea580c", "#eab308", "#16a34a", "#2563eb", "#9333ea", "#4b5563", "#ffffff"];
             if (val < 10) {
-                return [colors[val], colors[0], colors[0]]; // fallback
+                return [colors[val], colors[0], colors[0]];
             }
             const str = val.toString();
             const d1 = parseInt(str[0]);
@@ -517,11 +595,11 @@
                 const bV = document.getElementById(`${id}-mode-v`);
                 const bA = document.getElementById(`${id}-mode-a`);
                 if (mode === 'voltage') {
-                    bV.className = "bg-slate-950 text-slate-300 text-[9px] px-2 py-0.5 rounded font-bold border border-emerald-600";
-                    bA.className = "bg-slate-950 text-slate-500 text-[9px] px-2 py-0.5 rounded font-bold border border-transparent";
+                    bV.className = "bg-slate-950 text-slate-300 text-[10px] px-2.5 py-1 rounded font-bold border border-emerald-600";
+                    bA.className = "bg-slate-950 text-slate-500 text-[10px] px-2.5 py-1 rounded font-bold border border-transparent";
                 } else {
-                    bA.className = "bg-slate-950 text-slate-300 text-[9px] px-2 py-0.5 rounded font-bold border border-emerald-600";
-                    bV.className = "bg-slate-950 text-slate-500 text-[9px] px-2 py-0.5 rounded font-bold border border-transparent";
+                    bA.className = "bg-slate-950 text-slate-300 text-[10px] px-2.5 py-1 rounded font-bold border border-emerald-600";
+                    bV.className = "bg-slate-950 text-slate-500 text-[10px] px-2.5 py-1 rounded font-bold border border-transparent";
                 }
             }
         }
@@ -544,12 +622,38 @@
                 const btn = document.getElementById(`${id}-toggle`);
                 if (comp.state.closed) {
                     btn.innerText = "CLOSED (ON)";
-                    btn.className = "px-4 py-1.5 bg-emerald-900/40 border border-emerald-800 text-emerald-400 rounded-md text-xs font-bold w-full transition";
+                    btn.className = "px-4 py-2 bg-emerald-900/40 border border-emerald-800 text-emerald-400 rounded-md text-xs font-bold w-full transition";
                 } else {
                     btn.innerText = "OPEN (OFF)";
-                    btn.className = "px-4 py-1.5 bg-rose-900/40 border border-rose-800 text-rose-400 rounded-md text-xs font-bold w-full transition";
+                    btn.className = "px-4 py-2 bg-rose-900/40 border border-rose-800 text-rose-400 rounded-md text-xs font-bold w-full transition";
                 }
             }
+        }
+
+        // Pointer Resolution (Combines Touch and Click)
+        function getPointerCoords(e) {
+            const rect = workspace.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top,
+                    clientX: e.touches[0].clientX,
+                    clientY: e.touches[0].clientY
+                };
+            } else if (e.changedTouches && e.changedTouches.length > 0) {
+                return {
+                    x: e.changedTouches[0].clientX - rect.left,
+                    y: e.changedTouches[0].clientY - rect.top,
+                    clientX: e.changedTouches[0].clientX,
+                    clientY: e.changedTouches[0].clientY
+                };
+            }
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+                clientX: e.clientX,
+                clientY: e.clientY
+            };
         }
 
         // Dragging Logic
@@ -557,21 +661,28 @@
             if (e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'input') return;
             const comp = components.find(c => c.id === compId);
             if (comp) {
+                const coords = getPointerCoords(e);
                 draggedComponent = comp;
-                dragOffset.x = e.clientX - comp.x;
-                dragOffset.y = e.clientY - comp.y;
+                dragOffset.x = coords.clientX - comp.x;
+                dragOffset.y = coords.clientY - comp.y;
+                
+                // Add event tracking
                 document.addEventListener('mousemove', handleDrag);
+                document.addEventListener('touchmove', handleDrag, { passive: false });
                 document.addEventListener('mouseup', endDrag);
+                document.addEventListener('touchend', endDrag);
             }
         }
 
         function handleDrag(e) {
             if (draggedComponent) {
+                e.preventDefault(); // blocks browser scroll bounce while active
                 const rect = workspace.getBoundingClientRect();
-                let newX = e.clientX - dragOffset.x;
-                let newY = e.clientY - dragOffset.y;
+                const coords = getPointerCoords(e);
                 
-                // Constrain inside bounds
+                let newX = coords.clientX - dragOffset.x;
+                let newY = coords.clientY - dragOffset.y;
+                
                 newX = Math.max(0, Math.min(newX, rect.width - 192));
                 newY = Math.max(0, Math.min(newY, rect.height - 150));
 
@@ -590,37 +701,38 @@
         function endDrag() {
             draggedComponent = null;
             document.removeEventListener('mousemove', handleDrag);
+            document.removeEventListener('touchmove', handleDrag);
             document.removeEventListener('mouseup', endDrag);
+            document.removeEventListener('touchend', endDrag);
         }
 
-        // Connection/Wiring Handling
+        // Wiring/Connection Handling
         function startWire(e, termId) {
             e.stopPropagation();
-            e.preventDefault();
             activeWireStart = termId;
-            const rect = workspace.getBoundingClientRect();
-            mousePosition.x = e.clientX - rect.left;
-            mousePosition.y = e.clientY - rect.top;
+            const coords = getPointerCoords(e);
+            mousePosition.x = coords.x;
+            mousePosition.y = coords.y;
         }
 
-        function handleMouseMove(e) {
+        function handlePointerMove(e) {
             if (activeWireStart) {
-                const rect = workspace.getBoundingClientRect();
-                mousePosition.x = e.clientX - rect.left;
-                mousePosition.y = e.clientY - rect.top;
+                e.preventDefault();
+                const coords = getPointerCoords(e);
+                mousePosition.x = coords.x;
+                mousePosition.y = coords.y;
                 updateWires();
             }
         }
 
-        function handleMouseUp(e) {
+        function handlePointerUp(e) {
             if (activeWireStart) {
-                // Check if dropped over a valid terminal
-                const el = document.elementFromPoint(e.clientX, e.clientY);
+                const coords = getPointerCoords(e);
+                // Discover target element under finger or mouse release
+                const el = document.elementFromPoint(coords.clientX, coords.clientY);
                 if (el && el.dataset && el.dataset.termId) {
                     const termId = el.dataset.termId;
-                    // Connect if terminals are different
                     if (termId !== activeWireStart) {
-                        // Check if wire already exists
                         const wireExists = wires.some(w => 
                             (w.from === activeWireStart && w.to === termId) || 
                             (w.from === termId && w.to === activeWireStart)
@@ -639,7 +751,6 @@
             wireLayer.innerHTML = '';
             const rect = workspace.getBoundingClientRect();
 
-            // Render existing permanent wires
             wires.forEach((wire, index) => {
                 const elFrom = document.getElementById(wire.from);
                 const elTo = document.getElementById(wire.to);
@@ -652,32 +763,46 @@
                     const x2 = (rTo.left + rTo.width / 2) - rect.left;
                     const y2 = (rTo.top + rTo.height / 2) - rect.top;
 
-                    // Assign color based on node state potential (visual enhancement)
                     const termData = getTerminalObj(wire.from);
-                    let strokeColor = "#64748b"; // neutral slate-500
+                    let strokeColor = "#64748b";
                     if (termData) {
-                        if (termData.voltage > 4.5) strokeColor = "#ef4444"; // red 5V
-                        else if (termData.voltage <= 0.05) strokeColor = "#3b82f6"; // blue GND
-                        else if (termData.voltage > 1.5) strokeColor = "#f59e0b"; // yellow middle
+                        if (termData.voltage > 4.5) strokeColor = "#ef4444";
+                        else if (termData.voltage <= 0.05) strokeColor = "#3b82f6";
+                        else if (termData.voltage > 1.5) strokeColor = "#f59e0b";
                     }
 
                     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                     const controlOffset = Math.abs(x1 - x2) * 0.5;
                     path.setAttribute('d', `M ${x1} ${y1} C ${x1 + controlOffset} ${y1}, ${x2 - controlOffset} ${y2}, ${x2} ${y2}`);
                     path.setAttribute('stroke', strokeColor);
-                    path.setAttribute('stroke-width', '3.5');
+                    path.setAttribute('stroke-width', '4');
                     path.setAttribute('fill', 'none');
                     path.setAttribute('class', 'cursor-pointer hover:stroke-rose-500 pointer-events-auto transition-colors duration-150');
+                    
+                    // Delete handler for both Desktop Right-Click & Mobile Long Hold/Tap
                     path.addEventListener('contextmenu', (e) => {
                         e.preventDefault();
                         wires.splice(index, 1);
                         updateWires();
                     });
+                    
+                    // Double tap/click wire fallback to delete on mobile
+                    let lastTap = 0;
+                    path.addEventListener('touchend', (e) => {
+                        const currentTime = new Date().getTime();
+                        const tapLength = currentTime - lastTap;
+                        if (tapLength < 500 && tapLength > 0) {
+                            wires.splice(index, 1);
+                            updateWires();
+                        }
+                        lastTap = currentTime;
+                    });
+
                     wireLayer.appendChild(path);
                 }
             });
 
-            // Render active drag wire
+            // Render live temporary tracking wire
             if (activeWireStart) {
                 const elFrom = document.getElementById(activeWireStart);
                 if (elFrom) {
@@ -690,7 +815,7 @@
                     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                     const controlOffset = Math.abs(x1 - x2) * 0.5;
                     path.setAttribute('d', `M ${x1} ${y1} C ${x1 + controlOffset} ${y1}, ${x2 - controlOffset} ${y2}, ${x2} ${y2}`);
-                    path.setAttribute('stroke', '#2dd4bf'); // teal active drawing
+                    path.setAttribute('stroke', '#2dd4bf');
                     path.setAttribute('stroke-width', '3');
                     path.setAttribute('stroke-dasharray', '5,5');
                     path.setAttribute('fill', 'none');
@@ -707,11 +832,10 @@
             return null;
         }
 
-        // Real-Time Circuit Nodal relaxation Solver
+        // Live Electrochemical Network Solver
         function simulationTick() {
             if (!simulationRunning) return;
 
-            // 1. Map Connections using Union-Find structure
             const parent = {};
             function find(tId) {
                 if (!parent[tId]) parent[tId] = tId;
@@ -726,7 +850,6 @@
                 }
             }
 
-            // Populate base set of terminals
             const allTerminals = [];
             components.forEach(comp => {
                 comp.terminals.forEach(term => {
@@ -734,12 +857,10 @@
                 });
             });
 
-            // Wire bindings translate to unions
             wires.forEach(wire => {
                 union(wire.from, wire.to);
             });
 
-            // Map terminal IDs to node indices
             const nodeMap = {};
             let nodeCount = 0;
             allTerminals.forEach(tId => {
@@ -752,7 +873,6 @@
 
             if (nodeCount === 0) return;
 
-            // Identify default grounded/reference index (USB supply ground)
             let gndNodeIdx = -1;
             components.forEach(comp => {
                 if (comp.type === 'usb_power') {
@@ -763,16 +883,14 @@
                 }
             });
 
-            if (gndNodeIdx === -1) gndNodeIdx = 0; // standard fallback
+            if (gndNodeIdx === -1) gndNodeIdx = 0;
 
-            // Initial state node voltage vector
             const V = new Array(nodeCount).fill(0.0);
             if (lastVoltages && lastVoltages.length === nodeCount) {
                 for (let i = 0; i < nodeCount; i++) V[i] = lastVoltages[i];
             }
             V[gndNodeIdx] = 0.0;
 
-            // Relaxation Solver loop (Iterative approximation of node voltages)
             const iterations = 100;
             for (let iter = 0; iter < iterations; iter++) {
                 const nextV = [...V];
@@ -798,7 +916,7 @@
                             const nVbus = nodeMap[comp.terminals.find(t => t.label === '5V').id];
                             const nGnd = nodeMap[comp.terminals.find(t => t.label === 'GND').id];
                             if (nVbus === i || nGnd === i) {
-                                const R_src = 0.2; // small internal impedance
+                                const R_src = 0.2;
                                 const G = 1 / R_src;
                                 if (nVbus === i) {
                                     sumG += G;
@@ -815,12 +933,8 @@
                             if (nAnode === i || nCathode === i) {
                                 const formingRatio = comp.state.forming / 100;
                                 const chargeRatio = comp.state.charge / 100;
-                                
-                                // Open circuit potential matches actual chemical forming state
                                 const cellV = formingRatio * (1.5 + 0.5 * chargeRatio);
-                                
-                                // Internal resistance drops dramatically as plate surface forms
-                                const R_int = 150 - 146 * formingRatio; // Range: 150Ω down to 4Ω
+                                const R_int = 150 - 146 * formingRatio;
                                 const G = 1 / R_int;
 
                                 if (nAnode === i) {
@@ -837,13 +951,13 @@
                             const nAnode = nodeMap[comp.terminals.find(t => t.label === '+').id];
                             const nCathode = nodeMap[comp.terminals.find(t => t.label === '-').id];
                             if (nAnode === i || nCathode === i) {
-                                const Vf = 2.0; // Green LED Forward Threshold
+                                const Vf = 2.0;
                                 const vDiff = V[nAnode] - V[nCathode];
-                                let G = 1 / 1e6; // Default dark leakage conductance
+                                let G = 1 / 1e6;
                                 let V_eff = (nAnode === i) ? V[nCathode] : V[nAnode];
 
                                 if (vDiff > Vf) {
-                                    G = 1 / 20; // forward dynamic resistance
+                                    G = 1 / 20;
                                     if (nAnode === i) V_eff = V[nCathode] + Vf;
                                     else V_eff = V[nAnode] - Vf;
                                 }
@@ -856,7 +970,6 @@
                             const nBlack = nodeMap[comp.terminals.find(t => t.label === 'COM-').id];
                             if (nRed === i || nBlack === i) {
                                 const neighbor = (nRed === i) ? nBlack : nRed;
-                                // In voltage mode, shunt is megohms. Current mode shunt is 0.1 ohm.
                                 const R = (comp.state.mode === 'voltage') ? 1e7 : 0.1;
                                 const G = 1 / R;
                                 sumG += G;
@@ -889,13 +1002,11 @@
 
             lastVoltages = V;
 
-            // 2. Map voltages back to terminals and run chemical transformations
             components.forEach(comp => {
                 comp.terminals.forEach(term => {
                     term.voltage = V[nodeMap[term.id]] || 0.0;
                 });
 
-                // Type-specific dynamic simulation models
                 if (comp.type === 'diy_cell') {
                     const vAnode = comp.terminals.find(t => t.label === '+').voltage;
                     const vCathode = comp.terminals.find(t => t.label === '-').voltage;
@@ -904,23 +1015,20 @@
                     const cellV = formingRatio * (1.5 + 0.5 * chargeRatio);
                     const R_int = 150 - 146 * formingRatio;
 
-                    // Ohm's law calculates net loop flow
                     const current = (vAnode - vCathode - cellV) / R_int;
                     comp.state.current = current;
 
-                    // Chemical conversion dynamics
-                    const dt = 0.25; // accelerated clock step for simulation enjoyment
-                    if (current > 0) { // Charging direction
+                    const dt = 0.25;
+                    if (current > 0) {
                         if (comp.state.forming < 100) {
                             comp.state.forming = Math.min(100, comp.state.forming + current * 40 * dt);
                         } else {
                             comp.state.charge = Math.min(100, comp.state.charge + current * 20 * dt);
                         }
-                    } else if (current < 0) { // Discharging direction
+                    } else if (current < 0) {
                         comp.state.charge = Math.max(0, comp.state.charge + current * 15 * dt);
                     }
 
-                    // Update UI Readouts
                     document.getElementById(`${comp.id}-forming`).innerText = Math.round(comp.state.forming) + '%';
                     document.getElementById(`${comp.id}-forming-bar`).style.width = comp.state.forming + '%';
                     document.getElementById(`${comp.id}-charge`).innerText = Math.round(comp.state.charge) + '%';
@@ -930,7 +1038,6 @@
                     document.getElementById(`${comp.id}-voltage`).innerText = activeV + ' V';
                     document.getElementById(`${comp.id}-current`).innerText = (current * 1000).toFixed(1) + ' mA';
 
-                    // Gassing/Bubbling alert if forming current is excessive
                     const bubbleAlert = document.getElementById(`${comp.id}-bubbling`);
                     if (current > 0.012 && comp.state.forming >= 95) {
                         bubbleAlert.classList.remove('hidden');
@@ -946,7 +1053,7 @@
                     if (comp.state.blown) {
                         bulb.className = "relative w-8 h-8 rounded-full border border-rose-950 flex items-center justify-center bg-slate-900";
                         bulbInner.className = "w-4 h-4 rounded-full bg-rose-950/40 border border-rose-900";
-                        statusText.innerText = "💥 BLOWN (Fuse Melted)";
+                        statusText.innerText = "💥 BLOWN (Melted)";
                         statusText.className = "text-[9px] text-center text-rose-500 font-bold";
                         document.getElementById(`${comp.id}-reset`).classList.remove('hidden');
                         return;
@@ -963,7 +1070,7 @@
 
                     comp.state.current = current;
 
-                    if (current > 0.045) { // Fuse limit exceeded
+                    if (current > 0.045) {
                         comp.state.blown = true;
                     } else if (current > 0.001) {
                         const intensity = Math.min(1, current / 0.02);
@@ -989,14 +1096,12 @@
                         const measured = vRed - vBlack;
                         display.innerText = measured.toFixed(2) + ' V';
                     } else {
-                        // Current mode shunt measurement
                         const measuredI = (vRed - vBlack) / 0.1;
                         display.innerText = (measuredI * 1000).toFixed(1) + ' mA';
                     }
                 }
             });
 
-            // 3. Update the visual guides state
             evaluateTutorialCompanion(nodeMap);
         }
 
@@ -1008,19 +1113,16 @@
             const step4 = document.getElementById('step-4');
             const step5 = document.getElementById('step-5');
 
-            // Find key objects
             const cells = components.filter(c => c.type === 'diy_cell');
             const pwr = components.find(c => c.type === 'usb_power');
             const resistors = components.filter(c => c.type === 'resistor');
             const leds = components.filter(c => c.type === 'led');
 
-            // Step 1: Placement check
             const step1Passed = (cells.length >= 2 && pwr);
             updateStepStyle(step1, step1Passed, "Step 1: Placement");
 
             if (!step1Passed) return;
 
-            // Step 2: Series check (Anode of Cell A to Cathode of Cell B)
             let seriesConnected = false;
             let cell1 = cells[0];
             let cell2 = cells[1];
@@ -1030,7 +1132,6 @@
                 const a2 = nodeMap[cell2.terminals.find(t => t.label === '+').id];
                 const c2 = nodeMap[cell2.terminals.find(t => t.label === '-').id];
 
-                // Series link exists if Anode of one connects to Cathode of another, but they are not shorted
                 if ((a1 === c2 && a1 !== undefined) || (a2 === c1 && a2 !== undefined)) {
                     seriesConnected = true;
                 }
@@ -1039,14 +1140,12 @@
 
             if (!seriesConnected) return;
 
-            // Step 3: Resistor near 81 Ohms placed
             const chargingResistor = resistors.find(r => r.state.resistance >= 70 && r.state.resistance <= 120);
             const step3Passed = !!chargingResistor;
             updateStepStyle(step3, step3Passed, "Step 3: Current Protection", !seriesConnected);
 
             if (!step3Passed) return;
 
-            // Step 4: Forming charge check (Are batteries charging / forming?)
             const formingActive = cells.some(c => c.state.current > 0.005);
             const bothFullyFormed = cells.every(c => c.state.forming >= 99 && c.state.charge > 50);
             
@@ -1058,7 +1157,6 @@
 
             if (!bothFullyFormed) return;
 
-            // Step 5: Load testing check
             const ledLit = leds.some(l => l.state.current > 0.005 && !l.state.blown);
             updateStepStyle(step5, ledLit, "Step 5: Load Testing", !bothFullyFormed);
         }
@@ -1081,6 +1179,17 @@
 
             badge.innerText = passed ? "Completed" : "In Progress";
             badge.className = passed ? "status-badge text-emerald-400" : "status-badge text-amber-500";
+        }
+    </script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('PWA Service Worker registered successfully.', reg.scope))
+                    .catch(err => console.log('PWA Service Worker registration failed:', err));
+            });
         }
     </script>
 </body>
