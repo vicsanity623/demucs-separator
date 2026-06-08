@@ -2516,11 +2516,17 @@ function simulationTick() {
   });
 
   // 2. Fallback: Ensure every connected island has a locked reference node to prevent singular matrices
-  for (let i = 0; i < nodeCount; i++) {
-    if (islandGnds[i] === undefined) {
-      islandGnds[i] = i;
+  const uniqueRoots = new Set();
+  allTerminals.forEach(tid => {
+    uniqueRoots.add(nodeMap[find(tid)]);
+  });
+
+  // Assign a reference ground index only to the actual roots of independent islands
+  uniqueRoots.forEach(rootIdx => {
+    if (islandGnds[rootIdx] === undefined) {
+      islandGnds[rootIdx] = rootIdx; // Lock the root node of this isolated island to 0V as a baseline
     }
-  }
+  });
 
   const lockedGndNodes = new Set(Object.values(islandGnds));
 
