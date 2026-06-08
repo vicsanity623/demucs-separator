@@ -110,6 +110,7 @@ const PARTS_CATALOGUE = [
       { type: 'transformer', icon: '⊘', iconClass: 'icon-passive', name: 'Transformer 1:10', desc: 'Step-up audio, 600Ω:60kΩ' },
       { type: 'custom_load', icon: '🔌', iconClass: 'icon-passive', name: 'Custom Load', desc: 'Configurable voltage/power appliance' },
       { type: 'solder_joint', icon: '⚫', iconClass: 'icon-passive', name: 'Solder Joint', desc: 'Wiring junction point' },
+      { type: 'earth_gnd', icon: '⏚', iconClass: 'icon-passive', name: 'Earth Ground', desc: 'Reference 0V potential node' },
     ]
   },
   // ── SEMICONDUCTORS ─────────────────────────────────────────────────────────
@@ -192,6 +193,10 @@ function makeTerminals(id, defs) {
 function buildComponent(type, id, existingComponents) {
   let terminals = [], state = {};
   switch (type) {
+    case 'earth_gnd':
+      terminals = makeTerminals(id, [{ label: 'GND', x: 16, y: 16 }]);
+      state = { name: 'Earth Ground' };
+      break;
     case 'custom_load':
       terminals = makeTerminals(id, [{ label: '+', x: 16, y: 50 }, { label: '-', x: 176, y: 50 }]);
       state = { vNom: 12.0, pNom: 10.0, blown: false, name: 'Custom Load' };
@@ -806,7 +811,7 @@ function renderComponent(comp) {
   container.appendChild(div);
 
   // Custom drag binding for Headerless components (like Solder Joint)
-  if (comp.type === 'solder_joint') {
+  if (comp.type === 'solder_joint' || comp.type === 'earth_gnd') {
     div.addEventListener('mousedown', e => {
       if (e.button === 0) startDrag(e, comp.id);
     });
@@ -1844,6 +1849,18 @@ function getCompactGraphicHTML(comp) {
     `;
   }
 
+  // 13.8 Earth Ground Reference Symbols
+  if (type === 'earth_gnd') {
+    return `
+      <svg viewBox="0 0 40 40" width="32" height="32" style="position: absolute; top: -14px; left: 0;">
+        <line x1="20" y1="5" x2="20" y2="24" stroke="var(--sky)" stroke-width="2.5" />
+        <line x1="10" y1="24" x2="30" y2="24" stroke="var(--sky)" stroke-width="2.5" />
+        <line x1="14" y1="29" x2="26" y2="29" stroke="var(--sky)" stroke-width="2.5" />
+        <line x1="18" y1="34" x2="22" y2="34" stroke="var(--sky)" stroke-width="2.5" />
+      </svg>
+    `;
+  }
+
   // 14. Raw Materials (Salt Water Cells, Copper Wire coils)
   if (type === 'salt_water' || type === 'wire_copper' || type === 'wire_nichrome') {
     if (type === 'salt_water') {
@@ -2478,8 +2495,8 @@ function simulationTick() {
   if (!nodeCount) return;
 
   // Dynamic Multi-Island Ground Detection
-  const islandGnds = {}; // Maps each island's root node index to its local ground terminal node index
-  const gndTypes = ['usb_power', 'bench_psu', 'solar_panel', 'signal_generator', 'battery_9v', 'battery_aa', 'battery_cr2032', 'battery_lipo', 'battery_lead', 'battery_18650', 'battery_aaa', 'battery_d', 'lemon_battery'];
+  const islandGnds = {};
+  const gndTypes = ['earth_gnd', 'usb_power', 'bench_psu', 'solar_panel', 'signal_generator', 'battery_9v', 'battery_aa', 'battery_cr2032', 'battery_lipo', 'battery_lead', 'battery_18650', 'battery_aaa', 'battery_d', 'lemon_battery'];
 
   // 1. Scan all active components to find and assign local grounds for each isolated circuit island
   components.forEach(c => {
@@ -2488,7 +2505,11 @@ function simulationTick() {
       const root = find(gndTerm.id);
       const rootIdx = nodeMap[root];
       const gndNodeIdx = nodeMap[gndTerm.id];
-      if (islandGnds[rootIdx] === undefined) {
+
+      // Explicit earth grounds override default battery grounds
+      if (c.type === 'earth_gnd') {
+        islandGnds[rootIdx] = gndNodeIdx;
+      } else if (islandGnds[rootIdx] === undefined) {
         islandGnds[rootIdx] = gndNodeIdx;
       }
     }
