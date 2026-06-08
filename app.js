@@ -1946,7 +1946,7 @@ function updateWorkspaceHUD() {
   } else if (type.startsWith('battery') || type === 'diy_cell' || type === 'lemon_battery') {
     const vA = comp.terminals[0]?.voltage || 0;
     const vC = comp.terminals[1]?.voltage || 0;
-    const cellV = (comp.state.voltage || 1.5) * ((comp.state.charge || 100) / 100);
+    const cellV = getBatteryEMF(type, comp.state.charge || 100);
 
     // Check if terminals are connected
     const termA = comp.terminals[0]?.id;
@@ -2164,6 +2164,61 @@ function deleteProjectFromUI(name) {
     renderProjectList();
     showToast(`Deleted "${name}"`, 'warn');
   }
+}
+
+// ─── CHEMICAL EMF PROFILE CALCULATOR ──────────────────────────────────────────
+function getBatteryEMF(type, charge) {
+  const pct = Math.max(0, Math.min(100, charge)) / 100;
+
+  // 1. 18650 Li-ion & LiPo (3.7V Nominal, 4.2V Max, 3.0V Cut-off)
+  if (type === 'battery_18650' || type === 'battery_lipo') {
+    if (pct >= 0.9) {
+      return 4.0 + (pct - 0.9) * 2.0; // Rapid curve upward to 4.2V
+    } else if (pct >= 0.15) {
+      return 3.6 + (pct - 0.15) * (0.4 / 0.75); // Stable 3.7V nominal plateau
+    } else {
+      return 3.0 + pct * (0.6 / 0.15); // Drop-off curve under 3.0V
+    }
+  }
+
+  // 2. AA, AAA, & D Alkaline Cells (1.5V Nominal, 1.6V Max, 0.9V Cut-off)
+  if (type === 'battery_aa' || type === 'battery_aaa' || type === 'battery_d') {
+    if (pct >= 0.9) {
+      return 1.5 + (pct - 0.9) * 1.0; // Curve upward to 1.6V
+    } else if (pct >= 0.2) {
+      return 1.15 + (pct - 0.2) * (0.35 / 0.7); // Plateau
+    } else {
+      return 0.9 + pct * (0.25 / 0.2); // Depleted drop-off
+    }
+  }
+
+  // 3. Lead-Acid AGM (12.0V Nominal, 12.8V Max, 10.5V Cut-off)
+  if (type === 'battery_lead') {
+    return 10.5 + pct * 2.3;
+  }
+
+  // 4. 9V PP3 Alkaline (9.0V Nominal, 9.6V Max, 6.0V Cut-off)
+  if (type === 'battery_9v') {
+    return 6.0 + pct * 3.6;
+  }
+
+  // 5. CR2032 Lithium Coin (3.0V Nominal, 3.2V Max, 2.0V Cut-off)
+  if (type === 'battery_cr2032') {
+    return 2.0 + pct * 1.2;
+  }
+
+  // 6. Lemon Battery (0.9V Nominal, 0.95V Max, 0.4V Cut-off)
+  if (type === 'lemon_battery') {
+    return 0.4 + pct * 0.55;
+  }
+
+  // Fallback defaults if unspecified
+  const defaultVoltages = {
+    battery_18650: 3.7, battery_lipo: 3.7, battery_aa: 1.5, battery_aaa: 1.5,
+    battery_d: 1.5, battery_lead: 12.0, battery_9v: 9.0, battery_cr2032: 3.0,
+    lemon_battery: 0.9
+  };
+  return (defaultVoltages[type] || 1.5) * pct;
 }
 
 function getCustomCircuitMetrics() {
@@ -2429,7 +2484,7 @@ function simulationTick() {
         if (type === 'usb_power') twoPort(T('5V'), T('GND'), 5.0, 0.2);
         else if (type === 'bench_psu') twoPort(T('+'), T('GND'), state.voltage, 0.5);
         else if (type === 'battery_9v' || type === 'battery_aa' || type === 'battery_cr2032' || type === 'battery_lipo' || type === 'battery_lead' || type === 'battery_18650' || type === 'battery_aaa' || type === 'battery_d' || type === 'lemon_battery')
-          twoPort(T('+'), T('-'), state.voltage * (state.charge / 100), state.internalR);
+          twoPort(T('+'), T('-'), getBatteryEMF(type, state.charge), state.internalR);
         else if (type === 'solar_panel') twoPort(T('+'), T('-'), state.voltage, 5.0 + 50 * (1 - state.sunlight / 100));
         else if (type === 'signal_generator') {
           const wf = state.waveform || 'sine';
@@ -2715,7 +2770,9 @@ function simulationTick() {
     }
     else if (type === 'battery_9v' || type === 'battery_aa' || type === 'battery_cr2032' || type === 'battery_lipo' || type === 'battery_lead' || type === 'battery_18650' || type === 'battery_aaa' || type === 'battery_d' || type === 'lemon_battery') {
       const vp = tv('+'), vn = tv('-');
-      const emf = state.voltage * (state.charge / 100);
+
+      // Extract non-linear EMF matching active battery chemistry specifications
+      const emf = getBatteryEMF(type, state.charge);
 
       // Check if terminals are connected to active wires to prevent floating node calculations
       const termA = comp.terminals[0]?.id;
