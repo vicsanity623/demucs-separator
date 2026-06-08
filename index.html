@@ -345,14 +345,38 @@
         };
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Mouse & Touch bindings
+            // Interaction Event Listeners
             workspace.addEventListener('mousemove', handlePointerMove);
             workspace.addEventListener('touchmove', handlePointerMove, { passive: false });
             workspace.addEventListener('mouseup', handlePointerUp);
             workspace.addEventListener('touchend', handlePointerUp);
             window.addEventListener('resize', updateWires);
 
-            // Setup Layout Trigger
+            // Simulation Controls
+            playPauseBtn.addEventListener('click', () => {
+                simulationRunning = !simulationRunning;
+                if (simulationRunning) {
+                    playPauseBtn.className = "bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded shadow transition-colors flex items-center gap-1.5";
+                    document.getElementById('play-icon').innerText = "⏸";
+                    document.getElementById('play-text').innerText = "Pause";
+                } else {
+                    playPauseBtn.className = "bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs md:text-sm px-3 md:px-4 py-1.5 md:py-2 rounded shadow transition-colors flex items-center gap-1.5";
+                    document.getElementById('play-icon').innerText = "▶";
+                    document.getElementById('play-text').innerText = "Resume";
+                }
+            });
+
+            clearBtn.addEventListener('click', () => {
+                components = [];
+                wires = [];
+                container.innerHTML = '';
+                updateWires();
+            });
+
+            // Start Solver Loop
+            setInterval(simulationTick, 100);
+            
+            // Initialize the default guide and layout
             switchMobileTab('workspace');
             switchTutorial('lead_acid');
         });
@@ -1489,7 +1513,7 @@
             metricsContainer.innerHTML = tutorialGuides[currentTutorial].liveMetrics();
         }
 
-        // Checklist Path and Connection Verification Logic
+        // Checklist Path and Connection Verification Logic with optional chaining protections
         function evaluateActiveTutorial(nodeMap) {
             const steps = tutorialGuides[currentTutorial].steps;
 
@@ -1508,33 +1532,52 @@
                 // Step 1: Placement
                 const step1Passed = (cells.length >= 2 && pwr);
                 updateStepStyle(step1, step1Passed, steps[0].title);
-                if (!step1Passed) return;
+                if (!step1Passed) {
+                    updateStepStyle(step2, false, steps[1].title, true);
+                    updateStepStyle(step3, false, steps[2].title, true);
+                    updateStepStyle(step4, false, steps[3].title, true);
+                    updateStepStyle(step5, false, steps[4].title, true);
+                    return;
+                }
 
                 // Step 2: Series Battery Connection
                 let seriesConnected = false;
-                let c1_idx = -1, c2_idx = -1;
                 if (cells.length >= 2) {
-                    const c1A = nodeMap[cells[0].terminals.find(t => t.label === '+').id];
-                    const c1C = nodeMap[cells[0].terminals.find(t => t.label === '-').id];
-                    const c2A = nodeMap[cells[1].terminals.find(t => t.label === '+').id];
-                    const c2C = nodeMap[cells[1].terminals.find(t => t.label === '-').id];
+                    const c1A_t = cells[0].terminals.find(t => t.label === '+');
+                    const c1C_t = cells[0].terminals.find(t => t.label === '-');
+                    const c2A_t = cells[1].terminals.find(t => t.label === '+');
+                    const c2C_t = cells[1].terminals.find(t => t.label === '-');
 
-                    if (c1C === c2A && c1C !== undefined && c1A !== c2C) {
-                        seriesConnected = true;
-                        c1_idx = 0; c2_idx = 1;
-                    } else if (c2C === c1A && c2C !== undefined && c2A !== c1C) {
-                        seriesConnected = true;
-                        c1_idx = 1; c2_idx = 0;
+                    if (c1A_t && c1C_t && c2A_t && c2C_t) {
+                        const c1A = nodeMap[c1A_t.id];
+                        const c1C = nodeMap[c1C_t.id];
+                        const c2A = nodeMap[c2A_t.id];
+                        const c2C = nodeMap[c2C_t.id];
+
+                        if (c1C === c2A && c1C !== undefined && c1A !== c2C) {
+                            seriesConnected = true;
+                        } else if (c2C === c1A && c2C !== undefined && c2A !== c1C) {
+                            seriesConnected = true;
+                        }
                     }
                 }
                 updateStepStyle(step2, seriesConnected, steps[1].title, !step1Passed);
-                if (!seriesConnected) return;
+                if (!seriesConnected) {
+                    updateStepStyle(step3, false, steps[2].title, true);
+                    updateStepStyle(step4, false, steps[3].title, true);
+                    updateStepStyle(step5, false, steps[4].title, true);
+                    return;
+                }
 
                 // Step 3: Resistor Protection Value
                 const protectionResistor = resistors.find(r => r.state.resistance >= 75 && r.state.resistance <= 90);
                 const step3Passed = !!protectionResistor;
                 updateStepStyle(step3, step3Passed, steps[2].title, !seriesConnected);
-                if (!step3Passed) return;
+                if (!step3Passed) {
+                    updateStepStyle(step4, false, steps[3].title, true);
+                    updateStepStyle(step5, false, steps[4].title, true);
+                    return;
+                }
 
                 // Step 4: Forming Charge Verification
                 const formingActive = cells.some(c => c.state.current > 0.005);
@@ -1545,16 +1588,17 @@
                     step4Label += ` (${Math.round(cells[0].state.forming)}% Formed)`;
                 }
                 updateStepStyle(step4, bothFullyFormed, step4Label, !step3Passed);
-                if (!bothFullyFormed) return;
+                if (!bothFullyFormed) {
+                    updateStepStyle(step5, false, steps[4].title, true);
+                    return;
+                }
 
                 // Step 5: Safe Load Testing Loop
-                // Checks that the battery discharges through BOTH a resistor AND an LED.
                 let loadLoopIntact = false;
                 if (leds.length > 0 && resistors.length > 0) {
                     const activeLed = leds.find(l => l.state.current > 0.001 && !l.state.blown);
                     const activeRes = resistors.find(r => r.state.resistance >= 200 && r.state.resistance <= 400);
                     if (activeLed && activeRes) {
-                        // Check if current is flowing through the LED without blowing it
                         loadLoopIntact = true;
                     }
                 }
@@ -1570,34 +1614,49 @@
                 const caps = components.filter(c => c.type === 'capacitor');
                 const switches = components.filter(c => c.type === 'spst_switch');
 
-                // Step 1: Placement
                 const step1Passed = (solar && caps.length > 0 && switches.length > 0);
                 updateStepStyle(step1, step1Passed, steps[0].title);
-                if (!step1Passed) return;
+                if (!step1Passed) {
+                    updateStepStyle(step2, false, steps[1].title, true);
+                    updateStepStyle(step3, false, steps[2].title, true);
+                    updateStepStyle(step4, false, steps[3].title, true);
+                    return;
+                }
 
-                // Step 2: Storage Loop
                 let loopPassed = false;
-                if (step1Passed) {
-                    const sPos = nodeMap[solar.terminals.find(t => t.label === '+').id];
-                    const sNeg = nodeMap[solar.terminals.find(t => t.label === '-').id];
-                    const capPos = nodeMap[caps[0].terminals.find(t => t.label === '+').id];
-                    const capNeg = nodeMap[caps[0].terminals.find(t => t.label === '-').id];
-                    const swIn = nodeMap[switches[0].terminals.find(t => t.label === 'In').id];
-                    const swOut = nodeMap[switches[0].terminals.find(t => t.label === 'Out').id];
+                const sPos_t = solar.terminals.find(t => t.label === '+');
+                const sNeg_t = solar.terminals.find(t => t.label === '-');
+                const capPos_t = caps[0].terminals.find(t => t.label === '+');
+                const capNeg_t = caps[0].terminals.find(t => t.label === '-');
+                const swIn_t = switches[0].terminals.find(t => t.label === 'In');
+                const swOut_t = switches[0].terminals.find(t => t.label === 'Out');
+
+                if (sPos_t && sNeg_t && capPos_t && capNeg_t && swIn_t && swOut_t) {
+                    const sPos = nodeMap[sPos_t.id];
+                    const sNeg = nodeMap[sNeg_t.id];
+                    const capPos = nodeMap[capPos_t.id];
+                    const capNeg = nodeMap[capNeg_t.id];
+                    const swIn = nodeMap[swIn_t.id];
+                    const swOut = nodeMap[swOut_t.id];
 
                     const positiveTrack = (sPos === swIn && swOut === capPos) || (sPos === swOut && swIn === capPos);
                     const groundTrack = (sNeg === capNeg && sNeg !== undefined);
                     if (positiveTrack && groundTrack) loopPassed = true;
                 }
                 updateStepStyle(step2, loopPassed, steps[1].title, !step1Passed);
-                if (!loopPassed) return;
+                if (!loopPassed) {
+                    updateStepStyle(step3, false, steps[2].title, true);
+                    updateStepStyle(step4, false, steps[3].title, true);
+                    return;
+                }
 
-                // Step 3: Sunlight Slider to 100%
                 const sunPassed = solar.state.sunlight >= 95;
                 updateStepStyle(step3, sunPassed, steps[2].title, !loopPassed);
-                if (!sunPassed) return;
+                if (!sunPassed) {
+                    updateStepStyle(step4, false, steps[3].title, true);
+                    return;
+                }
 
-                // Step 4: Storage Charge Execution
                 const capCharged = caps.some(c => c.state.storedVoltage > 10.0);
                 updateStepStyle(step4, capCharged, steps[3].title, !sunPassed);
             }
@@ -1614,58 +1673,89 @@
                 const meters = components.filter(c => c.type === 'multimeter');
                 const pwr = components.find(c => c.type === 'usb_power');
 
-                // Step 1: Placement
                 const step1Passed = (gen && npn && resistors.length >= 1 && meters.length >= 1);
                 updateStepStyle(step1, step1Passed, steps[0].title);
-                if (!step1Passed) return;
+                if (!step1Passed) {
+                    updateStepStyle(step2, false, steps[1].title, true);
+                    updateStepStyle(step3, false, steps[2].title, true);
+                    updateStepStyle(step4, false, steps[3].title, true);
+                    updateStepStyle(step5, false, steps[4].title, true);
+                    return;
+                }
 
-                // Step 2: Collector Network Setup
                 let step2Passed = false;
                 if (pwr && resistors.length > 0) {
-                    const vbus = nodeMap[pwr.terminals.find(t => t.label === '5V').id];
-                    const gnd = nodeMap[pwr.terminals.find(t => t.label === 'GND').id];
-                    const r1A = nodeMap[resistors[0].terminals.find(t => t.label === 'A').id];
-                    const r1B = nodeMap[resistors[0].terminals.find(t => t.label === 'B').id];
-                    const coll = nodeMap[npn.terminals.find(t => t.label === 'C').id];
-                    const emit = nodeMap[npn.terminals.find(t => t.label === 'E').id];
+                    const vbus_t = pwr.terminals.find(t => t.label === '5V');
+                    const gnd_t = pwr.terminals.find(t => t.label === 'GND');
+                    const r1A_t = resistors[0].terminals.find(t => t.label === 'A');
+                    const r1B_t = resistors[0].terminals.find(t => t.label === 'B');
+                    const coll_t = npn.terminals.find(t => t.label === 'C');
+                    const emit_t = npn.terminals.find(t => t.label === 'E');
 
-                    const pullUp = (vbus === r1A && r1B === coll) || (vbus === r1B && r1A === coll);
-                    const groundedEmit = (emit === gnd && emit !== undefined);
-                    if (pullUp && groundedEmit) step2Passed = true;
+                    if (vbus_t && gnd_t && r1A_t && r1B_t && coll_t && emit_t) {
+                        const vbus = nodeMap[vbus_t.id];
+                        const gnd = nodeMap[gnd_t.id];
+                        const r1A = nodeMap[r1A_t.id];
+                        const r1B = nodeMap[r1B_t.id];
+                        const coll = nodeMap[coll_t.id];
+                        const emit = nodeMap[emit_t.id];
+
+                        const pullUp = (vbus === r1A && r1B === coll) || (vbus === r1B && r1A === coll);
+                        const groundedEmit = (emit === gnd && emit !== undefined);
+                        if (pullUp && groundedEmit) step2Passed = true;
+                    }
                 }
                 updateStepStyle(step2, step2Passed, steps[1].title, !step1Passed);
-                if (!step2Passed) return;
+                if (!step2Passed) {
+                    updateStepStyle(step3, false, steps[2].title, true);
+                    updateStepStyle(step4, false, steps[3].title, true);
+                    updateStepStyle(step5, false, steps[4].title, true);
+                    return;
+                }
 
-                // Step 3: Base Driver
                 let step3Passed = false;
-                if (step2Passed) {
-                    const sigPos = nodeMap[gen.terminals.find(t => t.label === '+').id];
-                    const sigNeg = nodeMap[gen.terminals.find(t => t.label === '-').id];
-                    const base = nodeMap[npn.terminals.find(t => t.label === 'B').id];
-                    const gnd = nodeMap[pwr.terminals.find(t => t.label === 'GND').id];
+                const sigPos_t = gen.terminals.find(t => t.label === '+');
+                const sigNeg_t = gen.terminals.find(t => t.label === '-');
+                const base_t = npn.terminals.find(t => t.label === 'B');
+                const gnd_t = pwr ? pwr.terminals.find(t => t.label === 'GND') : null;
+
+                if (sigPos_t && sigNeg_t && base_t && gnd_t) {
+                    const sigPos = nodeMap[sigPos_t.id];
+                    const sigNeg = nodeMap[sigNeg_t.id];
+                    const base = nodeMap[base_t.id];
+                    const gnd = nodeMap[gnd_t.id];
 
                     if (sigPos === base && sigNeg === gnd && sigPos !== undefined) step3Passed = true;
                 }
                 updateStepStyle(step3, step3Passed, steps[2].title, !step2Passed);
-                if (!step3Passed) return;
+                if (!step3Passed) {
+                    updateStepStyle(step4, false, steps[3].title, true);
+                    updateStepStyle(step5, false, steps[4].title, true);
+                    return;
+                }
 
-                // Step 4: Collector Probe Setup
                 let step4Passed = false;
-                if (step3Passed) {
-                    const coll = nodeMap[npn.terminals.find(t => t.label === 'C').id];
-                    const gnd = nodeMap[pwr.terminals.find(t => t.label === 'GND').id];
-                    const mRed = nodeMap[meters[0].terminals.find(t => t.label === 'VΩ+').id];
-                    const mBlack = nodeMap[meters[0].terminals.find(t => t.label === 'COM-').id];
+                const coll_t = npn.terminals.find(t => t.label === 'C');
+                const mRed_t = meters[0].terminals.find(t => t.label === 'VΩ+');
+                const mBlack_t = meters[0].terminals.find(t => t.label === 'COM-');
+                const pwrGnd_t = pwr ? pwr.terminals.find(t => t.label === 'GND') : null;
+
+                if (coll_t && mRed_t && mBlack_t && pwrGnd_t) {
+                    const coll = nodeMap[coll_t.id];
+                    const gnd = nodeMap[pwrGnd_t.id];
+                    const mRed = nodeMap[mRed_t.id];
+                    const mBlack = nodeMap[mBlack_t.id];
 
                     if (mRed === coll && mBlack === gnd && mRed !== undefined) step4Passed = true;
                 }
                 updateStepStyle(step4, step4Passed, steps[3].title, !step3Passed);
-                if (!step4Passed) return;
+                if (!step4Passed) {
+                    updateStepStyle(step5, false, steps[4].title, true);
+                    return;
+                }
 
-                // Step 5: Dynamic Amplification Performance
                 const r1 = resistors[0];
                 const rightResistance = r1.state.resistance >= 800 && r1.state.resistance <= 1200;
-                // Verify output voltage swing dynamics on the collector node are greater than base input
                 const vC = npn.terminals.find(t => t.label === 'C').voltage;
                 const amplifies = rightResistance && (vC > 0.5 && vC < 4.5);
                 updateStepStyle(step5, amplifies, steps[4].title, !step4Passed);
