@@ -193,191 +193,191 @@ function buildComponent(type, id, existingComponents) {
   let terminals = [], state = {};
   switch (type) {
     case 'custom_load':
-      terminals = makeTerminals(id, [{ label: '+', x: 16, y: 50 }, { label: '-', x: 176, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { vNom: 12.0, pNom: 10.0, blown: false, name: 'Custom Load' };
       break;
     case 'solder_joint':
       terminals = makeTerminals(id, [{ label: 'Node', x: 16, y: 16 }]);
       state = { name: 'Solder Joint' };
       break;
-    case 'battery_18650':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
-      state = { voltage: 3.7, capacity: 2600, charge: 100, internalR: 0.04, name: '18650 Li-ion' };
-      break;
-    case 'battery_aaa':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
-      state = { voltage: 1.5, capacity: 1200, charge: 100, internalR: 0.3, name: 'AAA Alkaline' };
-      break;
-    case 'battery_d':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
-      state = { voltage: 1.5, capacity: 10000, charge: 100, internalR: 0.1, name: 'D Cell' };
-      break;
-    case 'lemon_battery':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
-      state = { voltage: 0.9, capacity: 50, charge: 100, internalR: 250, name: 'Lemon Bat' };
-      break;
     case 'usb_power':
-      terminals = makeTerminals(id, [{ label: '5V', x: 176, y: 32 }, { label: 'GND', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '5V', x: 192, y: 32 }, { label: 'GND', x: 192, y: 68 }]);
       state = { name: 'USB 5V' };
       break;
     case 'bench_psu':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: 'GND', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: 'GND', x: 192, y: 68 }]);
       state = { voltage: 12.0, currentLimit: 1.0, name: 'Bench PSU' };
       break;
+    case 'battery_18650':
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
+      state = { voltage: 3.7, capacity: 2600, charge: 100, internalR: 0.04, name: '18650 Li-ion' };
+      break;
+    case 'battery_aaa':
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
+      state = { voltage: 1.5, capacity: 1200, charge: 100, internalR: 0.3, name: 'AAA Alkaline' };
+      break;
+    case 'battery_d':
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
+      state = { voltage: 1.5, capacity: 10000, charge: 100, internalR: 0.1, name: 'D Cell' };
+      break;
+    case 'lemon_battery':
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
+      state = { voltage: 0.9, capacity: 50, charge: 100, internalR: 250, name: 'Lemon Bat' };
+      break;
     case 'battery_9v':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 9.0, capacity: 500, charge: 100, internalR: 5, name: '9V PP3' };
       break;
     case 'battery_aa':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 1.5, capacity: 2850, charge: 100, internalR: 0.3, name: 'AA 1.5V' };
       break;
     case 'battery_cr2032':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 3.0, capacity: 210, charge: 100, internalR: 10, name: 'CR2032' };
       break;
     case 'battery_lipo':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 3.7, capacity: 1000, charge: 100, internalR: 0.08, name: 'LiPo 3.7V' };
       break;
     case 'battery_lead':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 12.0, capacity: 7000, charge: 100, internalR: 0.05, name: '12V SLA' };
       break;
     case 'solar_panel':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { sunlight: 50, voltage: 6.0, isc: 0.66, name: 'Solar 12V' };
       break;
     case 'signal_generator':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 50 }, { label: '-', x: 20, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 50 }, { label: '-', x: 0, y: 50 }]);
       state = { frequency: 0.5, amplitude: 2.0, waveform: 'sine', outputVoltage: 0.0, name: 'Sig.Gen' };
       break;
     case 'diy_cell':
-      terminals = makeTerminals(id, [{ label: '+', x: 25, y: 32 }, { label: '-', x: 155, y: 32 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 32 }, { label: '-', x: 192, y: 32 }]);
       state = {
         forming: 0, charge: 0, voltage: 0.0, current: 0.0,
         name: 'Cell ' + (existingComponents.filter(c => c.type === 'diy_cell').length + 1)
       };
       break;
     case 'resistor':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 330, fixed: false };
       break;
     case 'resistor_1k':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 1000, fixed: true };
       break;
     case 'resistor_10k':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 10000, fixed: true };
       break;
     case 'resistor_100':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 100, fixed: true };
       break;
     case 'pot':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'W', x: 96, y: 20 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'W', x: 96, y: 0 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 10000, wiper: 0.5 };
       break;
     case 'capacitor':
-      terminals = makeTerminals(id, [{ label: '+', x: 25, y: 50 }, { label: '-', x: 155, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { capacitance: 1000e-6, storedVoltage: 0.0, name: '1000µF' };
       break;
     case 'cap_100n':
-      terminals = makeTerminals(id, [{ label: '+', x: 25, y: 50 }, { label: '-', x: 155, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { capacitance: 100e-9, storedVoltage: 0.0, name: '100nF' };
       break;
     case 'cap_10u':
-      terminals = makeTerminals(id, [{ label: '+', x: 25, y: 50 }, { label: '-', x: 155, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { capacitance: 10e-6, storedVoltage: 0.0, name: '10µF' };
       break;
     case 'ind_1mH':
     case 'inductor':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 50 }, { label: 'B', x: 176, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 50 }, { label: 'B', x: 192, y: 50 }]);
       state = { inductance: 100e-6, current: 0.0, name: '100µH' };
       break;
     case 'diode':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 16, y: 62 }, { label: 'K-', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 62 }, { label: 'K-', x: 192, y: 62 }]);
       state = { vf: 0.7, name: '1N4007' };
       break;
     case 'zener':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 16, y: 62 }, { label: 'K-', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 62 }, { label: 'K-', x: 192, y: 62 }]);
       state = { vf: 0.7, vz: 5.1, name: '5.1V Zener' };
       break;
     case 'transformer':
-      terminals = makeTerminals(id, [{ label: 'P+', x: 16, y: 35 }, { label: 'P-', x: 16, y: 70 }, { label: 'S+', x: 176, y: 35 }, { label: 'S-', x: 176, y: 70 }]);
+      terminals = makeTerminals(id, [{ label: 'P+', x: 0, y: 35 }, { label: 'P-', x: 0, y: 70 }, { label: 'S+', x: 192, y: 35 }, { label: 'S-', x: 192, y: 70 }]);
       state = { ratio: 10, name: '1:10 XFMR' };
       break;
     case 'led':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 28, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 72 }, { label: 'K-', x: 192, y: 72 }]);
       state = { blown: false, current: 0.0, vf: 2.0, color: '#ef4444', name: 'LED Red' };
       break;
     case 'led_green':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 28, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 72 }, { label: 'K-', x: 192, y: 72 }]);
       state = { blown: false, current: 0.0, vf: 2.2, color: '#22c55e', name: 'LED Green' };
       break;
     case 'led_blue':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 28, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 72 }, { label: 'K-', x: 192, y: 72 }]);
       state = { blown: false, current: 0.0, vf: 3.2, color: '#3b82f6', name: 'LED Blue' };
       break;
     case 'led_yellow':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 28, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
       state = { blown: false, current: 0.0, vf: 2.1, color: '#eab308', name: 'LED Yellow' };
       break;
     case 'led_rgb':
-      terminals = makeTerminals(id, [{ label: 'R+', x: 20, y: 85 }, { label: 'G+', x: 60, y: 85 }, { label: 'B+', x: 100, y: 85 }, { label: 'K-', x: 140, y: 85 }]);
+      terminals = makeTerminals(id, [{ label: 'R+', x: 20, y: 105 }, { label: 'G+', x: 60, y: 105 }, { label: 'B+', x: 100, y: 105 }, { label: 'K-', x: 140, y: 105 }]);
       state = { blownR: false, blownG: false, blownB: false, name: 'RGB LED' };
       break;
     case 'npn_transistor':
-      terminals = makeTerminals(id, [{ label: 'C', x: 92, y: 22 }, { label: 'B', x: 26, y: 82 }, { label: 'E', x: 158, y: 82 }]);
+      terminals = makeTerminals(id, [{ label: 'C', x: 96, y: 0 }, { label: 'B', x: 0, y: 82 }, { label: 'E', x: 192, y: 82 }]);
       state = { current_b: 0.0, beta: 100, name: '2N2222 NPN', vbe_on: 0.7 };
       break;
     case 'pnp_transistor':
-      terminals = makeTerminals(id, [{ label: 'C', x: 92, y: 22 }, { label: 'B', x: 26, y: 82 }, { label: 'E', x: 158, y: 82 }]);
+      terminals = makeTerminals(id, [{ label: 'C', x: 96, y: 0 }, { label: 'B', x: 0, y: 82 }, { label: 'E', x: 192, y: 82 }]);
       state = { current_b: 0.0, beta: 100, name: '2N2907 PNP', vbe_on: 0.7 };
       break;
     case 'mosfet_n':
-      terminals = makeTerminals(id, [{ label: 'D', x: 92, y: 22 }, { label: 'G', x: 26, y: 82 }, { label: 'S', x: 158, y: 82 }]);
+      terminals = makeTerminals(id, [{ label: 'D', x: 96, y: 0 }, { label: 'G', x: 0, y: 82 }, { label: 'S', x: 192, y: 82 }]);
       state = { threshold: 2.0, rds_on: 0.022, name: 'IRLZ44N N-ch' };
       break;
     case 'mosfet_p':
-      terminals = makeTerminals(id, [{ label: 'D', x: 92, y: 22 }, { label: 'G', x: 26, y: 82 }, { label: 'S', x: 158, y: 82 }]);
+      terminals = makeTerminals(id, [{ label: 'D', x: 96, y: 0 }, { label: 'G', x: 0, y: 82 }, { label: 'S', x: 192, y: 82 }]);
       state = { threshold: -4.0, rds_on: 0.117, name: 'IRF9540N P-ch' };
       break;
     case 'ne555':
-      terminals = makeTerminals(id, [{ label: 'Vcc', x: 176, y: 25 }, { label: 'GND', x: 176, y: 55 }, { label: 'OUT', x: 176, y: 80 }, { label: 'TRG', x: 20, y: 25 }, { label: 'THR', x: 20, y: 55 }, { label: 'DIS', x: 20, y: 80 }]);
+      terminals = makeTerminals(id, [{ label: 'Vcc', x: 192, y: 25 }, { label: 'GND', x: 192, y: 55 }, { label: 'OUT', x: 192, y: 80 }, { label: 'TRG', x: 0, y: 25 }, { label: 'THR', x: 0, y: 55 }, { label: 'DIS', x: 0, y: 80 }]);
       state = { mode: 'astable', out: false, capV: 0.0, name: 'NE555' };
       break;
     case 'lm741':
-      terminals = makeTerminals(id, [{ label: 'IN+', x: 20, y: 35 }, { label: 'IN-', x: 20, y: 65 }, { label: 'Vcc+', x: 96, y: 10 }, { label: 'Vcc-', x: 96, y: 90 }, { label: 'OUT', x: 176, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: 'IN+', x: 0, y: 35 }, { label: 'IN-', x: 0, y: 65 }, { label: 'Vcc+', x: 96, y: 0 }, { label: 'Vcc-', x: 96, y: 100 }, { label: 'OUT', x: 192, y: 50 }]);
       state = { gain: 100000, name: 'LM741' };
       break;
     case 'lm358':
-      terminals = makeTerminals(id, [{ label: 'IN+', x: 20, y: 35 }, { label: 'IN-', x: 20, y: 65 }, { label: 'Vcc', x: 96, y: 10 }, { label: 'GND', x: 96, y: 90 }, { label: 'OUT', x: 176, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: 'IN+', x: 0, y: 35 }, { label: 'IN-', x: 0, y: 65 }, { label: 'Vcc', x: 96, y: 0 }, { label: 'GND', x: 96, y: 100 }, { label: 'OUT', x: 192, y: 50 }]);
       state = { gain: 100000, name: 'LM358' };
       break;
     case 'lm7805':
-      terminals = makeTerminals(id, [{ label: 'IN', x: 20, y: 55 }, { label: 'GND', x: 96, y: 85 }, { label: 'OUT', x: 176, y: 55 }]);
+      terminals = makeTerminals(id, [{ label: 'IN', x: 0, y: 55 }, { label: 'GND', x: 96, y: 100 }, { label: 'OUT', x: 192, y: 55 }]);
       state = { vout: 5.0, name: 'LM7805' };
       break;
     case 'lm317':
-      terminals = makeTerminals(id, [{ label: 'IN', x: 20, y: 55 }, { label: 'ADJ', x: 96, y: 85 }, { label: 'OUT', x: 176, y: 55 }]);
+      terminals = makeTerminals(id, [{ label: 'IN', x: 0, y: 55 }, { label: 'ADJ', x: 96, y: 100 }, { label: 'OUT', x: 192, y: 55 }]);
       state = { r1: 240, r2: 2400, vout: 12.0, name: 'LM317' };
       break;
     case 'thermistor':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { temp: 25, b: 3950, r25: 10000, name: 'NTC 10kΩ' };
       break;
     case 'ldr':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { lightPct: 50, name: 'LDR GL5539' };
       break;
     case 'spst_switch':
-      terminals = makeTerminals(id, [{ label: 'In', x: 22, y: 50 }, { label: 'Out', x: 152, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: 'In', x: 0, y: 50 }, { label: 'Out', x: 192, y: 50 }]);
       state = { closed: false, name: 'SPST' };
       break;
     case 'pushbutton':
-      terminals = makeTerminals(id, [{ label: '1', x: 22, y: 50 }, { label: '2', x: 152, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '1', x: 0, y: 50 }, { label: '2', x: 192, y: 50 }]);
       state = { pressed: false, name: 'Pushbutton' };
       break;
     case 'seven_seg':
@@ -385,19 +385,19 @@ function buildComponent(type, id, existingComponents) {
       state = { name: '7-Seg' };
       break;
     case 'buzzer':
-      terminals = makeTerminals(id, [{ label: '+', x: 28, y: 72 }, { label: '-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 72 }, { label: '-', x: 192, y: 72 }]);
       state = { freq: 2300, active: false, name: 'Buzzer 5V' };
       break;
     case 'speaker':
-      terminals = makeTerminals(id, [{ label: '+', x: 28, y: 72 }, { label: '-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 72 }, { label: '-', x: 192, y: 72 }]);
       state = { impedance: 8, power: 0.25, active: false, name: '8Ω Speaker' };
       break;
     case 'multimeter':
-      terminals = makeTerminals(id, [{ label: 'VΩ+', x: 38, y: 130 }, { label: 'COM-', x: 138, y: 130 }]);
+      terminals = makeTerminals(id, [{ label: 'VΩ+', x: 0, y: 130 }, { label: 'COM-', x: 176, y: 130 }]);
       state = { mode: 'voltage', value: 0.0, name: 'DMM' };
       break;
     case 'oscilloscope':
-      terminals = makeTerminals(id, [{ label: 'CH1', x: 30, y: 130 }, { label: 'GND', x: 96, y: 130 }, { label: 'CH2', x: 162, y: 130 }]);
+      terminals = makeTerminals(id, [{ label: 'CH1', x: 0, y: 130 }, { label: 'GND', x: 96, y: 130 }, { label: 'CH2', x: 192, y: 130 }]);
       state = { timebase: 0.5, gain: 1.0, name: 'Oscilloscope' };
       if (!oscData[id]) oscData[id] = { ch1: [], ch2: [] };
       break;
