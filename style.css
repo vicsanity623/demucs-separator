@@ -1467,6 +1467,48 @@ select:focus {
   box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
 }
 
+/* === EARTH GROUND MODULE === */
+.comp-card[data-type="earth_gnd"] {
+  width: 32px !important;
+  height: 32px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: grab;
+}
+
+.comp-card[data-type="earth_gnd"] .comp-header {
+  display: none !important;
+}
+
+.comp-card[data-type="earth_gnd"] .comp-body {
+  padding: 0 !important;
+  min-height: auto !important;
+}
+
+.comp-card[data-type="earth_gnd"] .compact-graphic {
+  display: flex !important;
+  background: transparent !important;
+  border: none !important;
+  pointer-events: none;
+}
+
+.comp-card[data-type="earth_gnd"] .term-node {
+  left: 5px !important;
+  top: 5px !important;
+  width: 22px !important;
+  height: 22px !important;
+  background: var(--bg-deepest) !important;
+  border: 2px solid var(--sky) !important;
+  color: var(--sky) !important;
+  font-weight: bold;
+  font-size: 6px;
+}
+
+.comp-card[data-type="earth_gnd"] .term-node span {
+  display: none !important;
+}
+
 .comp-card[data-type="solder_joint"] .term-node span {
   display: none !important;
   /* Hide node labels */
