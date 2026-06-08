@@ -2389,15 +2389,17 @@ function simulationTick() {
       const vp = tv('+'), vn = tv('-');
       const emf = state.voltage * (state.charge / 100);
 
-      // Current is positive when discharging (current flows OUT of positive terminal)
-      const I = (emf - (vp - vn)) / state.internalR;
+      // Use a damped resistance (min 0.5 ohms) for the charge integration step to prevent stiff overshoot oscillations
+      const R_safe = Math.max(0.5, state.internalR);
+      const I = (emf - (vp - vn)) / R_safe;
 
+      const transferRate = 0.001; // Symmetrical rate for perfect energy conservation
       if (I > 0.001) {
         // Discharging: reduce charge
-        state.charge = Math.max(0, state.charge - I * 0.001);
+        state.charge = Math.max(0, state.charge - I * transferRate);
       } else if (I < -0.001) {
-        // Charging: increase charge (capped at 100%)
-        state.charge = Math.min(100, state.charge - I * 0.0005);
+        // Charging: increase charge
+        state.charge = Math.min(100, state.charge - I * transferRate);
       }
 
       const chg = document.getElementById(`${id}-chg`); if (chg) chg.innerText = Math.round(state.charge) + '%';
