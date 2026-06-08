@@ -108,6 +108,7 @@ const PARTS_CATALOGUE = [
       { type: 'diode', icon: '▶', iconClass: 'icon-passive', name: 'Diode 1N4007', desc: 'Rectifier, Vf 0.7V, 1A 1000V' },
       { type: 'zener', icon: '⇒', iconClass: 'icon-passive', name: 'Zener Diode 5.1V', desc: 'BZX55C5V1, Pzmax 500mW' },
       { type: 'transformer', icon: '⊘', iconClass: 'icon-passive', name: 'Transformer 1:10', desc: 'Step-up audio, 600Ω:60kΩ' },
+      { type: 'custom_load', icon: '🔌', iconClass: 'icon-passive', name: 'Custom Load', desc: 'Configurable voltage/power appliance' },
       { type: 'solder_joint', icon: '⚫', iconClass: 'icon-passive', name: 'Solder Joint', desc: 'Wiring junction point' },
     ]
   },
@@ -191,6 +192,10 @@ function makeTerminals(id, defs) {
 function buildComponent(type, id, existingComponents) {
   let terminals = [], state = {};
   switch (type) {
+    case 'custom_load':
+      terminals = makeTerminals(id, [{ label: '+', x: 16, y: 50 }, { label: '-', x: 176, y: 50 }]);
+      state = { vNom: 12.0, pNom: 10.0, blown: false, name: 'Custom Load' };
+      break;
     case 'solder_joint':
       terminals = makeTerminals(id, [{ label: 'Node', x: 16, y: 16 }]);
       state = { name: 'Solder Joint' };
@@ -684,6 +689,20 @@ function buildCardBody(comp) {
              </select>
            </div>
          </div>`;
+
+    case 'custom_load':
+      return `<div class="flex flex-col gap-1.5">
+           <div class="flex justify-between items-center"><span class="text-muted" style="font-size:9px">Req. Volts (V)</span>
+             <input type="number" id="${id}-vnom" min="1" max="240" step="1" value="${comp.state.vNom}" style="width:56px" onchange="updateCustomLoad('${id}','vNom',this.value)">
+           </div>
+           <div class="flex justify-between items-center"><span class="text-muted" style="font-size:9px">Power (W)</span>
+             <input type="number" id="${id}-pnom" min="0.1" max="1000" step="0.5" value="${comp.state.pNom}" style="width:56px" onchange="updateCustomLoad('${id}','pNom',this.value)">
+           </div>
+           <div class="flex justify-between"><span class="text-muted" style="font-size:9px">Applied V</span><span class="font-mono text-teal" id="${id}-vop" style="font-size:10px">0.00 V</span></div>
+           <div class="flex justify-between"><span class="text-muted" style="font-size:9px">Current</span><span class="font-mono text-emerald" id="${id}-cop" style="font-size:10px">0.0 mA</span></div>
+           <div class="flex justify-between"><span class="text-muted" style="font-size:9px">Status</span><span class="font-mono" id="${id}-status" style="font-size:10px;color:var(--emerald)">OK</span></div>
+           <button id="${id}-reset" class="hidden btn btn-danger" style="font-size:9px;padding:3px 8px;margin-top:4px" onclick="resetBlownLoad('${id}')">Replace Load</button>
+         </div>`;
     default:
       return `<div class="text-muted" style="font-size:9px;text-align:center;padding:8px 0">${comp.type}</div>`;
   }
@@ -913,6 +932,22 @@ function toggleDip(id, num) {
   if (thumb) thumb.style.transform = `translateY(${comp.state['sw' + num] ? 0 : 20}px)`;
 }
 
+function updateCustomLoad(id, field, val) {
+  const comp = components.find(c => c.id === id);
+  if (!comp) return;
+  comp.state[field] = parseFloat(val) || 1.0;
+  saveWorkspaceToLocalStorage();
+}
+
+function resetBlownLoad(id) {
+  const comp = components.find(c => c.id === id);
+  if (!comp) return;
+  comp.state.blown = false;
+  const r = document.getElementById(`${id}-reset`); if (r) r.classList.add('hidden');
+  const status = document.getElementById(`${id}-status`); if (status) { status.innerText = 'OK'; status.style.color = ''; }
+  saveWorkspaceToLocalStorage();
+}
+
 function toggleSlide(id) {
   const comp = components.find(c => c.id === id);
   if (!comp) return;
@@ -1056,11 +1091,12 @@ function handleDrag(e) {
     if (el) { el.style.left = nx + 'px'; el.style.top = ny + 'px'; }
   }
   updateWires();
+  saveWorkspaceToLocalStorage();
 }
 
 function endDrag() {
   if (draggedComponent) {
-    const gridSize = 24;
+    const gridSize = 12;
 
     if (selectedComponents.has(draggedComponent.id)) {
       selectedComponents.forEach(id => {
@@ -1372,6 +1408,7 @@ function showWireColorPicker(wireIdx) {
   const current = colors.indexOf(wire.color);
   wire.color = colors[(current + 1) % colors.length];
   updateWires();
+  saveWorkspaceToLocalStorage();
 }
 
 // ─── LONG PRESS ───────────────────────────────────────────────────────────────
@@ -1784,6 +1821,18 @@ function getCompactGraphicHTML(comp) {
     return `
       <svg viewBox="0 0 50 50" width="48" height="48">
         <path d="M 12 25 Q 16 12 20 25 Q 24 12 28 25 Q 32 12 36 25" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" />
+      </svg>
+    `;
+  }
+
+  // 13.5 Configurable Appliance Loads
+  if (type === 'custom_load') {
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <rect x="10" y="10" width="30" height="30" rx="6" fill="#1e293b" stroke="#eab308" stroke-width="2" />
+        <circle cx="25" cy="25" r="10" fill="none" stroke="#eab308" stroke-width="2" />
+        <path d="M 21 25 L 29 25 M 25 21 L 25 29" stroke="#eab308" stroke-width="2" />
+        <text x="25" y="44" fill="var(--text-muted)" font-size="5" font-family="monospace" text-anchor="middle">APPLIANCE</text>
       </svg>
     `;
   }
@@ -2386,6 +2435,15 @@ function simulationTick() {
           const Rint = 150 - 146 * fr;
           twoPort(T('+'), T('-'), cellV, Rint);
         }
+        else if (type === 'custom_load') {
+          if (state.blown) return;
+          const nP = T('+'), nN = T('-'); if (nP === undefined || nN === undefined) return;
+
+          // R = V_nom^2 / P_nom
+          const R = Math.pow(state.vNom, 2) / Math.max(0.1, state.pNom);
+          const G = 1 / R; const nb = (nP === i) ? nN : nP;
+          if (nP === i || nN === i) { sumG += G; sumGV += G * V[nb]; }
+        }
         else if (type === 'resistor' || type === 'resistor_1k' || type === 'resistor_10k' || type === 'resistor_100' || type === 'resistor_220' || type === 'resistor_330' || type === 'resistor_4k7' || type === 'resistor_1m' || type === 'wire_copper' || type === 'wire_nichrome' || type === 'salt_water') {
           const nA = T('A'), nB = T('B'); if (nA === undefined || nB === undefined) return;
           const G = 1 / state.resistance; const nb = (nA === i) ? nB : nA;
@@ -2660,7 +2718,8 @@ function simulationTick() {
 
       // True physical discharge equation: Delta % = (I * dt * 100) / (Capacity_mAh * 3.6)
       const capacity = state.capacity || 2000; // Falls back to 2000mAh if not specified
-      const deltaCharge = (I * 2.778) / capacity;
+      const simSpeedMultiplier = 20;
+      const deltaCharge = ((I * 2.778) / capacity) * simSpeedMultiplier;
 
       if (I > 0.001) {
         // Discharging
@@ -2779,6 +2838,34 @@ function simulationTick() {
       const fwd = vA - vK > state.vf;
       const el = document.getElementById(`${id}-state`);
       if (el) { el.innerText = fwd ? 'ON' : 'OFF'; el.style.color = fwd ? 'var(--teal)' : 'var(--text-muted)'; }
+    }
+    else if (type === 'custom_load') {
+      const vp = tv('+'), vn = tv('-');
+      const vDiff = Math.abs(vp - vn);
+      const R = Math.pow(state.vNom, 2) / Math.max(0.1, state.pNom);
+      const I = state.blown ? 0.0 : (vDiff / R);
+
+      // Blow if voltage exceeds requirements by 20%
+      if (!state.blown && vDiff > state.vNom * 1.2) {
+        state.blown = true;
+        const r = document.getElementById(`${id}-reset`); if (r) r.classList.remove('hidden');
+      }
+
+      const vop = document.getElementById(`${id}-vop`); if (vop) vop.innerText = vDiff.toFixed(2) + ' V';
+      const cop = document.getElementById(`${id}-cop`); if (cop) cop.innerText = (I * 1000).toFixed(1) + ' mA';
+      const status = document.getElementById(`${id}-status`);
+      if (status) {
+        if (state.blown) {
+          status.innerText = '💥 OVERVOLTAGE';
+          status.style.color = 'var(--rose)';
+        } else if (vDiff > 0.1) {
+          status.innerText = 'RUNNING';
+          status.style.color = 'var(--teal)';
+        } else {
+          status.innerText = 'STANDBY';
+          status.style.color = 'var(--text-secondary)';
+        }
+      }
     }
     else if (type === 'transformer') {
       const vPp = tv('P+'), vPn = tv('P-');
