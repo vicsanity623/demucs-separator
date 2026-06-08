@@ -2089,7 +2089,7 @@ function simulationTick() {
   V[gndIdx] = 0.0;
 
   // Iterative nodal analysis (Gauss-Seidel)
-  for (let iter = 0; iter < 80; iter++) {
+  for (let iter = 0; iter < 200; iter++) {
     const nV = [...V];
     for (let i = 0; i < nodeCount; i++) {
       if (i === gndIdx) continue;
@@ -2350,9 +2350,10 @@ function simulationTick() {
     }
     else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u') {
       const vp = tv('+'), vn = tv('-');
-      const C = state.capacitance, dt = 0.1, Req = dt / C;
-      state.storedVoltage += ((vp - vn - state.storedVoltage) / Req) * dt;
+
+      state.storedVoltage = vp - vn;
       state.storedVoltage = Math.max(-50, Math.min(50, state.storedVoltage));
+
       const sv = document.getElementById(`${id}-sv`); if (sv) sv.innerText = state.storedVoltage.toFixed(2) + ' V';
       const cb = document.getElementById(`${id}-cbar`); if (cb) cb.style.width = Math.max(0, Math.min(100, (state.storedVoltage / 15) * 100)) + '%';
     }
@@ -2387,8 +2388,18 @@ function simulationTick() {
     else if (type === 'battery_9v' || type === 'battery_aa' || type === 'battery_cr2032' || type === 'battery_lipo' || type === 'battery_lead' || type === 'battery_18650' || type === 'battery_aaa' || type === 'battery_d' || type === 'lemon_battery') {
       const vp = tv('+'), vn = tv('-');
       const emf = state.voltage * (state.charge / 100);
-      const I = (vp - vn - emf) / state.internalR;
-      if (I > 0.001) state.charge = Math.max(0, state.charge - I * 0.001);
+
+      // Current is positive when discharging (current flows OUT of positive terminal)
+      const I = (emf - (vp - vn)) / state.internalR;
+
+      if (I > 0.001) {
+        // Discharging: reduce charge
+        state.charge = Math.max(0, state.charge - I * 0.001);
+      } else if (I < -0.001) {
+        // Charging: increase charge (capped at 100%)
+        state.charge = Math.min(100, state.charge - I * 0.0005);
+      }
+
       const chg = document.getElementById(`${id}-chg`); if (chg) chg.innerText = Math.round(state.charge) + '%';
       const bar = document.getElementById(`${id}-chg-bar`); if (bar) bar.style.width = state.charge + '%';
     }
