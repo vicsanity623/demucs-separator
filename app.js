@@ -1432,21 +1432,30 @@ function getCompactGraphicHTML(comp) {
   const type = comp.type;
   const state = comp.state;
 
-  // 1. LEDs
+  // 1. LEDs (Red, Green, Blue, Yellow, White, RGB)
   if (type.startsWith('led')) {
-    const ledColor = state.color || '#ef4444';
+    const ledColor = state.color || (type === 'led_white' ? '#ffffff' : type === 'led_green' ? '#22c55e' : type === 'led_blue' ? '#3b82f6' : type === 'led_yellow' ? '#eab308' : '#ef4444');
     return `
       <svg viewBox="0 0 50 50" width="48" height="48">
         <circle cx="25" cy="25" r="18" fill="#1e293b" stroke="${ledColor}" stroke-width="2" />
         <circle cx="25" cy="25" r="13" fill="${ledColor}" opacity="0.8" />
-        <line x1="38" y1="15" x2="38" y2="35" stroke="${ledColor}" stroke-width="3" stroke-linecap="round" />
+        <line x1="38" y1="15" x2="38" y2="35" stroke="${ledColor}" stroke-width="2.5" stroke-linecap="round" />
         <text x="25" y="29" fill="#fff" font-size="10" font-family="monospace" text-anchor="middle" font-weight="bold">LED</text>
       </svg>
     `;
   }
 
-  // 2. Resistors (Reads live color codes!)
+  // 2. Resistors & Potentiometers
   if (type.startsWith('resistor') || type === 'pot') {
+    if (type === 'pot') {
+      return `
+        <svg viewBox="0 0 50 50" width="48" height="48">
+          <circle cx="25" cy="25" r="17" fill="#1e293b" stroke="#00e5c8" stroke-width="2" />
+          <circle cx="25" cy="25" r="10" fill="#334155" />
+          <line x1="25" y1="25" x2="25" y2="12" stroke="#00e5c8" stroke-width="3" stroke-linecap="round" />
+        </svg>
+      `;
+    }
     const colors = ['#000', '#78350f', '#dc2626', '#ea580c', '#eab308', '#16a34a', '#2563eb', '#9333ea', '#4b5563', '#fff'];
     const r = state.resistance || 330;
     const s = r.toString();
@@ -1456,7 +1465,7 @@ function getCompactGraphicHTML(comp) {
     return `
       <svg viewBox="0 0 60 40" width="56" height="40">
         <line x1="5" y1="20" x2="55" y2="20" stroke="#4b5563" stroke-width="3" stroke-linecap="round" />
-        <rect x="15" y="11" width="30" height="18" rx="4" fill="#e2b07e" stroke="#c084fc" stroke-width="1" />
+        <rect x="15" y="11" width="30" height="18" rx="4" fill="#e2b07e" stroke="#1e3048" stroke-width="1" />
         <rect x="20" y="11" width="4" height="18" fill="${c1}" />
         <rect x="27" y="11" width="4" height="18" fill="${c2}" />
         <rect x="34" y="11" width="4" height="18" fill="${c3}" />
@@ -1465,26 +1474,24 @@ function getCompactGraphicHTML(comp) {
     `;
   }
 
-  // 3. Batteries
+  // 3. Active Chemical & Standard Battery Cells
   if (type.startsWith('battery') || type === 'lemon_battery' || type === 'diy_cell') {
-    const isLemon = type === 'lemon_battery';
-    const fillCol = isLemon ? '#facc15' : type === 'diy_cell' ? '#10b981' : '#3b82f6';
+    const fillCol = type === 'lemon_battery' ? '#eab308' : type === 'diy_cell' ? '#10b981' : '#3b82f6';
     return `
       <svg viewBox="0 0 50 50" width="48" height="48">
         <rect x="14" y="8" width="22" height="34" rx="4" fill="#1e293b" stroke="${fillCol}" stroke-width="2.5" />
         <rect x="21" y="3" width="8" height="5" rx="1" fill="${fillCol}" />
-        <text x="25" y="30" fill="${fillCol}" font-size="22" font-family="sans-serif" text-anchor="middle" font-weight="bold">BAT</text>
+        <text x="25" y="30" fill="${fillCol}" font-size="20" font-family="monospace" text-anchor="middle" font-weight="bold">BAT</text>
       </svg>
     `;
   }
 
-  // 4. IC Chips (NE555, LM741, Logic Gates, etc.)
+  // 4. IC Logic, Microcontrollers, and Timers (NE555, LM741, Gates)
   if (type.startsWith('ic_') || type === 'ne555' || type.startsWith('lm')) {
     return `
       <svg viewBox="0 0 50 50" width="48" height="48">
         <rect x="11" y="8" width="28" height="34" rx="2" fill="#18181b" stroke="#374151" stroke-width="2" />
         <path d="M 20 8 A 5 5 0 0 0 30 8" fill="#111b27" stroke="#374151" stroke-width="1.5" />
-        <!-- Microchip pins -->
         <rect x="5" y="12" width="6" height="3" rx="0.5" fill="#94a3b8" />
         <rect x="5" y="20" width="6" height="3" rx="0.5" fill="#94a3b8" />
         <rect x="5" y="28" width="6" height="3" rx="0.5" fill="#94a3b8" />
@@ -1495,7 +1502,7 @@ function getCompactGraphicHTML(comp) {
     `;
   }
 
-  // 5. Capacitors
+  // 5. Capacitor Modules
   if (type.startsWith('cap')) {
     return `
       <svg viewBox="0 0 50 50" width="48" height="48">
@@ -1507,39 +1514,155 @@ function getCompactGraphicHTML(comp) {
     `;
   }
 
-  // 6. Transistors & Mosfets
-  if (type.includes('transistor') || type.startsWith('mosfet')) {
+  // 6. Transistors (NPN, PNP, MOSFETs)
+  if (type.includes('transistor') || type.startsWith('mosfet') || type.startsWith('npn') || type.startsWith('pnp')) {
     return `
       <svg viewBox="0 0 50 50" width="48" height="48">
-        <path d="M 10 35 A 15 15 0 0 1 40 35 Z" fill="#1e293b" stroke="#f43f5e" stroke-width="2" />
-        <line x1="10" y1="35" x2="40" y2="35" stroke="#f43f5e" stroke-width="3" />
-        <text x="25" y="28" fill="#f43f5e" font-size="9" font-family="monospace" text-anchor="middle" font-weight="bold">TR</text>
+        <path d="M 12 35 A 13 15 0 0 1 38 35 Z" fill="#1e293b" stroke="#f43f5e" stroke-width="25%" />
+        <line x1="12" y1="35" x2="38" y2="35" stroke="#f43f5e" stroke-width="3" />
+        <text x="25" y="27" fill="#f43f5e" font-size="9" font-family="monospace" text-anchor="middle" font-weight="bold">TO-92</text>
       </svg>
     `;
   }
 
-  // 7. Diodes
-  if (type === 'diode' || type === 'zener') {
+  // 7. Standard Rectifier & Zener Diodes
+  if (type === 'diode' || type === 'zener' || type.startsWith('diode_')) {
+    const strokeColor = type === 'zener' ? '#a78bfa' : '#4ade80';
     return `
       <svg viewBox="0 0 50 40" width="48" height="40">
         <line x1="5" y1="20" x2="45" y2="20" stroke="#4b5563" stroke-width="3" stroke-linecap="round" />
-        <rect x="12" y="10" width="26" height="20" rx="2" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+        <rect x="12" y="10" width="26" height="20" rx="2" fill="#1e293b" stroke="${strokeColor}" stroke-width="1.5" />
         <rect x="30" y="10" width="4" height="20" fill="#cbd5e1" />
       </svg>
     `;
   }
 
-  // 8. General Power Systems (USB, Signal Generator, Bench supply)
+  // 8. General Power Systems (USB Ports, Signal Generator, Bench PSU)
   if (type === 'usb_power' || type === 'bench_psu' || type === 'signal_generator') {
     return `
       <svg viewBox="0 0 50 50" width="48" height="48">
         <rect x="10" y="10" width="30" height="30" rx="6" fill="#1e1b4b" stroke="#818cf8" stroke-width="2" />
-        <path d="M 25 15 L 18 28 L 24 28 L 22 36 L 32 23 L 26 23 Z" fill="#facc15" />
+        <path d="M 25 14 L 18 27 L 24 27 L 22 36 L 32 22 L 26 23 Z" fill="#facc15" />
       </svg>
     `;
   }
 
-  // 9. Default Fallback
+  // 9. Photo-Sensors & Thermal Resistors (LDR, Thermistors)
+  if (type === 'ldr' || type === 'thermistor') {
+    if (type === 'ldr') {
+      return `
+        <svg viewBox="0 0 50 50" width="48" height="48">
+          <circle cx="25" cy="25" r="16" fill="#f57c00" stroke="#b26a00" stroke-width="2" />
+          <path d="M 16 25 Q 21 16, 25 25 T 34 25" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" />
+        </svg>
+      `;
+    }
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <line x1="25" y1="25" x2="25" y2="44" stroke="#4b5563" stroke-width="2.5" />
+        <circle cx="25" cy="18" r="10" fill="#1d4ed8" stroke="#1e40af" stroke-width="2" />
+        <text x="25" y="21" fill="#fff" font-size="8" font-family="monospace" text-anchor="middle">NTC</text>
+      </svg>
+    `;
+  }
+
+  // 10. Manual Toggle & Momentary Switches (SPST, Slide, Pushbutton, DIP)
+  if (type === 'spst_switch' || type === 'pushbutton' || type === 'slide_switch' || type === 'dip_switch') {
+    if (type === 'pushbutton') {
+      return `
+        <svg viewBox="0 0 50 50" width="48" height="48">
+          <rect x="11" y="11" width="28" height="28" rx="4" fill="#334155" stroke="#475569" stroke-width="2" />
+          <circle cx="25" cy="25" r="9" fill="#e11d48" stroke="#be123c" stroke-width="1.5" />
+        </svg>
+      `;
+    }
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <rect x="10" y="14" width="30" height="22" rx="3" fill="#1e293b" stroke="#64748b" stroke-width="2" />
+        <rect x="16" y="21" width="18" height="8" rx="1" fill="#0f172a" />
+        <rect x="${state.closed || state.pressed || state.pos === 2 ? '24' : '16'}" y="18" width="10" height="14" rx="2" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1" />
+      </svg>
+    `;
+  }
+
+  // 11. Instrumentation (DMM Screen & Waveform Scope)
+  if (type === 'multimeter' || type === 'oscilloscope') {
+    if (type === 'multimeter') {
+      return `
+        <svg viewBox="0 0 50 50" width="48" height="48">
+          <rect x="12" y="6" width="26" height="38" rx="4" fill="#f97316" stroke="#c2410c" stroke-width="2.5" />
+          <rect x="16" y="11" width="18" height="10" fill="#000" rx="1" />
+          <circle cx="25" cy="31" r="6" fill="#334155" stroke="#cbd5e1" stroke-width="1.5" />
+        </svg>
+      `;
+    }
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <rect x="8" y="10" width="34" height="30" rx="4" fill="#334155" stroke="#1e293b" stroke-width="2" />
+        <rect x="12" y="14" width="18" height="22" fill="#000a04" stroke="#0a2f1a" stroke-width="1" />
+        <path d="M 13 25 Q 16 16 19 25 T 25 25 T 29 25" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" />
+      </svg>
+    `;
+  }
+
+  // 12. Audio Output Devices & Display Panels (Speakers, Buzzers, 7-Segments)
+  if (type === 'buzzer' || type === 'speaker' || type === 'seven_seg') {
+    if (type === 'seven_seg') {
+      return `
+        <svg viewBox="0 0 50 50" width="48" height="48">
+          <rect x="13" y="6" width="24" height="38" rx="2" fill="#1e293b" stroke="#475569" stroke-width="2" />
+          <path d="M 21 11 L 29 11 L 29 23 L 21 23 Z M 21 23 L 29 23 L 29 35 L 21 32 Z" fill="none" stroke="#334155" stroke-width="2" />
+        </svg>
+      `;
+    }
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <circle cx="25" cy="25" r="16" fill="#1e293b" stroke="#a855f7" stroke-width="2" />
+        <path d="M 17 21 L 23 21 L 28 15 L 28 35 L 23 29 L 17 29 Z" fill="#a855f7" />
+      </svg>
+    `;
+  }
+
+  // 13. Passive Inductors & Transformers
+  if (type === 'transformer' || type === 'inductor' || type === 'ind_1mH') {
+    if (type === 'transformer') {
+      return `
+        <svg viewBox="0 0 50 50" width="48" height="48">
+          <rect x="10" y="12" width="10" height="26" rx="2" fill="none" stroke="#ea580c" stroke-width="2" />
+          <rect x="30" y="12" width="10" height="26" rx="2" fill="none" stroke="#ea580c" stroke-width="2" />
+          <line x1="23" y1="12" x2="23" y2="38" stroke="#64748b" stroke-width="1.5" />
+          <line x1="27" y1="12" x2="27" y2="38" stroke="#64748b" stroke-width="1.5" />
+        </svg>
+      `;
+    }
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <path d="M 12 25 Q 16 12 20 25 Q 24 12 28 25 Q 32 12 36 25" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" />
+      </svg>
+    `;
+  }
+
+  // 14. Raw Materials (Salt Water Cells, Copper Wire coils)
+  if (type === 'salt_water' || type === 'wire_copper' || type === 'wire_nichrome') {
+    if (type === 'salt_water') {
+      return `
+        <svg viewBox="0 0 50 50" width="48" height="48">
+          <rect x="12" y="12" width="26" height="30" rx="3" fill="none" stroke="#cbd5e1" stroke-width="2" />
+          <path d="M 13 26 L 37 25" stroke="#38bdf8" stroke-width="2" />
+          <rect x="17" y="10" width="4" height="20" fill="#94a3b8" />
+          <rect x="29" y="10" width="4" height="20" fill="#fbbf24" />
+        </svg>
+      `;
+    }
+    const wireColor = type === 'wire_copper' ? '#b45309' : '#94a3b8';
+    return `
+      <svg viewBox="0 0 50 40" width="48" height="40">
+        <path d="M 10 20 C 15 10, 20 30, 25 20 C 30 10, 35 30, 40 20" fill="none" stroke="${wireColor}" stroke-width="3" stroke-linecap="round" />
+      </svg>
+    `;
+  }
+
+  // Default Fallback Frame
   return `
     <svg viewBox="0 0 50 50" width="48" height="48">
       <rect x="10" y="10" width="30" height="30" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2" />
