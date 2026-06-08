@@ -29,18 +29,18 @@
             background-image: radial-gradient(#334155 1px, transparent 1px);
             background-size: 20px 20px;
         }
-        /* Touch target enhancement for terminals on mobile */
+        /* Mobile terminal touch area amplification */
         .term-node::after {
             content: '';
             position: absolute;
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: transparent;
         }
     </style>
 </head>
-<body class="h-full bg-slate-950 text-slate-100 flex flex-col overflow-hidden">
+<body class="h-full bg-slate-955 text-slate-100 flex flex-col overflow-hidden">
 
     <!-- Header Panel -->
     <header class="bg-slate-900 border-b border-slate-800 px-4 md:px-6 py-3 flex flex-shrink-0 justify-between items-center z-20">
@@ -58,7 +58,7 @@
         </div>
     </header>
 
-    <!-- Mobile Top Navigation Tab Bar (Hidden on Desktop) -->
+    <!-- Mobile Top Navigation Tab Bar -->
     <nav class="md:hidden bg-slate-900 border-b border-slate-800 flex justify-around items-center text-xs font-semibold h-11 flex-shrink-0 z-20">
         <button onclick="switchMobileTab('workspace')" id="tab-workspace" class="flex-1 h-full text-center border-b-2 border-teal-500 text-teal-400">
             Workspace
@@ -137,7 +137,7 @@
         </aside>
 
         <!-- Main Center Workspace Canvas -->
-        <main id="panel-workspace" class="flex-1 relative workspace-grid overflow-hidden touch-none">
+        <main id="workspace" class="flex-1 relative workspace-grid overflow-hidden touch-none">
             <!-- Connection SVG Layer -->
             <svg id="wire-layer" class="absolute inset-0 pointer-events-none w-full h-full z-0"></svg>
             
@@ -228,6 +228,7 @@
         let lastVoltages = [];
         let currentMobileTab = 'workspace';
 
+        // Element Queries
         const workspace = document.getElementById('workspace');
         const container = document.getElementById('components-container');
         const wireLayer = document.getElementById('wire-layer');
@@ -235,22 +236,23 @@
         const clearBtn = document.getElementById('btn-clear');
 
         window.addEventListener('DOMContentLoaded', () => {
-            // Generate starter layout dynamically
+            // Safe Layout Calculations
             const wWidth = workspace.clientWidth || window.innerWidth;
             const startX = wWidth < 768 ? 20 : 60;
             
+            // Build Initial Starter Circuit
             addComponent('usb_power', startX, 40);
             addComponent('diy_cell', startX, 180);
             addComponent('diy_cell', startX, 330);
             
-            // Mouse & Touch bindings
+            // Interaction Event Listeners
             workspace.addEventListener('mousemove', handlePointerMove);
             workspace.addEventListener('touchmove', handlePointerMove, { passive: false });
             workspace.addEventListener('mouseup', handlePointerUp);
             workspace.addEventListener('touchend', handlePointerUp);
             window.addEventListener('resize', updateWires);
 
-            // Play/Pause Action
+            // Simulation Controls
             playPauseBtn.addEventListener('click', () => {
                 simulationRunning = !simulationRunning;
                 if (simulationRunning) {
@@ -271,16 +273,15 @@
                 updateWires();
             });
 
-            // Initialize background clock loop
+            // Start Solver Loop
             setInterval(simulationTick, 100);
-            // Refresh styles for current sizing
             switchMobileTab('workspace');
         });
 
-        // Responsive PWA Layout Controller
+        // Responsive PWA Tab switcher
         function switchMobileTab(tab) {
             currentMobileTab = tab;
-            const pWorkspace = document.getElementById('panel-workspace');
+            const pWorkspace = document.getElementById('workspace');
             const pParts = document.getElementById('panel-parts');
             const pGuide = document.getElementById('panel-guide');
 
@@ -288,7 +289,6 @@
             const tParts = document.getElementById('tab-parts');
             const tGuide = document.getElementById('tab-guide');
 
-            // Hide panels initially on mobile viewports
             pWorkspace.classList.add('hidden');
             pParts.classList.add('hidden');
             pGuide.classList.add('hidden');
@@ -303,7 +303,7 @@
                 setTimeout(updateWires, 50);
             } else if (tab === 'parts') {
                 pParts.classList.remove('hidden');
-                pParts.classList.remove('md:flex'); // overriding block styles
+                pParts.classList.remove('md:flex');
                 pParts.classList.add('flex');
                 tParts.className = "flex-1 h-full text-center border-b-2 border-teal-500 text-teal-400";
             } else if (tab === 'guide') {
@@ -314,10 +314,9 @@
             }
         }
 
-        // Add component and instantly move viewport to workspace on mobile
+        // Handles Component Addition and mobile viewport updates
         function addAndFocusComponent(type) {
             const rect = workspace.getBoundingClientRect();
-            // Spawns near middle of the workspace area
             const spawnX = Math.max(10, (rect.width / 2) - 96);
             const spawnY = Math.max(10, (rect.height / 2) - 80);
             
@@ -328,7 +327,7 @@
             }
         }
 
-        // Component Definitions & Creation
+        // Component Assembly Logic
         function addComponent(type, customX = null, customY = null) {
             const id = type + '_' + Math.random().toString(36).substr(2, 9);
             const rect = workspace.getBoundingClientRect();
@@ -395,7 +394,7 @@
             updateWires();
         }
 
-        // Render Component UI Element
+        // Render Component elements on CSS DOM
         function renderComponent(comp) {
             const div = document.createElement('div');
             div.id = comp.id;
@@ -455,7 +454,6 @@
                                 <span class="text-[10px] text-slate-400">Value (Ω):</span>
                                 <input type="number" id="${comp.id}-val-input" min="1" max="10000" class="w-20 bg-slate-950 border border-slate-700 rounded text-center text-xs text-slate-100 py-0.5 font-semibold" value="${comp.state.resistance}" onchange="updateResistorVal('${comp.id}', this.value)">
                             </div>
-                            <!-- Band Colors Visual -->
                             <div class="h-6 w-full bg-orange-100/10 rounded flex items-center justify-around px-4 border border-slate-700 relative">
                                 <div class="absolute h-1 w-full bg-slate-600 left-0 z-0"></div>
                                 <div class="w-4 h-4 bg-amber-200 rounded-sm z-10 flex justify-between px-0.5 relative">
@@ -506,7 +504,7 @@
 
             innerHtml += `</div>`;
 
-            // Render Terminals (port connections)
+            // Append Connection Terminal Ports
             comp.terminals.forEach((term) => {
                 innerHtml += `
                     <div id="${term.id}" 
@@ -604,7 +602,7 @@
             }
         }
 
-        // LED Switch toggles
+        // LED Reset handler
         function resetBlownLed(id) {
             const comp = components.find(c => c.id === id);
             if (comp) {
@@ -630,7 +628,7 @@
             }
         }
 
-        // Pointer Resolution (Combines Touch and Click)
+        // Unified input resolution coordinate processor
         function getPointerCoords(e) {
             const rect = workspace.getBoundingClientRect();
             if (e.touches && e.touches.length > 0) {
@@ -656,7 +654,7 @@
             };
         }
 
-        // Dragging Logic
+        // Dragging Event Handlers
         function startDrag(e, compId) {
             if (e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'input') return;
             const comp = components.find(c => c.id === compId);
@@ -666,7 +664,6 @@
                 dragOffset.x = coords.clientX - comp.x;
                 dragOffset.y = coords.clientY - comp.y;
                 
-                // Add event tracking
                 document.addEventListener('mousemove', handleDrag);
                 document.addEventListener('touchmove', handleDrag, { passive: false });
                 document.addEventListener('mouseup', endDrag);
@@ -676,7 +673,7 @@
 
         function handleDrag(e) {
             if (draggedComponent) {
-                e.preventDefault(); // blocks browser scroll bounce while active
+                e.preventDefault();
                 const rect = workspace.getBoundingClientRect();
                 const coords = getPointerCoords(e);
                 
@@ -728,7 +725,6 @@
         function handlePointerUp(e) {
             if (activeWireStart) {
                 const coords = getPointerCoords(e);
-                // Discover target element under finger or mouse release
                 const el = document.elementFromPoint(coords.clientX, coords.clientY);
                 if (el && el.dataset && el.dataset.termId) {
                     const termId = el.dataset.termId;
@@ -779,14 +775,12 @@
                     path.setAttribute('fill', 'none');
                     path.setAttribute('class', 'cursor-pointer hover:stroke-rose-500 pointer-events-auto transition-colors duration-150');
                     
-                    // Delete handler for both Desktop Right-Click & Mobile Long Hold/Tap
                     path.addEventListener('contextmenu', (e) => {
                         e.preventDefault();
                         wires.splice(index, 1);
                         updateWires();
                     });
                     
-                    // Double tap/click wire fallback to delete on mobile
                     let lastTap = 0;
                     path.addEventListener('touchend', (e) => {
                         const currentTime = new Date().getTime();
@@ -802,7 +796,6 @@
                 }
             });
 
-            // Render live temporary tracking wire
             if (activeWireStart) {
                 const elFrom = document.getElementById(activeWireStart);
                 if (elFrom) {
