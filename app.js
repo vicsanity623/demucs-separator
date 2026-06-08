@@ -14,6 +14,7 @@ let isPanningWorkspace = false;
 let panStart = { x: 0, y: 0 };
 let lastTouchDistance = 0;
 let compactMode = false;
+let selectedComponentId = null;
 let activeWireStart = null;
 let mousePosition = { x: 0, y: 0 };
 let draggedComponent = null;
@@ -741,6 +742,12 @@ function renderComponent(comp) {
          <div class="compact-graphic">${getCompactGraphicHTML(comp)}</div>
        </div>
      `;
+
+  // Bind selection handler
+  div.addEventListener('click', (e) => {
+    if (e.target.tagName.toLowerCase() === 'button' || e.target.tagName.toLowerCase() === 'input' || e.target.tagName.toLowerCase() === 'select') return;
+    selectComponent(comp.id);
+  });
 
   // Add terminals
   comp.terminals.forEach(term => {
@@ -1699,6 +1706,109 @@ function getCompactGraphicHTML(comp) {
   `;
 }
 
+function selectComponent(id) {
+  // Clear previous select states
+  if (selectedComponentId) {
+    const prev = document.getElementById(selectedComponentId);
+    if (prev) prev.classList.remove('selected');
+  }
+
+  // Toggle off if clicking the same component twice
+  if (selectedComponentId === id) {
+    selectedComponentId = null;
+  } else {
+    selectedComponentId = id;
+    const next = document.getElementById(id);
+    if (next) next.classList.add('selected');
+  }
+  updateWorkspaceHUD();
+}
+
+function updateWorkspaceHUD() {
+  const hud = document.getElementById('workspace-metrics-hud');
+  if (!hud) return;
+
+  if (!selectedComponentId) {
+    hud.innerHTML = `
+      <div class="metrics-title">📊 Live Telemetry</div>
+      <div style="font-size:10px; color:var(--text-secondary); line-height:1.45;">
+        Tap any component card on the board to analyze dynamic power draw and voltages.
+      </div>
+    `;
+    return;
+  }
+
+  const comp = components.find(c => c.id === selectedComponentId);
+  if (!comp) {
+    selectedComponentId = null;
+    updateWorkspaceHUD();
+    return;
+  }
+
+  const title = getComponentTitle(comp);
+  let metricsHtml = `
+    <div class="metrics-title" style="color:var(--teal); display:flex; justify-content:space-between;">
+      <span>⚡ ${title}</span>
+    </div>
+  `;
+
+  // 1. Show Dynamic Node Voltages for Terminals
+  comp.terminals.forEach(t => {
+    metricsHtml += `
+      <div class="metric-row">
+        <span>Terminal (${t.label})</span>
+        <span class="metric-val" style="color:var(--sky)">${t.voltage.toFixed(2)} V</span>
+      </div>
+    `;
+  });
+
+  metricsHtml += `<div class="ctx-menu-sep" style="margin:8px 0;"></div>`;
+
+  // 2. Render Component-Specific Dynamic Statistics
+  const type = comp.type;
+  if (type.startsWith('resistor') || type === 'pot') {
+    const vA = comp.terminals[0]?.voltage || 0;
+    const vB = comp.terminals[1]?.voltage || 0;
+    const vDiff = Math.abs(vA - vB);
+    const P = Math.pow(vDiff, 2) / comp.state.resistance;
+    metricsHtml += `
+      <div class="metric-row"><span>Resistance</span><span class="metric-val">${formatResistance(comp.state.resistance)}</span></div>
+      <div class="metric-row"><span>Voltage Drop</span><span class="metric-val text-teal">${vDiff.toFixed(2)} V</span></div>
+      <div class="metric-row"><span>Power Loss</span><span class="metric-val text-amber">${(P * 1000).toFixed(1)} mW</span></div>
+    `;
+  } else if (type.startsWith('battery') || type === 'diy_cell' || type === 'lemon_battery') {
+    const vA = comp.terminals[0]?.voltage || 0;
+    const vC = comp.terminals[1]?.voltage || 0;
+    const cellV = (comp.state.voltage || 1.5) * ((comp.state.charge || 100) / 100);
+    const cur = (vA - vC - cellV) / (comp.state.internalR || 1);
+    metricsHtml += `
+      <div class="metric-row"><span>Soc (Charge)</span><span class="metric-val text-amber">${Math.round(comp.state.charge || 0)}%</span></div>
+      <div class="metric-row"><span>EMF Voltage</span><span class="metric-val text-teal">${cellV.toFixed(2)} V</span></div>
+      <div class="metric-row"><span>Net Current</span><span class="metric-val text-emerald">${Math.abs(cur * 1000).toFixed(1)} mA</span></div>
+    `;
+  } else if (type.startsWith('led')) {
+    metricsHtml += `
+      <div class="metric-row"><span>LED Current</span><span class="metric-val text-emerald">${((comp.state.current || 0) * 1000).toFixed(1)} mA</span></div>
+      <div class="metric-row"><span>Core Status</span><span class="metric-val" style="color:${comp.state.blown ? 'var(--rose)' : 'var(--emerald)'}">${comp.state.blown ? 'Blown' : 'Active'}</span></div>
+    `;
+  } else if (type.includes('transistor')) {
+    metricsHtml += `
+      <div class="metric-row"><span>Base Current</span><span class="metric-val">${((comp.state.current_b || 0) * 1e6).toFixed(1)} µA</span></div>
+      <div class="metric-row"><span>Hfe Gain</span><span class="metric-val">${comp.state.beta || 100}</span></div>
+    `;
+  } else if (type === 'multimeter') {
+    metricsHtml += `
+      <div class="metric-row"><span>DMM mode</span><span class="metric-val text-teal">${comp.state.mode}</span></div>
+    `;
+  } else {
+    metricsHtml += `
+      <div class="metric-row" style="color:var(--text-secondary)"><span>Telemetry Status</span><span class="metric-val text-teal">Active</span></div>
+    `;
+  }
+
+  hud.innerHTML = metricsHtml;
+}
+
 function getCustomCircuitMetrics() {
   let html = '';
   const sources = components.filter(c => ['usb_power', 'bench_psu', 'battery_9v', 'battery_aa', 'battery_cr2032', 'battery_lipo', 'battery_lead', 'battery_18650', 'battery_aaa', 'battery_d', 'diy_cell'].includes(c.type));
@@ -2396,6 +2506,9 @@ function simulationTick() {
       mEl.innerHTML = getCustomCircuitMetrics();
     }
   }
+
+  // Real-time HUD refresh
+  updateWorkspaceHUD();
 }
 
 // ─── OSCILLOSCOPE RENDERER ────────────────────────────────────────────────────
@@ -2661,7 +2774,19 @@ window.addEventListener('DOMContentLoaded', () => {
   workspace.addEventListener('touchmove', handlePointerMove, { passive: false });
   workspace.addEventListener('mouseup', handlePointerUp);
   workspace.addEventListener('touchend', handlePointerUp);
-  workspace.addEventListener('click', e => { if (!activeWireStart) closeContextMenu(); });
+  // Handle empty background clicks to deselect active nodes
+  workspace.addEventListener('click', e => {
+    if (e.target === workspace || e.target.id === 'wire-layer' || e.target.id === 'components-container') {
+      if (selectedComponentId) {
+        const prev = document.getElementById(selectedComponentId);
+        if (prev) prev.classList.remove('selected');
+        selectedComponentId = null;
+      }
+      if (!activeWireStart) closeContextMenu();
+      updateWorkspaceHUD();
+    }
+  });
+
   window.addEventListener('resize', updateWires);
 
   // Canvas Navigation Listeners (Zoom & Pan)
@@ -2696,6 +2821,13 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('parts-search')?.addEventListener('input', e => filterParts(e.target.value));
 
   document.getElementById('btn-wires')?.addEventListener('click', openWireManager);
+
+  // Programmatically mount the Telemetry HUD element inside the workspace viewport
+  const hud = document.createElement('div');
+  hud.id = 'workspace-metrics-hud';
+  hud.className = 'workspace-metrics-hud';
+  workspace.appendChild(hud);
+  updateWorkspaceHUD();
 
   // Inject clean floating workspace action buttons
   const workspaceControls = document.createElement('div');
