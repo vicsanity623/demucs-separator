@@ -2196,6 +2196,80 @@ function getCustomCircuitMetrics() {
   return html || '<div class="metric-row" style="color:var(--text-secondary)">Build a closed loop to monitor paths.</div>';
 }
 
+// ─── COMPONENT GLOSSARY DATABASE ──────────────────────────────────────────────
+const GLOSSARY_DB = [
+  {
+    name: "🔋 18650 Li-ion / AAA Battery",
+    desc: "Stores energy chemically. <strong>EMF (Electromotive Force)</strong> is the resting open-circuit voltage, while <strong>Internal Resistance</strong> acts as a small parasite resistor that drops voltage when current is drawn under load."
+  },
+  {
+    name: "🔌 Solder Joint / Junction",
+    desc: "A zero-impedance node used to split or merge electrical connections. Wires connected to the same solder joint are brought to equal voltage levels, acting like a breadboard power bus."
+  },
+  {
+    name: "🔌 Custom Load (Appliance)",
+    desc: "A configurable power appliance. Calculates equivalent resistance dynamically using the formula <strong>R = V² / P</strong>. Blows/fuses if applied voltage exceeds nominal requirements by 20%."
+  },
+  {
+    name: "Ω Resistors & Potentiometers",
+    desc: "Limits current flow using Ohm's Law: <strong>V = I × R</strong>. Converts excess electrical energy into heat. Potentiometers use a sliding wiper to divide resistance proportionally across 3 terminals."
+  },
+  {
+    name: "◫ Capacitors (CAP)",
+    desc: "Stores electrostatic energy inside an electric field. Blocks DC currents once charged but acts as a low-impedance path to transient/high-frequency AC waveforms."
+  },
+  {
+    name: "▶ Diodes & LEDs",
+    desc: "Semiconductor PN junctions. Allows current to flow in only one direction (Anode to Cathode). LEDs emit photons when current flows, and will blow if currents exceed maximum ratings."
+  },
+  {
+    name: "📉 Transistors (BJTs & MOSFETs)",
+    desc: "Three-terminal active switches. Small input currents (Base on BJTs) or gate voltages (Gate on MOSFETs) control larger output paths, enabling digital switches and analog amplifiers."
+  },
+  {
+    name: "📟 Multimeters & Oscilloscopes",
+    desc: "Measurement instruments. Multimeters measure Voltages (in parallel) and Currents (in series using shunts). Oscilloscopes track and plot rapid voltage variations over time."
+  }
+];
+
+function switchRightSidebarTab(mode) {
+  const tracker = document.getElementById('step-tracker');
+  const glossary = document.getElementById('glossary-tracker');
+  const btnGuide = document.getElementById('subtab-guide');
+  const btnGlossary = document.getElementById('subtab-glossary');
+
+  if (!tracker || !glossary) return;
+
+  if (mode === 'glossary') {
+    tracker.classList.add('hidden');
+    glossary.classList.remove('hidden');
+    btnGuide.classList.remove('btn-teal');
+    btnGuide.classList.add('btn-secondary');
+    btnGlossary.classList.add('btn-teal');
+    btnGlossary.classList.remove('btn-secondary');
+    renderGlossary();
+  } else {
+    tracker.classList.remove('hidden');
+    glossary.classList.add('hidden');
+    btnGuide.classList.add('btn-teal');
+    btnGuide.classList.remove('btn-secondary');
+    btnGlossary.classList.remove('btn-teal');
+    btnGlossary.classList.add('btn-secondary');
+  }
+}
+
+function renderGlossary() {
+  const container = document.getElementById('glossary-tracker');
+  if (!container) return;
+
+  container.innerHTML = GLOSSARY_DB.map(item => `
+    <div class="glossary-item">
+      <div class="glossary-name">${item.name}</div>
+      <div class="glossary-text">${item.desc}</div>
+    </div>
+  `).join('');
+}
+
 function switchTutorial(key) {
   currentTutorial = key;
   const config = tutorialGuides[key];
@@ -3329,6 +3403,28 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('parts-search')?.addEventListener('input', e => filterParts(e.target.value));
 
   document.getElementById('btn-wires')?.addEventListener('click', openWireManager);
+
+  // Mount Sub-Tabs and Glossary container inside the Right Sidebar Header
+  const guideHeader = document.querySelector('#panel-guide .sidebar-header');
+  if (guideHeader) {
+    const tabContainer = document.createElement('div');
+    tabContainer.className = 'sub-tab-bar';
+    tabContainer.style = 'display:flex; gap:4px; margin-top:8px;';
+    tabContainer.innerHTML = `
+      <button id="subtab-guide" class="btn btn-teal w-full" style="padding:4px 8px; font-size:10px; justify-content:center;" onclick="switchRightSidebarTab('guide')">📖 Guide</button>
+      <button id="subtab-glossary" class="btn btn-secondary w-full" style="padding:4px 8px; font-size:10px; justify-content:center;" onclick="switchRightSidebarTab('glossary')">🧠 Glossary</button>
+    `;
+    guideHeader.appendChild(tabContainer);
+  }
+
+  const guideBody = document.querySelector('#panel-guide .sidebar-body');
+  if (guideBody) {
+    const glossTracker = document.createElement('div');
+    glossTracker.id = 'glossary-tracker';
+    glossTracker.className = 'hidden';
+    glossTracker.style = 'display:flex; flex-direction:column; gap:8px; max-height: 400px; overflow-y: auto;';
+    guideBody.insertBefore(glossTracker, guideBody.firstChild);
+  }
 
   // Programmatically mount the Telemetry HUD element inside the workspace viewport
   const hud = document.createElement('div');
