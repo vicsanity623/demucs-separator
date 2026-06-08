@@ -711,6 +711,9 @@ function renderComponent(comp) {
   div.style.left = comp.x + 'px';
   div.style.top = comp.y + 'px';
 
+  // Bind CSS custom variables so the absolute positioned terminal nodes scale dynamically
+  div.style.setProperty('--rotation', `${comp.rotation || 0}deg`);
+
   const headerColors = {
     usb_power: 'border-bottom-color:#1e1b4b',
     bench_psu: 'border-bottom-color:#2d0f17',
@@ -725,8 +728,6 @@ function renderComponent(comp) {
     mosfet_n: 'border-bottom-color:#0d1a3d', mosfet_p: 'border-bottom-color:#0d1a3d',
   };
 
-  div.style.setProperty('--rotation', `${comp.rotation || 0}deg`);
-
   div.innerHTML = `
        <div class="comp-header" style="${headerColors[comp.type] || ''}"
             onmousedown="startDrag(event,'${comp.id}')"
@@ -735,7 +736,10 @@ function renderComponent(comp) {
          <button class="comp-rotate-btn" title="Rotate 90°" onclick="rotateComponent('${comp.id}')">↻</button>
          <button class="comp-remove-btn" onclick="removeComponent('${comp.id}')">✕</button>
        </div>
-       <div class="comp-body">${buildCardBody(comp)}</div>
+       <div class="comp-body">
+         ${buildCardBody(comp)}
+         <div class="compact-graphic">${getCompactGraphicHTML(comp)}</div>
+       </div>
      `;
 
   // Add terminals
@@ -748,6 +752,8 @@ function renderComponent(comp) {
     tDiv.innerText = term.label;
     tDiv.style.left = (term.relX - 11) + 'px';
     tDiv.style.top = (term.relY - 11) + 'px';
+    tDiv.style.setProperty('--rel-x', term.relX);
+    tDiv.style.setProperty('--rel-y', term.relY);
     tDiv.addEventListener('mousedown', e => startWire(e, term.id));
     tDiv.addEventListener('touchstart', e => { startWire(e, term.id); }, { passive: false });
     div.appendChild(tDiv);
@@ -1420,6 +1426,126 @@ const tutorialGuides = {
     liveMetrics: () => getCustomCircuitMetrics()
   }
 };
+
+function getCompactGraphicHTML(comp) {
+  const type = comp.type;
+  const state = comp.state;
+
+  // 1. LEDs
+  if (type.startsWith('led')) {
+    const ledColor = state.color || '#ef4444';
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <circle cx="25" cy="25" r="18" fill="#1e293b" stroke="${ledColor}" stroke-width="2" />
+        <circle cx="25" cy="25" r="13" fill="${ledColor}" opacity="0.8" />
+        <line x1="38" y1="15" x2="38" y2="35" stroke="${ledColor}" stroke-width="3" stroke-linecap="round" />
+        <text x="25" y="29" fill="#fff" font-size="10" font-family="monospace" text-anchor="middle" font-weight="bold">LED</text>
+      </svg>
+    `;
+  }
+
+  // 2. Resistors (Reads live color codes!)
+  if (type.startsWith('resistor') || type === 'pot') {
+    const colors = ['#000', '#78350f', '#dc2626', '#ea580c', '#eab308', '#16a34a', '#2563eb', '#9333ea', '#4b5563', '#fff'];
+    const r = state.resistance || 330;
+    const s = r.toString();
+    const d1 = parseInt(s[0]) || 0, d2 = parseInt(s[1]) || 0, mult = Math.max(0, s.length - 2);
+    const c1 = colors[d1] || '#000', c2 = colors[d2] || '#000', c3 = colors[mult] || '#000';
+
+    return `
+      <svg viewBox="0 0 60 40" width="56" height="40">
+        <line x1="5" y1="20" x2="55" y2="20" stroke="#4b5563" stroke-width="3" stroke-linecap="round" />
+        <rect x="15" y="11" width="30" height="18" rx="4" fill="#e2b07e" stroke="#c084fc" stroke-width="1" />
+        <rect x="20" y="11" width="4" height="18" fill="${c1}" />
+        <rect x="27" y="11" width="4" height="18" fill="${c2}" />
+        <rect x="34" y="11" width="4" height="18" fill="${c3}" />
+        <rect x="41" y="11" width="2" height="18" fill="#c8a000" />
+      </svg>
+    `;
+  }
+
+  // 3. Batteries
+  if (type.startsWith('battery') || type === 'lemon_battery' || type === 'diy_cell') {
+    const isLemon = type === 'lemon_battery';
+    const fillCol = isLemon ? '#facc15' : type === 'diy_cell' ? '#10b981' : '#3b82f6';
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <rect x="14" y="8" width="22" height="34" rx="4" fill="#1e293b" stroke="${fillCol}" stroke-width="2.5" />
+        <rect x="21" y="3" width="8" height="5" rx="1" fill="${fillCol}" />
+        <text x="25" y="30" fill="${fillCol}" font-size="22" font-family="sans-serif" text-anchor="middle" font-weight="bold">BAT</text>
+      </svg>
+    `;
+  }
+
+  // 4. IC Chips (NE555, LM741, Logic Gates, etc.)
+  if (type.startsWith('ic_') || type === 'ne555' || type.startsWith('lm')) {
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <rect x="11" y="8" width="28" height="34" rx="2" fill="#18181b" stroke="#374151" stroke-width="2" />
+        <path d="M 20 8 A 5 5 0 0 0 30 8" fill="#111b27" stroke="#374151" stroke-width="1.5" />
+        <!-- Microchip pins -->
+        <rect x="5" y="12" width="6" height="3" rx="0.5" fill="#94a3b8" />
+        <rect x="5" y="20" width="6" height="3" rx="0.5" fill="#94a3b8" />
+        <rect x="5" y="28" width="6" height="3" rx="0.5" fill="#94a3b8" />
+        <rect x="39" y="12" width="6" height="3" rx="0.5" fill="#94a3b8" />
+        <rect x="39" y="20" width="6" height="3" rx="0.5" fill="#94a3b8" />
+        <rect x="39" y="28" width="6" height="3" rx="0.5" fill="#94a3b8" />
+      </svg>
+    `;
+  }
+
+  // 5. Capacitors
+  if (type.startsWith('cap')) {
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <circle cx="25" cy="25" r="17" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+        <circle cx="25" cy="25" r="14" fill="#0f172a" />
+        <path d="M 33 11 A 17 17 0 0 1 33 39" fill="none" stroke="#64748b" stroke-width="4" />
+        <text x="25" y="29" fill="#38bdf8" font-size="11" font-family="monospace" text-anchor="middle" font-weight="bold">CAP</text>
+      </svg>
+    `;
+  }
+
+  // 6. Transistors & Mosfets
+  if (type.includes('transistor') || type.startsWith('mosfet')) {
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <path d="M 10 35 A 15 15 0 0 1 40 35 Z" fill="#1e293b" stroke="#f43f5e" stroke-width="2" />
+        <line x1="10" y1="35" x2="40" y2="35" stroke="#f43f5e" stroke-width="3" />
+        <text x="25" y="28" fill="#f43f5e" font-size="9" font-family="monospace" text-anchor="middle" font-weight="bold">TR</text>
+      </svg>
+    `;
+  }
+
+  // 7. Diodes
+  if (type === 'diode' || type === 'zener') {
+    return `
+      <svg viewBox="0 0 50 40" width="48" height="40">
+        <line x1="5" y1="20" x2="45" y2="20" stroke="#4b5563" stroke-width="3" stroke-linecap="round" />
+        <rect x="12" y="10" width="26" height="20" rx="2" fill="#1e293b" stroke="#475569" stroke-width="1.5" />
+        <rect x="30" y="10" width="4" height="20" fill="#cbd5e1" />
+      </svg>
+    `;
+  }
+
+  // 8. General Power Systems (USB, Signal Generator, Bench supply)
+  if (type === 'usb_power' || type === 'bench_psu' || type === 'signal_generator') {
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <rect x="10" y="10" width="30" height="30" rx="6" fill="#1e1b4b" stroke="#818cf8" stroke-width="2" />
+        <path d="M 25 15 L 18 28 L 24 28 L 22 36 L 32 23 L 26 23 Z" fill="#facc15" />
+      </svg>
+    `;
+  }
+
+  // 9. Default Fallback
+  return `
+    <svg viewBox="0 0 50 50" width="48" height="48">
+      <rect x="10" y="10" width="30" height="30" rx="6" fill="#1e293b" stroke="#475569" stroke-width="2" />
+      <text x="25" y="29" fill="#475569" font-size="16" font-family="monospace" text-anchor="middle" font-weight="bold">?</text>
+    </svg>
+  `;
+}
 
 function getCustomCircuitMetrics() {
   let html = '';
