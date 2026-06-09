@@ -5,10 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>VicsBoard 0.0.1.b</title>
+    <title>VicsBoard 0.0.1.c</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#080c18">
+    
+    <!-- Link Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -19,7 +23,7 @@
         <div class="header-brand">
             <div class="brand-icon-wrap">⚡</div>
             <div>
-                <h1 class="brand-title">v<em>0.0.1.b</em></h1>
+                <h1 class="brand-title">v<em>0.0.1.c</em></h1>
                 <p class="brand-sub">Simulation Playground</p>
             </div>
         </div>
@@ -148,6 +152,30 @@
     <div id="toast" class="toast hidden"></div>
 
     <script src="app.js"></script>
+
+    <!-- Register Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => {
+                        console.log('[SW] Registered successfully in scope:', reg.scope);
+                        
+                        // Check for source code updates on load and refresh browser automatically on update detection
+                        reg.onupdatefound = () => {
+                            const installingWorker = reg.installing;
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[SW] New source code changes detected. Loading update...');
+                                    window.location.reload();
+                                }
+                            };
+                        };
+                    })
+                    .catch(err => console.error('[SW] Registration failed:', err));
+            });
+        }
+    </script>
 </body>
 
 </html>
