@@ -1236,18 +1236,21 @@ function startWire(e, termId) {
   if (isDragging) return;
   e.stopPropagation();
   e.preventDefault();
-
+  
   // Cancel any active wire if clicking same terminal twice
-  if (activeWireStart === termId) {
-    activeWireStart = null;
-    updateWires();
-    saveWorkspaceToLocalStorage();
-    return;
+  if (activeWireStart === termId) { 
+    activeWireStart = null; 
+    updateWires(); 
+    return; 
   }
 
-  // UE5-Style Detach: Check if this terminal already has a wire connected to it
-  const connectedWireIdx = wires.findIndex(w => w.from === termId || w.to === termId);
+  // Solder Joint Check: Find the component associated with this terminal
+  const comp = components.find(c => c.terminals.some(t => t.id === termId));
+  const isSolderJoint = comp && comp.type === 'solder_joint';
 
+  // UE5-Style Detach: Skip detach logic entirely if this is a solder joint terminal
+  const connectedWireIdx = isSolderJoint ? -1 : wires.findIndex(w => w.from === termId || w.to === termId);
+  
   if (connectedWireIdx !== -1) {
     const wire = wires[connectedWireIdx];
 
