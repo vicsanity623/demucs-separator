@@ -1627,11 +1627,43 @@ function switchMobileTab(tab) {
 function rotateComponent(id) {
   const comp = components.find(c => c.id === id);
   if (!comp) return;
+
   comp.rotation = ((comp.rotation || 0) + 90) % 360;
+
   const el = document.getElementById(id);
-  if (el) {
-    el.style.setProperty('--rotation', `${comp.rotation}deg`);
-  }
+  if (!el) return;
+
+  const W = 192; // Standard card width
+  const H = el.clientHeight || 100; // Dynamic height
+  const rad = (comp.rotation * Math.PI) / 180;
+
+  // Mathematically rotate terminal coords around the upright card boundary
+  comp.terminals.forEach(term => {
+    // Preserve original coordinates for accurate multi-step rotations
+    if (term.origX === undefined) term.origX = term.relX;
+    if (term.origY === undefined) term.origY = term.relY;
+
+    // Normalize coordinates to [-1, 1] range
+    const nx = (term.origX - 96) / 96;
+    const ny = (term.origY - H / 2) / (H / 2 || 1);
+
+    // Perform 2D rotation transformation
+    const nxRot = nx * Math.cos(rad) - ny * Math.sin(rad);
+    const nyRot = nx * Math.sin(rad) + ny * Math.cos(rad);
+
+    // Map coordinates back to standard card bounds
+    term.relX = Math.round(96 + nxRot * 96);
+    term.relY = Math.round(H / 2 + nyRot * (H / 2));
+
+    // Update terminal DOM nodes instantly
+    const tDiv = document.getElementById(term.id);
+    if (tDiv) {
+      tDiv.style.left = (term.relX - 11) + 'px';
+      tDiv.style.top = (term.relY - 11) + 'px';
+    }
+  });
+
+  // Instant wire snapping redraw
   updateWires();
   saveWorkspaceToLocalStorage();
 }
