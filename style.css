@@ -42,6 +42,8 @@
   --wire-yellow: #eab308;
   --wire-white: #94a3b8;
   --wire-purple: #a855f7;
+  --base-font-size: 12px;
+  --card-scale: 1.0;
   --font-mono: 'JetBrains Mono', monospace;
   --font-ui: 'Space Grotesk', sans-serif;
   --radius: 8px;
@@ -1507,10 +1509,12 @@ select:focus {
 
 /* === SOLDER JOINT/JUNCTION OVERRIDES === */
 .comp-card[data-type="solder_joint"] {
-  width: 32px !important;
-  height: 32px !important;
-  background: transparent !important;
-  border: none !important;
+  width: 48px !important;
+  height: 48px !important;
+  background: rgba(245, 158, 11, 0.04) !important;
+  border: 1.5px dashed rgba(245, 158, 11, 0.25) !important;
+  /* Grab halo ring */
+  border-radius: 50% !important;
   box-shadow: none !important;
   cursor: grab;
   overflow: visible !important;
@@ -1526,8 +1530,9 @@ select:focus {
 }
 
 .comp-card[data-type="solder_joint"] .term-node {
-  left: 5px !important;
-  top: 5px !important;
+  left: 13px !important;
+  /* Centered in the 48px outer ring */
+  top: 13px !important;
   width: 22px !important;
   height: 22px !important;
   background: #f59e0b !important;
@@ -1538,15 +1543,16 @@ select:focus {
 
 .comp-card[data-type="solder_joint"] .term-node span {
   display: none !important;
-  /* Hide node labels */
 }
 
 /* === WIRE REROUTE NODE OVERRIDES === */
 .comp-card[data-type="reroute_node"] {
-  width: 16px !important;
-  height: 16px !important;
-  background: transparent !important;
-  border: none !important;
+  width: 40px !important;
+  height: 40px !important;
+  background: rgba(255, 255, 255, 0.02) !important;
+  border: 1.5px dashed rgba(255, 255, 255, 0.15) !important;
+  /* Grab halo ring */
+  border-radius: 50% !important;
   box-shadow: none !important;
   cursor: grab;
   overflow: visible !important;
@@ -1562,8 +1568,9 @@ select:focus {
 }
 
 .comp-card[data-type="reroute_node"] .term-node {
-  left: -3px !important;
-  top: -3px !important;
+  left: 9px !important;
+  /* Centered in the 40px outer ring */
+  top: 9px !important;
   width: 22px !important;
   height: 22px !important;
   background: rgba(15, 23, 42, 0.85) !important;
@@ -1578,6 +1585,36 @@ select:focus {
 .comp-card[data-type="reroute_node"]:hover .term-node {
   border-color: var(--teal) !important;
   box-shadow: 0 0 10px var(--teal-glow);
+}
+
+/* === TEXT TOOL OVERRIDES === */
+.comp-card[data-type="text_box"] {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.comp-card[data-type="text_box"] .comp-header {
+  opacity: 0.15;
+  transition: opacity 0.15s;
+}
+
+.comp-card[data-type="text_box"]:hover .comp-header {
+  opacity: 1;
+}
+
+.compact-view .comp-card[data-type="text_box"] .term-node[data-label="A"] {
+  left: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) scale(0.85) !important;
+}
+
+.compact-view .comp-card[data-type="text_box"] .term-node[data-label="B"] {
+  left: auto !important;
+  right: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) scale(0.85) !important;
 }
 
 /* === WORKSPACE METRICS HUD === */
@@ -1916,4 +1953,126 @@ kbd {
   color: var(--text-muted);
   font-size: 12px;
   flex-shrink: 0;
+}
+
+/* =====================================================
+   ⚙️ DYNAMIC ENGINE SCALING & PERFORMANCE OVERRIDES
+   ===================================================== */
+
+/* Apply global base font scaling to all readouts, labels, and buttons */
+body,
+.btn,
+.part-name,
+.step-title,
+select,
+input,
+.metric-row,
+.dmm-value,
+.readout,
+.step-desc {
+  font-size: var(--base-font-size, 12px) !important;
+}
+
+/* Apply instant physical sizing scaling to all component cards */
+.comp-card {
+  width: calc(192px * var(--card-scale, 1.0)) !important;
+}
+
+/* Disable heavy GPU wire-dash animations immediately in High FPS Mode */
+.perf-mode-active .wire-animated {
+  animation: none !important;
+  stroke-dasharray: none !important;
+}
+
+/* =====================================================
+   ⚙️ DYNAMIC CARD SCALING & VECTOR PDF PRINT SYSTEM
+   ===================================================== */
+
+/* Apply base font and card width scaling overrides */
+body,
+.btn,
+.part-name,
+.step-title,
+select,
+input,
+.metric-row,
+.dmm-value,
+.readout,
+.step-desc {
+  font-size: var(--base-font-size, 12px) !important;
+}
+
+/* Width & Height Card Scaling */
+.comp-card {
+  width: calc(192px * var(--card-scale, 1.0)) !important;
+  min-height: calc(80px * var(--card-height-scale, 1.0)) !important;
+}
+
+/* Prevent scale overrides on headerless components */
+.comp-card[data-type="solder_joint"],
+.comp-card[data-type="reroute_node"] {
+  width: 32px !important;
+  height: 32px !important;
+  min-height: auto !important;
+}
+
+/* Relative Terminal Pinning - binds terminals to borders on resize */
+.term-node {
+  left: calc((var(--rel-x, 0) * var(--card-scale, 1.0)) - 11px) !important;
+  top: calc((var(--rel-y, 0) * var(--card-height-scale, 1.0)) - 11px) !important;
+}
+
+/* Standard Compact View scaling rules */
+.compact-view .term-node {
+  transform: scale(0.85);
+  background: var(--bg-deepest);
+  border-color: var(--border-hi);
+  left: calc((var(--rel-x) * var(--card-scale, 1.0) * 0.52) - 11px) !important;
+  top: calc((var(--rel-y) * var(--card-height-scale, 1.0) * 0.75) - 11px) !important;
+}
+
+/* === VECTOR PDF BLUEPRINT PRINTER === */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+
+  body {
+    background: #060b14 !important;
+    color: #d6e8ff !important;
+  }
+
+  /* Hide all non-essential workspace interface and settings controls */
+  .app-header,
+  .sidebar,
+  .mobile-tab-bar,
+  .gesture-shortcut-bar,
+  .instructions-chip,
+  .toast-container,
+  .modal,
+  .overlay,
+  .btn,
+  #selection-box,
+  .comp-remove-btn,
+  .comp-rotate-btn {
+    display: none !important;
+  }
+
+  .main-content {
+    height: 100vh !important;
+    width: 100vw !important;
+    overflow: visible !important;
+  }
+
+  .workspace {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    transform: scale(1.0) !important;
+    background-color: #060b14 !important;
+    background-image: radial-gradient(circle, #1e3048 1px, transparent 1px) !important;
+    background-size: 24px 24px !important;
+  }
 }

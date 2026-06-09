@@ -20,6 +20,7 @@ let selectStart = { x: 0, y: 0 };
 let selectedComponents = new Set();
 let initialDragPositions = {};
 let selectionModeActive = false;
+let blockWireStart = false
 let threeFingerStartPoints = [];
 let threeFingerStartTime = 0;
 let currentProjectName = "Default Project";
@@ -172,6 +173,7 @@ const PARTS_CATALOGUE = [
       { type: 'slide_switch', icon: '🎚️', iconClass: 'icon-sensor', name: 'Slide Switch', desc: 'SPDT contact' },
       { type: 'thermistor', icon: '🌡️', iconClass: 'icon-sensor', name: 'NTC Thermistor 10kΩ', desc: 'B=3950K, R25=10kΩ, -40°–125°C' },
       { type: 'ldr', icon: '👁️', iconClass: 'icon-sensor', name: 'LDR Photoresistor', desc: 'CdS GL5539, 5–200kΩ dark/light' },
+      { type: 'text_box', icon: '📝', iconClass: 'icon-display', name: 'Text Annotation', desc: 'Place custom text labels on your schematic' },
       { type: 'spst_switch', icon: '🎛️', iconClass: 'icon-sensor', name: 'SPST Switch', desc: 'Manual SPST contact' },
       { type: 'pushbutton', icon: '⏏️', iconClass: 'icon-sensor', name: 'Pushbutton (NO)', desc: 'Momentary NO contact' },
     ]
@@ -218,12 +220,16 @@ function buildComponent(type, id, existingComponents) {
       terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { vNom: 12.0, pNom: 10.0, blown: false, name: 'Custom Load' };
       break;
+    case 'text_box':
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 50 }, { label: 'B', x: 192, y: 50 }]);
+      state = { text: 'Text Label', font: 'Space Grotesk', fontSize: 13, color: '#00e5c8', bg: 'transparent', bold: true, italic: false, name: 'Annotation' };
+      break;
     case 'solder_joint':
-      terminals = makeTerminals(id, [{ label: 'Node', x: 16, y: 16 }]);
+      terminals = makeTerminals(id, [{ label: 'Node', x: 24, y: 24 }]); // Re-centered
       state = { name: 'Solder Joint' };
       break;
     case 'reroute_node':
-      terminals = makeTerminals(id, [{ label: 'Pin', x: 8, y: 8 }]);
+      terminals = makeTerminals(id, [{ label: 'Pin', x: 20, y: 20 }]); // Re-centered
       state = { name: 'Reroute' };
       break;
     case 'usb_power':
@@ -506,6 +512,24 @@ function getComponentTitle(comp) {
 function buildCardBody(comp) {
   const id = comp.id;
   switch (comp.type) {
+    case 'solder_joint':
+    case 'reroute_node':
+      return ''; // Strips out the default "solder_joint" card background text entirely
+
+    case 'text_box':
+      return `<div class="flex flex-col gap-1.5" style="padding:6px; background:var(--bg-deep); border:1px solid var(--border); border-radius:var(--radius);">
+           <input type="text" id="${id}-text-val" value="${comp.state.text}" style="background:var(--bg-deepest); border:1px solid var(--border); color:#fff; padding:4px 8px; font-size:11px; border-radius:4px; width:100%;" onchange="updateTextBox('${id}', 'text', this.value)">
+           <div style="display:flex; gap:4px; margin-top:2px;">
+             <select id="${id}-font-family" style="width:70px; padding:2px; font-size:9px;" onchange="updateTextBox('${id}', 'font', this.value)">
+               <option value="Space Grotesk" ${comp.state.font === 'Space Grotesk' ? 'selected' : ''}>UI Font</option>
+               <option value="JetBrains Mono" ${comp.state.font === 'JetBrains Mono' ? 'selected' : ''}>Mono</option>
+               <option value="sans-serif" ${comp.state.font === 'sans-serif' ? 'selected' : ''}>Sans</option>
+               <option value="serif" ${comp.state.font === 'serif' ? 'selected' : ''}>Serif</option>
+             </select>
+             <input type="number" id="${id}-font-size" min="8" max="48" value="${comp.state.fontSize}" style="width:40px; padding:2px; font-size:9px;" onchange="updateTextBox('${id}', 'fontSize', this.value)">
+             <input type="color" id="${id}-font-color" value="${comp.state.color}" style="width:24px; height:20px; padding:0; border:none; cursor:pointer;" onchange="updateTextBox('${id}', 'color', this.value)">
+           </div>
+         </div>`;
     case 'usb_power':
       return `<div class="flex flex-col items-center gap-1 py-1">
            <div class="readout-label">USB NATIVE OUTPUT</div>
@@ -884,10 +908,11 @@ function renderComponent(comp) {
     const tDiv = document.createElement('div');
     tDiv.id = term.id;
     tDiv.className = 'term-node';
-    tDiv.dataset.termId = term.id;
-    tDiv.dataset.compId = comp.id;
-    tDiv.dataset.label = term.label;
+    tDiv.setAttribute('data-label', term.label);
     tDiv.innerHTML = `<span>${term.label}</span>`;
+    // Bind relative variables to DOM node for relative scale operations
+    tDiv.style.setProperty('--rel-x', term.relX);
+    tDiv.style.setProperty('--rel-y', term.relY);
     tDiv.style.left = (term.relX - 11) + 'px';
     tDiv.style.top = (term.relY - 11) + 'px';
     tDiv.style.setProperty('--rel-x', term.relX + 'px');
@@ -916,12 +941,12 @@ function renderComponent(comp) {
   }
 
   if (comp.type === 'solder_joint') {
-    // Append direct-edit text input beneath the junction pad
+    // Append self-sizing direct-edit text input beneath the junction pad with a dark backing
     const labelDiv = document.createElement('div');
-    labelDiv.style = 'position: absolute; top: 32px; left: 50%; transform: translateX(-50%); width: 120px; text-align: center; pointer-events: auto;';
+    labelDiv.style = 'position: absolute; top: 48px; left: 50%; transform: translateX(-50%); width: max-content; min-width: 60px; text-align: center; pointer-events: auto;';
     labelDiv.innerHTML = `
       <input type="text" id="${comp.id}-label-input" value="${comp.state.name || 'Junction'}" 
-             style="background: transparent; border: none; border-bottom: 1.5px dashed rgba(0, 229, 200, 0.35); color: var(--teal); font-family: var(--font-mono); font-size: 10px; font-weight: bold; text-align: center; width: 100%; outline: none;"
+             style="background: rgba(10, 18, 32, 0.9); border: none; border-bottom: 1.5px dashed var(--teal); color: var(--teal); font-family: var(--font-mono); font-size: 9px; font-weight: bold; text-align: center; width: 100%; outline: none; padding: 2px 6px; border-radius: 4px;"
              onfocus="this.style.borderBottomColor='var(--teal)';"
              onblur="this.style.borderBottomColor='rgba(0, 229, 200, 0.35)';"
              onchange="updateSolderJointLabel('${comp.id}', this.value)">
@@ -935,6 +960,15 @@ function renderComponent(comp) {
     labelDiv.addEventListener('touchmove', stop);
 
     div.appendChild(labelDiv);
+  }
+
+  // Append dynamic text label renderer for the transparent Text Box annotation tool
+  if (comp.type === 'text_box') {
+    const textDiv = document.createElement('div');
+    textDiv.id = `${comp.id}-display-text`;
+    textDiv.style = 'position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; pointer-events: none; z-index: 5; padding: 10px; box-sizing: border-box;';
+    applyTextBoxStyle(textDiv, comp.state);
+    div.appendChild(textDiv);
   }
 
   // Prevent sliding, typing, and button clicks from bubbling up and triggering workspace panning
@@ -1075,6 +1109,29 @@ function updateToneGenerator(id, field, val) {
   }
 
   saveWorkspaceToLocalStorage();
+}
+
+function updateTextBox(id, field, val) {
+  const comp = components.find(c => c.id === id);
+  if (!comp) return;
+  comp.state[field] = val;
+
+  // Instantly apply changes to the live text label element
+  const disp = document.getElementById(`${id}-display-text`);
+  if (disp) {
+    applyTextBoxStyle(disp, comp.state);
+  }
+  saveWorkspaceToLocalStorage();
+}
+
+function applyTextBoxStyle(el, state) {
+  if (!el) return;
+  el.textContent = state.text;
+  el.style.fontFamily = state.font || 'var(--font-ui)';
+  el.style.fontSize = (state.fontSize || 13) + 'px';
+  el.style.color = state.color || 'var(--teal)';
+  el.style.fontWeight = state.bold ? 'bold' : 'normal';
+  el.style.fontStyle = state.italic ? 'italic' : 'normal';
 }
 
 function updateSolderJointLabel(id, val) {
@@ -1282,7 +1339,7 @@ function endDrag() {
 
 // ─── WIRING ───────────────────────────────────────────────────────────────────
 function startWire(e, termId) {
-  if (isDragging) return;
+  if (isDragging || blockWireStart) return;
   e.stopPropagation();
   e.preventDefault();
 
@@ -1341,8 +1398,13 @@ function handlePointerMove(e) {
 
 function handlePointerUp(e) {
   if (!activeWireStart) return;
-  const coords = getPointerCoords(e);
-  let el = document.elementFromPoint(coords.clientX, coords.clientY);
+
+  // Safely extract coordinates from changedTouches on touchup events
+  const src = (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0] :
+    (e.touches && e.touches.length > 0) ? e.touches[0] : e;
+
+  // FIX: Changed "coords" to "src" to match your extracted coordinate variable
+  let el = document.elementFromPoint(src.clientX, src.clientY);
 
   // DOM Traversal Guard: Resolve parent terminal node if pointer landed on the inner text <span>
   if (el) {
@@ -1352,13 +1414,17 @@ function handlePointerUp(e) {
 
   let successfullyReconnected = false;
 
-  if (el && el.dataset && el.dataset.termId && el.dataset.termId !== activeWireStart) {
-    const termId = el.dataset.termId;
+  if (el && el.classList.contains('term-node') && el.id && el.id !== activeWireStart) {
+    const termId = el.id;
     const wireExists = wires.some(w => (w.from === activeWireStart && w.to === termId) || (w.from === termId && w.to === activeWireStart));
     if (!wireExists) {
       wires.push({ from: activeWireStart, to: termId, color: selectedWireColor });
       showToast('Wire connected ✓', 'success');
       successfullyReconnected = true;
+
+      // Lock out immediate re-triggering of startWire on the target terminal
+      blockWireStart = true;
+      setTimeout(() => { blockWireStart = false; }, 150);
     }
   }
 
@@ -1369,6 +1435,7 @@ function handlePointerUp(e) {
 
   activeWireStart = null;
   updateWires();
+  saveWorkspaceToLocalStorage(); // Saves your new connections to project history
 }
 
 // Dynamic scale-immune coordinate lookup
@@ -1411,8 +1478,23 @@ function updateWires() {
     }
 
     const dx = x2 - x1, dy = y2 - y1;
-    const ctrl = Math.min(Math.abs(dx) * 0.5, 80);
-    const d = `M${x1} ${y1} C${x1 + ctrl} ${y1},${x2 - ctrl} ${y2},${x2} ${y2}`;
+
+    // Find the associated components for the wire endpoints
+    const compFrom = components.find(c => c.terminals.some(t => t.id === wire.from));
+    const compTo = components.find(c => c.terminals.some(t => t.id === wire.to));
+    const isSolderOrReroute = (compFrom && ['solder_joint', 'reroute_node'].includes(compFrom.type)) ||
+      (compTo && ['solder_joint', 'reroute_node'].includes(compTo.type));
+
+    let d = '';
+    if (isSolderOrReroute) {
+      // Draw a straight, professional blueprint path for routing components
+      d = `M${x1} ${y1} L${x2} ${y2}`;
+    } else {
+      // Mathematically damp the control points on standard components to prevent loops
+      const loopDamp = Math.max(0.1, Math.min(1.0, Math.abs(dx) / Math.max(1, Math.abs(dy))));
+      const ctrl = Math.min(Math.abs(dx) * 0.5, 80) * loopDamp;
+      d = `M${x1} ${y1} C${x1 + ctrl} ${y1},${x2 - ctrl} ${y2},${x2} ${y2}`;
+    }
 
     // Shadow path
     const shadow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -1480,15 +1562,29 @@ function updateWires() {
       const x1 = coordsFrom.x;
       const y1 = coordsFrom.y;
       const x2 = mousePosition.x, y2 = mousePosition.y;
-      const ctrl = Math.min(Math.abs(x2 - x1) * 0.5, 80);
+
+      const compFrom = components.find(c => c.terminals.some(t => t.id === activeWireStart));
+      const isSolderOrReroute = compFrom && ['solder_joint', 'reroute_node'].includes(compFrom.type);
+
+      let previewD = '';
+      if (isSolderOrReroute) {
+        previewD = `M${x1} ${y1} L${x2} ${y2}`;
+      } else {
+        const dxPreview = x2 - x1, dyPreview = y2 - y1;
+        const loopDampPreview = Math.max(0.1, Math.min(1.0, Math.abs(dxPreview) / Math.max(1, Math.abs(dyPreview))));
+        const ctrl = Math.min(Math.abs(dxPreview) * 0.5, 80) * loopDampPreview;
+        previewD = `M${x1} ${y1} C${x1 + ctrl} ${y1},${x2 - ctrl} ${y2},${x2} ${y2}`;
+      }
+
       const preview = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      preview.setAttribute('d', `M${x1} ${y1} C${x1 + ctrl} ${y1},${x2 - ctrl} ${y2},${x2} ${y2}`);
+      preview.setAttribute('d', previewD);
       preview.setAttribute('stroke', selectedWireColor);
       preview.setAttribute('stroke-width', '3');
       preview.setAttribute('stroke-dasharray', '6,4');
       preview.setAttribute('fill', 'none');
       preview.setAttribute('stroke-linecap', 'round');
       preview.setAttribute('opacity', '0.7');
+      preview.style.pointerEvents = 'none';
       wireLayer.appendChild(preview);
     }
   }
@@ -1667,11 +1763,11 @@ function rotateComponent(id) {
     term.relX = Math.round(96 + nxRot * 96);
     term.relY = Math.round(H / 2 + nyRot * (H / 2));
 
-    // Update terminal DOM nodes instantly
+    // Update CSS variables directly on DOM node so CSS relative pinning resolves them instantly
     const tDiv = document.getElementById(term.id);
     if (tDiv) {
-      tDiv.style.left = (term.relX - 11) + 'px';
-      tDiv.style.top = (term.relY - 11) + 'px';
+      tDiv.style.setProperty('--rel-x', term.relX + 'px');
+      tDiv.style.setProperty('--rel-y', term.relY + 'px');
     }
   });
 
@@ -3403,6 +3499,12 @@ function simulationTick() {
   // Post-process updates
   components.forEach(comp => {
     const { id, type, state, terminals } = comp;
+
+    // CPU Optimization: Skip heavy DOM/text calculations for off-screen cards in Performance Mode
+    if (workbenchSettings.perfMode && !isCardInViewport(id)) {
+      return;
+    }
+
     const tv = (label) => { const t = terminals.find(x => x.label === label); return t ? t.voltage : 0; };
 
     if (type === 'signal_generator') {
@@ -4134,12 +4236,14 @@ window.addEventListener('DOMContentLoaded', () => {
     handleWorkspacePanAndZoom(e);
   }, { passive: false });
 
-  document.addEventListener('mouseup', () => {
+  document.addEventListener('mouseup', e => {
+    handlePointerUp(e); // Restores your essential wire connection and latching logic
     endWorkspaceSelect();
     stopWorkspacePan();
   });
   document.addEventListener('touchend', e => {
     handleThreeFingerTouchEnd(e);
+    handlePointerUp(e); // Restores your essential wire connection and latching logic
     endWorkspaceSelect();
     stopWorkspacePan();
   });
@@ -4205,6 +4309,7 @@ window.addEventListener('DOMContentLoaded', () => {
     <button class="btn btn-secondary" onclick="toggleSidebar('panel-parts')">📁 Toggle Library</button>
     <button class="btn btn-secondary" onclick="toggleSidebar('panel-guide')">📖 Toggle Guide</button>
     <button class="btn btn-secondary" onclick="openProjectManager()">📁 Projects</button>
+    <button class="btn btn-secondary" onclick="openSettingsManager()">⚙️ Settings</button>
   `;
   workspace.appendChild(workspaceControls);
 

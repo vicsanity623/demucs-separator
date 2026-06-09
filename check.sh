@@ -1,58 +1,61 @@
 #!/usr/bin/env bash
-# Strict Repository Validation Pipeline (V2 - Web + Python)
+# Strict Web Repository Validation Pipeline (HTML, CSS, JS)
 
 set -e 
 set -u 
 
 echo "=========================================="
-echo " Starting Strict Quality Checks..."
+echo " Starting Strict Web Quality Checks..."
 echo "=========================================="
 
 # 1. Verify necessary Web Files exist
 echo "[1/4] Checking required web files..."
-# Added style.css to the required list
-REQUIRED_FILES=("index.html" "app.js" "style.css" "manifest.json" "sw.js")
+REQUIRED_FILES=("index.html" "app.js" "style.css" "settings.js" "manifest.json" "sw.js")
 for FILE in "${REQUIRED_FILES[@]}"; do
     if [ ! -f "$FILE" ]; then
         echo "❌ ERROR: Required file '$FILE' is missing."
         exit 1
     fi
 done
+echo "    All required web files exist."
 
-# 2. Verify Internal Links (Catches the "missing file but linked" error)
-echo "[2/4] Validating internal file references..."
-# This looks for href="file.css" or src="file.js" and checks if those files exist
-links=$(grep -oE '(href|src)="([^"#]+)"' index.html | cut -d'"' -f2)
+# 2. Verify Internal Links in HTML
+echo "[2/4] Validating internal file references in index.html..."
+links=$(grep -oE '(href|src)="([^"#\?]+)"' index.html | cut -d'"' -f2)
 for link in $links; do
-    if [[ $link == http* ]] || [[ $link == \$\{* ]]; then continue; fi # Skip external URLs
+    if [[ $link == http* ]] || [[ $link == \$\{* ]] || [[ $link == https* ]]; then continue; fi
     if [ ! -f "$link" ]; then
         echo "❌ ERROR: index.html references '$link', but the file does not exist."
         exit 1
     fi
 done
+echo "    All internal file links are valid."
 
-# 3. HTML/CSS Syntax Check (Optional but recommended)
-echo "[3/4] Checking HTML/CSS Integrity..."
-if command -v htmlhint &> /dev/null; then
-    htmlhint index.html
+# 3. CSS Validation Check
+echo "[3/4] Validating CSS variables and syntax..."
+open_brackets=$(grep -o "{" style.css | wc -l)
+close_brackets=$(grep -o "}" style.css | wc -l)
+if [ "$open_brackets" -ne "$close_brackets" ]; then
+    echo "❌ ERROR: style.css has mismatched curly brackets (Open: $open_brackets, Close: $close_brackets)."
+    exit 1
+fi
+echo "    CSS bracket matching is correct."
+
+# 4. JavaScript Syntax Validation Check
+echo "[4/4] Validating JavaScript Syntax..."
+if command -v node &> /dev/null; then
+    for JS_FILE in "app.js" "settings.js" "sw.js"; do
+        node -c "$JS_FILE"
+        echo "    $JS_FILE syntax is correct."
+    done
 else
-    # Fallback: Basic check to ensure no dangling CSS variables in raw HTML
-    if grep -q "--bg-color" index.html; then
-        # If we see CSS variables in HTML but no <style> tag, it's likely a bot error
-        if ! grep -q "<style>" index.html; then
-            echo "❌ ERROR: Detected raw CSS variables in index.html without a <style> tag."
+    for JS_FILE in "app.js" "settings.js" "sw.js"; do
+        if [ ! -s "$JS_FILE" ]; then
+            echo "❌ ERROR: $JS_FILE is empty."
             exit 1
         fi
-    fi
-fi
-
-# 4. Python Strict Linting via Ruff
-echo "[4/4] Running Ruff (Strict Python Linter)..."
-if command -v ruff &> /dev/null; then
-    ruff check .
-    echo "✅ Ruff checks passed."
-else
-    echo "⚠️  Ruff not installed. Skipping."
+    done
+    echo "    Node.js not installed. Performed basic file checks."
 fi
 
 echo "=========================================="

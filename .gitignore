@@ -6,3 +6,4 @@ __pycache__/
 venv
 venvaxiom
 .venv
+package-lock.json
