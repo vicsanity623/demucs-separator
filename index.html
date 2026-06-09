@@ -1,14 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>DIY Electronics Workbench Pro</title>
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>VicsBoard 0.0.1.c</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#080c18">
+    
+    <!-- Link Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body class="app-shell">
 
     <!-- ─── App Header ──────────────────────────────────────────────── -->
@@ -16,14 +23,14 @@
         <div class="header-brand">
             <div class="brand-icon-wrap">⚡</div>
             <div>
-                <h1 class="brand-title">DIY Workbench <em>Pro</em></h1>
-                <p class="brand-sub">Electronics · Electrochemistry · Semiconductors</p>
+                <h1 class="brand-title">v<em>0.0.1.c</em></h1>
+                <p class="brand-sub">Simulation Playground</p>
             </div>
         </div>
         <div class="header-controls">
             <button id="btn-wires" class="btn btn-wire" title="Manage Wires">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                 </svg>
                 <span>Wires</span>
             </button>
@@ -38,21 +45,22 @@
     <nav id="mobile-nav" class="mobile-tab-bar">
         <button class="mobile-tab active" id="mtab-workspace" onclick="switchMobileTab('workspace')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="2" y="2" width="20" height="20" rx="2"/>
-                <path d="M8 12h8M12 8v8"/>
+                <rect x="2" y="2" width="20" height="20" rx="2" />
+                <path d="M8 12h8M12 8v8" />
             </svg>
             Workspace
         </button>
         <button class="mobile-tab" id="mtab-parts" onclick="switchMobileTab('parts')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <path
+                    d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
             </svg>
             Parts
         </button>
         <button class="mobile-tab" id="mtab-guide" onclick="switchMobileTab('guide')">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
             </svg>
             Guide
         </button>
@@ -65,8 +73,8 @@
         <aside id="panel-parts" class="sidebar">
             <div class="sidebar-header">
                 <span class="sidebar-title">Component Library</span>
-                <input type="text" id="part-search" placeholder="Search parts…"
-                       oninput="filterParts(this.value)" class="part-search" autocomplete="off">
+                <input type="text" id="part-search" placeholder="Search parts…" oninput="filterParts(this.value)"
+                    class="part-search" autocomplete="off">
             </div>
             <div id="parts-container" class="sidebar-body"></div>
         </aside>
@@ -83,11 +91,9 @@
             <!-- Long-press progress ring (mobile) -->
             <div id="lp-ring" class="lp-ring hidden">
                 <svg viewBox="0 0 36 36" width="48" height="48">
-                    <circle class="lp-track" cx="18" cy="18" r="15" fill="none" stroke-width="3"/>
-                    <circle id="lp-progress" class="lp-fill" cx="18" cy="18" r="15"
-                            fill="none" stroke-width="3"
-                            stroke-dasharray="94.2" stroke-dashoffset="94.2"
-                            transform="rotate(-90 18 18)"/>
+                    <circle class="lp-track" cx="18" cy="18" r="15" fill="none" stroke-width="3" />
+                    <circle id="lp-progress" class="lp-fill" cx="18" cy="18" r="15" fill="none" stroke-width="3"
+                        stroke-dasharray="94.2" stroke-dashoffset="94.2" transform="rotate(-90 18 18)" />
                 </svg>
             </div>
         </main>
@@ -123,8 +129,9 @@
         <div class="modal" id="wire-modal">
             <div class="modal-head">
                 <span class="modal-title">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2.5">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
                     </svg>
                     Wire Manager
                 </span>
@@ -145,5 +152,30 @@
     <div id="toast" class="toast hidden"></div>
 
     <script src="app.js"></script>
+
+    <!-- Register Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => {
+                        console.log('[SW] Registered successfully in scope:', reg.scope);
+                        
+                        // Check for source code updates on load and refresh browser automatically on update detection
+                        reg.onupdatefound = () => {
+                            const installingWorker = reg.installing;
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    console.log('[SW] New source code changes detected. Loading update...');
+                                    window.location.reload();
+                                }
+                            };
+                        };
+                    })
+                    .catch(err => console.error('[SW] Registration failed:', err));
+            });
+        }
+    </script>
 </body>
+
 </html>

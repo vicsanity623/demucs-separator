@@ -1,8 +1,8 @@
 // ============================================================
-//  BreadBoard — Service Worker  v0.0.2
+//  BreadBoard — Service Worker
 // ============================================================
 
-const CACHE_NAME = 'breadboard-v0.0.2';
+const CACHE_NAME = 'breadboard-v0.0.8';
 const STATIC_ASSETS = ['./', './index.html', './app.js', './style.css', './manifest.json'];
 const AUDIO_CACHE = 'soundvault-audio-v5.8';
 const MAX_AUDIO_CACHE_MB = 4096; // 4 GB limit for audio cache
@@ -34,29 +34,38 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
 
-  // Audio files — cache-first with Range support
+  // 1. Audio: Cache-First (large assets)
   if (isAudioRequest(event.request)) {
     event.respondWith(handleAudio(event.request));
     return;
   }
 
-  // library.json — network-first (always fresh)
-  if (url.pathname.endsWith('library.json')) {
-    event.respondWith(networkFirst(event.request));
-    return;
-  }
-
-  // Static app shell — cache-first
-  if (isStaticAsset(url)) {
-    event.respondWith(cacheFirst(event.request));
-    return;
-  }
-
-  // Default — network with cache fallback
+  // 2. Everything else (HTML, JS, CSS, JSON): Network-First
+  // Forces a network request to check the server first, falling back to cache if offline.
   event.respondWith(networkFirst(event.request));
 });
 
 // ── Strategies ────────────────────────────────────────────────
+async function networkFirst(request) {
+  try {
+    // Try network first
+    const response = await fetch(request);
+    
+    // If successful, update the cache and return
+    if (response.ok) {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, response.clone());
+      return response;
+    }
+    return response;
+  } catch (err) {
+    // If network fails (offline), check cache
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    return new Response('Offline and no cache available', { status: 503 });
+  }
+}
+
 async function cacheFirst(request) {
   const cached = await caches.match(request);
   if (cached) return cached;
@@ -66,21 +75,6 @@ async function cacheFirst(request) {
     cache.put(request, response.clone());
   }
   return response;
-}
-
-async function networkFirst(request) {
-  try {
-    const response = await fetch(request);
-    if (response.ok) {
-      const cache = await caches.open(CACHE_NAME);
-      cache.put(request, response.clone());
-    }
-    return response;
-  } catch {
-    const cached = await caches.match(request);
-    if (cached) return cached;
-    return new Response('Offline', { status: 503 });
-  }
 }
 
 async function handleAudio(request) {
@@ -158,8 +152,6 @@ self.addEventListener('sync', event => {
 });
 
 async function syncPlaylists() {
-  // Playlists are stored in IndexedDB / localStorage on-device
-  // This hook is available for future server-side sync
   console.log('[SW] Playlist sync triggered');
 }
 
