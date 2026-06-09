@@ -3214,7 +3214,11 @@ function getTouchDistance(e) {
 // ─── SELECTION BOX LOGIC ──────────────────────────────────────────────────────
 function startWorkspaceSelect(e) {
   // Lock out selection boxes during active drags or wiring adjustments
-  if (draggedComponent || isDragging || activeWireStart || e.button !== 0 || e.shiftKey) return;
+  if (draggedComponent || isDragging || activeWireStart) return;
+
+  // Safely allow single-touch events on mobile and bypass desktop e.button checks
+  const isTouch = !!e.touches;
+  if (!isTouch && e.button !== 0) return;
 
   isSelecting = true;
   const coords = getPointerCoords(e);
@@ -3447,8 +3451,11 @@ window.addEventListener('DOMContentLoaded', () => {
   // Direct gesture event router (Left-clicks / touches)
   workspace.addEventListener('mousedown', e => {
     if (e.button === 0) {
-      if (selectionModeActive) startWorkspaceSelect(e);
-      else startWorkspacePan(e);
+      if (selectionModeActive) {
+        startWorkspaceSelect(e);
+      } else {
+        startWorkspacePan(e);
+      }
     } else {
       startWorkspacePan(e); // Right/Middle clicks always pan
     }
@@ -3456,12 +3463,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
   workspace.addEventListener('touchstart', e => {
     if (e.touches.length === 3) {
-      handleThreeFingerTouchStart(e); // Track three-finger triggers
+      handleThreeFingerTouchStart(e); // Track three-finger tap/swipe
     } else if (e.touches.length === 2) {
-      startWorkspacePan(e); // Two fingers always pan
+      startWorkspacePan(e); // Two-finger touch always pans/zooms
     } else {
-      if (selectionModeActive) startWorkspaceSelect(e);
-      else startWorkspacePan(e); // Default: single-finger panning
+      if (selectionModeActive) {
+        startWorkspaceSelect(e);
+      } else {
+        startWorkspacePan(e); // Single-finger panning by default
+      }
     }
   }, { passive: false });
 
@@ -3511,16 +3521,24 @@ window.addEventListener('DOMContentLoaded', () => {
   shortcutBar.id = 'gesture-shortcut-bar';
   shortcutBar.className = 'gesture-shortcut-bar';
   shortcutBar.innerHTML = `
-    <button class="shortcut-btn" title="Undo (Three-finger swipe left)" onclick="triggerShortcutAction('undo')">↶</button>
-    <button class="shortcut-btn" title="Cut" onclick="triggerShortcutAction('cut')">✂️</button>
-    <button class="shortcut-btn" title="Copy" onclick="triggerShortcutAction('copy')">📋</button>
-    <button class="shortcut-btn" title="Paste" onclick="triggerShortcutAction('paste')">📥</button>
+    <button id="sh-btn-undo" class="shortcut-btn" title="Undo (Three-finger swipe left)">↶</button>
+    <button id="sh-btn-cut" class="shortcut-btn" title="Cut">✂️</button>
+    <button id="sh-btn-copy" class="shortcut-btn" title="Copy">📋</button>
+    <button id="sh-btn-paste" class="shortcut-btn" title="Paste">📥</button>
     <div class="shortcut-divider"></div>
-    <button id="sh-btn-select" class="shortcut-btn" title="Selection Tool Toggle" onclick="triggerShortcutAction('select_mode')">🎯</button>
+    <button id="sh-btn-select" class="shortcut-btn" title="Selection Tool Toggle">🎯</button>
     <div class="shortcut-divider"></div>
-    <button class="shortcut-btn" title="Redo (Three-finger swipe right)" onclick="triggerShortcutAction('redo')">↷</button>
+    <button id="sh-btn-redo" class="shortcut-btn" title="Redo (Three-finger swipe right)">↷</button>
   `;
   document.body.appendChild(shortcutBar);
+
+  // Programmatic event listeners to prevent modular scope wrapping issues
+  document.getElementById('sh-btn-undo')?.addEventListener('click', () => triggerShortcutAction('undo'));
+  document.getElementById('sh-btn-cut')?.addEventListener('click', () => triggerShortcutAction('cut'));
+  document.getElementById('sh-btn-copy')?.addEventListener('click', () => triggerShortcutAction('copy'));
+  document.getElementById('sh-btn-paste')?.addEventListener('click', () => triggerShortcutAction('paste'));
+  document.getElementById('sh-btn-select')?.addEventListener('click', () => triggerShortcutAction('select_mode'));
+  document.getElementById('sh-btn-redo')?.addEventListener('click', () => triggerShortcutAction('redo'));
 
   // Programmatically mount the Telemetry HUD element inside the workspace viewport
   const hud = document.createElement('div');
