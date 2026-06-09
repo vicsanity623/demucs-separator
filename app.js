@@ -19,6 +19,9 @@ let isSelecting = false;
 let selectStart = { x: 0, y: 0 };
 let selectedComponents = new Set();
 let initialDragPositions = {};
+let selectionModeActive = false;
+let threeFingerStartPoints = [];
+let threeFingerStartTime = 0;
 let currentProjectName = "Default Project";
 let activeWireStart = null;
 let mousePosition = { x: 0, y: 0 };
@@ -110,7 +113,6 @@ const PARTS_CATALOGUE = [
       { type: 'transformer', icon: '⊘', iconClass: 'icon-passive', name: 'Transformer 1:10', desc: 'Step-up audio, 600Ω:60kΩ' },
       { type: 'custom_load', icon: '🔌', iconClass: 'icon-passive', name: 'Custom Load', desc: 'Configurable voltage/power appliance' },
       { type: 'solder_joint', icon: '⚫', iconClass: 'icon-passive', name: 'Solder Joint', desc: 'Wiring junction point' },
-      { type: 'earth_gnd', icon: '⏚', iconClass: 'icon-passive', name: 'Earth Ground', desc: 'Reference 0V potential node' },
     ]
   },
   // ── SEMICONDUCTORS ─────────────────────────────────────────────────────────
@@ -121,6 +123,12 @@ const PARTS_CATALOGUE = [
       { type: 'diode_1n5819', icon: '▶', iconClass: 'icon-passive', name: 'Diode 1N5819', desc: 'Schottky, 0.2V drop' },
       { type: 'led_white', icon: '🤍', iconClass: 'icon-active', name: 'LED White 5mm', desc: 'Vf 3.3V, If 20mA' },
       { type: 'npn_bc547', icon: '📉', iconClass: 'icon-active', name: 'NPN BC547', desc: 'Small signal BJT' },
+      { type: 'pnp_bc557', icon: '📈', iconClass: 'icon-active', name: 'PNP BC557', desc: 'Small signal BJT' },
+      { type: 'npn_2n3904', icon: '📉', iconClass: 'icon-active', name: 'NPN 2N3904', desc: 'Workbench general-purpose NPN BJT' },
+      { type: 'pnp_2n3906', icon: '📈', iconClass: 'icon-active', name: 'PNP 2N3906', desc: 'Workbench general-purpose PNP BJT' },
+      { type: 'npn_c1815', icon: '📉', iconClass: 'icon-active', name: 'NPN C1815', desc: 'Silicon NPN, 150mA, High-Gain AF Amp' },
+      { type: 'npn_c2001', icon: '📉', iconClass: 'icon-active', name: 'NPN C2001', desc: 'Silicon NPN, 700mA AF Power Amp' },
+      { type: 'pnp_2n3906', icon: '📈', iconClass: 'icon-active', name: 'PNP 2N3906', desc: 'Workbench general-purpose PNP BJT' },
       { type: 'pnp_bc557', icon: '📈', iconClass: 'icon-active', name: 'PNP BC557', desc: 'Small signal BJT' },
       { type: 'mosfet_2n7000', icon: '🧱', iconClass: 'icon-active', name: 'N-ch 2N7000', desc: 'Small signal MOSFET' },
       { type: 'led', icon: '💡', iconClass: 'icon-active', name: 'LED Red 5mm', desc: 'Vf 2.0V, If 20mA max 45mA' },
@@ -193,196 +201,216 @@ function makeTerminals(id, defs) {
 function buildComponent(type, id, existingComponents) {
   let terminals = [], state = {};
   switch (type) {
-    case 'earth_gnd':
-      terminals = makeTerminals(id, [{ label: 'GND', x: 16, y: 16 }]);
-      state = { name: 'Earth Ground' };
-      break;
     case 'custom_load':
-      terminals = makeTerminals(id, [{ label: '+', x: 16, y: 50 }, { label: '-', x: 176, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { vNom: 12.0, pNom: 10.0, blown: false, name: 'Custom Load' };
       break;
     case 'solder_joint':
       terminals = makeTerminals(id, [{ label: 'Node', x: 16, y: 16 }]);
       state = { name: 'Solder Joint' };
       break;
-    case 'battery_18650':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
-      state = { voltage: 3.7, capacity: 2600, charge: 100, internalR: 0.04, name: '18650 Li-ion' };
-      break;
-    case 'battery_aaa':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
-      state = { voltage: 1.5, capacity: 1200, charge: 100, internalR: 0.3, name: 'AAA Alkaline' };
-      break;
-    case 'battery_d':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
-      state = { voltage: 1.5, capacity: 10000, charge: 100, internalR: 0.1, name: 'D Cell' };
-      break;
-    case 'lemon_battery':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
-      state = { voltage: 0.9, capacity: 50, charge: 100, internalR: 250, name: 'Lemon Bat' };
-      break;
     case 'usb_power':
-      terminals = makeTerminals(id, [{ label: '5V', x: 176, y: 32 }, { label: 'GND', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '5V', x: 192, y: 32 }, { label: 'GND', x: 192, y: 68 }]);
       state = { name: 'USB 5V' };
       break;
     case 'bench_psu':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: 'GND', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: 'GND', x: 192, y: 68 }]);
       state = { voltage: 12.0, currentLimit: 1.0, name: 'Bench PSU' };
       break;
+    case 'battery_18650':
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
+      state = { voltage: 3.7, capacity: 2600, charge: 100, internalR: 0.04, name: '18650 Li-ion' };
+      break;
+    case 'battery_aaa':
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
+      state = { voltage: 1.5, capacity: 1200, charge: 100, internalR: 0.3, name: 'AAA Alkaline' };
+      break;
+    case 'battery_d':
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
+      state = { voltage: 1.5, capacity: 10000, charge: 100, internalR: 0.1, name: 'D Cell' };
+      break;
+    case 'lemon_battery':
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
+      state = { voltage: 0.9, capacity: 50, charge: 100, internalR: 250, name: 'Lemon Bat' };
+      break;
     case 'battery_9v':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 9.0, capacity: 500, charge: 100, internalR: 5, name: '9V PP3' };
       break;
     case 'battery_aa':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 1.5, capacity: 2850, charge: 100, internalR: 0.3, name: 'AA 1.5V' };
       break;
     case 'battery_cr2032':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 3.0, capacity: 210, charge: 100, internalR: 10, name: 'CR2032' };
       break;
     case 'battery_lipo':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 3.7, capacity: 1000, charge: 100, internalR: 0.08, name: 'LiPo 3.7V' };
       break;
     case 'battery_lead':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { voltage: 12.0, capacity: 7000, charge: 100, internalR: 0.05, name: '12V SLA' };
       break;
     case 'solar_panel':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 32 }, { label: '-', x: 176, y: 68 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 32 }, { label: '-', x: 192, y: 68 }]);
       state = { sunlight: 50, voltage: 6.0, isc: 0.66, name: 'Solar 12V' };
       break;
     case 'signal_generator':
-      terminals = makeTerminals(id, [{ label: '+', x: 176, y: 50 }, { label: '-', x: 20, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 192, y: 50 }, { label: '-', x: 0, y: 50 }]);
       state = { frequency: 0.5, amplitude: 2.0, waveform: 'sine', outputVoltage: 0.0, name: 'Sig.Gen' };
       break;
     case 'diy_cell':
-      terminals = makeTerminals(id, [{ label: '+', x: 25, y: 32 }, { label: '-', x: 155, y: 32 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 32 }, { label: '-', x: 192, y: 32 }]);
       state = {
         forming: 0, charge: 0, voltage: 0.0, current: 0.0,
         name: 'Cell ' + (existingComponents.filter(c => c.type === 'diy_cell').length + 1)
       };
       break;
     case 'resistor':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 330, fixed: false };
       break;
     case 'resistor_1k':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 1000, fixed: true };
       break;
     case 'resistor_10k':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 10000, fixed: true };
       break;
     case 'resistor_100':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 100, fixed: true };
       break;
     case 'pot':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'W', x: 96, y: 20 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'W', x: 96, y: 0 }, { label: 'B', x: 192, y: 62 }]);
       state = { resistance: 10000, wiper: 0.5 };
       break;
     case 'capacitor':
-      terminals = makeTerminals(id, [{ label: '+', x: 25, y: 50 }, { label: '-', x: 155, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { capacitance: 1000e-6, storedVoltage: 0.0, name: '1000µF' };
       break;
     case 'cap_100n':
-      terminals = makeTerminals(id, [{ label: '+', x: 25, y: 50 }, { label: '-', x: 155, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { capacitance: 100e-9, storedVoltage: 0.0, name: '100nF' };
       break;
     case 'cap_10u':
-      terminals = makeTerminals(id, [{ label: '+', x: 25, y: 50 }, { label: '-', x: 155, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { capacitance: 10e-6, storedVoltage: 0.0, name: '10µF' };
       break;
     case 'ind_1mH':
     case 'inductor':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 50 }, { label: 'B', x: 176, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 50 }, { label: 'B', x: 192, y: 50 }]);
       state = { inductance: 100e-6, current: 0.0, name: '100µH' };
       break;
+    case 'diode_1n4148':
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 62 }, { label: 'K-', x: 192, y: 62 }]);
+      state = { vf: 0.7, name: '1N4148' };
+      break;
+    case 'diode_1n5819':
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 62 }, { label: 'K-', x: 192, y: 62 }]);
+      state = { vf: 0.3, name: '1N5819' };
+      break;
     case 'diode':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 16, y: 62 }, { label: 'K-', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 62 }, { label: 'K-', x: 192, y: 62 }]);
       state = { vf: 0.7, name: '1N4007' };
       break;
     case 'zener':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 16, y: 62 }, { label: 'K-', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 62 }, { label: 'K-', x: 192, y: 62 }]);
       state = { vf: 0.7, vz: 5.1, name: '5.1V Zener' };
       break;
     case 'transformer':
-      terminals = makeTerminals(id, [{ label: 'P+', x: 16, y: 35 }, { label: 'P-', x: 16, y: 70 }, { label: 'S+', x: 176, y: 35 }, { label: 'S-', x: 176, y: 70 }]);
+      terminals = makeTerminals(id, [{ label: 'P+', x: 0, y: 35 }, { label: 'P-', x: 0, y: 70 }, { label: 'S+', x: 192, y: 35 }, { label: 'S-', x: 192, y: 70 }]);
       state = { ratio: 10, name: '1:10 XFMR' };
       break;
     case 'led':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 28, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 72 }, { label: 'K-', x: 192, y: 72 }]);
       state = { blown: false, current: 0.0, vf: 2.0, color: '#ef4444', name: 'LED Red' };
       break;
     case 'led_green':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 28, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 72 }, { label: 'K-', x: 192, y: 72 }]);
       state = { blown: false, current: 0.0, vf: 2.2, color: '#22c55e', name: 'LED Green' };
       break;
     case 'led_blue':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 28, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 72 }, { label: 'K-', x: 192, y: 72 }]);
       state = { blown: false, current: 0.0, vf: 3.2, color: '#3b82f6', name: 'LED Blue' };
       break;
     case 'led_yellow':
-      terminals = makeTerminals(id, [{ label: 'A+', x: 28, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: 'A+', x: 0, y: 72 }, { label: 'K-', x: 148, y: 72 }]);
       state = { blown: false, current: 0.0, vf: 2.1, color: '#eab308', name: 'LED Yellow' };
       break;
     case 'led_rgb':
-      terminals = makeTerminals(id, [{ label: 'R+', x: 20, y: 85 }, { label: 'G+', x: 60, y: 85 }, { label: 'B+', x: 100, y: 85 }, { label: 'K-', x: 140, y: 85 }]);
+      terminals = makeTerminals(id, [{ label: 'R+', x: 20, y: 105 }, { label: 'G+', x: 60, y: 105 }, { label: 'B+', x: 100, y: 105 }, { label: 'K-', x: 140, y: 105 }]);
       state = { blownR: false, blownG: false, blownB: false, name: 'RGB LED' };
       break;
+    case 'npn_c1815':
+      terminals = makeTerminals(id, [{ label: 'C', x: 96, y: 0 }, { label: 'B', x: 0, y: 82 }, { label: 'E', x: 192, y: 82 }]);
+      state = { current_b: 0.0, beta: 200, name: 'C1815 NPN', vbe_on: 0.7 };
+      break;
+    case 'npn_c2001':
+      terminals = makeTerminals(id, [{ label: 'C', x: 96, y: 0 }, { label: 'B', x: 0, y: 82 }, { label: 'E', x: 192, y: 82 }]);
+      state = { current_b: 0.0, beta: 300, name: 'C2001 NPN', vbe_on: 0.7 };
+      break;
+    case 'npn_2n3904':
+      terminals = makeTerminals(id, [{ label: 'C', x: 96, y: 0 }, { label: 'B', x: 0, y: 82 }, { label: 'E', x: 192, y: 82 }]);
+      state = { current_b: 0.0, beta: 200, name: '2N3904 NPN', vbe_on: 0.7 };
+      break;
+    case 'pnp_2n3906':
+      terminals = makeTerminals(id, [{ label: 'C', x: 96, y: 0 }, { label: 'B', x: 0, y: 82 }, { label: 'E', x: 192, y: 82 }]);
+      state = { current_b: 0.0, beta: 200, name: '2N3906 PNP', vbe_on: 0.7 };
+      break;
     case 'npn_transistor':
-      terminals = makeTerminals(id, [{ label: 'C', x: 92, y: 22 }, { label: 'B', x: 26, y: 82 }, { label: 'E', x: 158, y: 82 }]);
+      terminals = makeTerminals(id, [{ label: 'C', x: 96, y: 0 }, { label: 'B', x: 0, y: 82 }, { label: 'E', x: 192, y: 82 }]);
       state = { current_b: 0.0, beta: 100, name: '2N2222 NPN', vbe_on: 0.7 };
       break;
     case 'pnp_transistor':
-      terminals = makeTerminals(id, [{ label: 'C', x: 92, y: 22 }, { label: 'B', x: 26, y: 82 }, { label: 'E', x: 158, y: 82 }]);
+      terminals = makeTerminals(id, [{ label: 'C', x: 96, y: 0 }, { label: 'B', x: 0, y: 82 }, { label: 'E', x: 192, y: 82 }]);
       state = { current_b: 0.0, beta: 100, name: '2N2907 PNP', vbe_on: 0.7 };
       break;
     case 'mosfet_n':
-      terminals = makeTerminals(id, [{ label: 'D', x: 92, y: 22 }, { label: 'G', x: 26, y: 82 }, { label: 'S', x: 158, y: 82 }]);
+      terminals = makeTerminals(id, [{ label: 'D', x: 96, y: 0 }, { label: 'G', x: 0, y: 82 }, { label: 'S', x: 192, y: 82 }]);
       state = { threshold: 2.0, rds_on: 0.022, name: 'IRLZ44N N-ch' };
       break;
     case 'mosfet_p':
-      terminals = makeTerminals(id, [{ label: 'D', x: 92, y: 22 }, { label: 'G', x: 26, y: 82 }, { label: 'S', x: 158, y: 82 }]);
+      terminals = makeTerminals(id, [{ label: 'D', x: 96, y: 0 }, { label: 'G', x: 0, y: 82 }, { label: 'S', x: 192, y: 82 }]);
       state = { threshold: -4.0, rds_on: 0.117, name: 'IRF9540N P-ch' };
       break;
     case 'ne555':
-      terminals = makeTerminals(id, [{ label: 'Vcc', x: 176, y: 25 }, { label: 'GND', x: 176, y: 55 }, { label: 'OUT', x: 176, y: 80 }, { label: 'TRG', x: 20, y: 25 }, { label: 'THR', x: 20, y: 55 }, { label: 'DIS', x: 20, y: 80 }]);
+      terminals = makeTerminals(id, [{ label: 'Vcc', x: 192, y: 25 }, { label: 'GND', x: 192, y: 55 }, { label: 'OUT', x: 192, y: 80 }, { label: 'TRG', x: 0, y: 25 }, { label: 'THR', x: 0, y: 55 }, { label: 'DIS', x: 0, y: 80 }]);
       state = { mode: 'astable', out: false, capV: 0.0, name: 'NE555' };
       break;
     case 'lm741':
-      terminals = makeTerminals(id, [{ label: 'IN+', x: 20, y: 35 }, { label: 'IN-', x: 20, y: 65 }, { label: 'Vcc+', x: 96, y: 10 }, { label: 'Vcc-', x: 96, y: 90 }, { label: 'OUT', x: 176, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: 'IN+', x: 0, y: 35 }, { label: 'IN-', x: 0, y: 65 }, { label: 'Vcc+', x: 96, y: 0 }, { label: 'Vcc-', x: 96, y: 100 }, { label: 'OUT', x: 192, y: 50 }]);
       state = { gain: 100000, name: 'LM741' };
       break;
     case 'lm358':
-      terminals = makeTerminals(id, [{ label: 'IN+', x: 20, y: 35 }, { label: 'IN-', x: 20, y: 65 }, { label: 'Vcc', x: 96, y: 10 }, { label: 'GND', x: 96, y: 90 }, { label: 'OUT', x: 176, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: 'IN+', x: 0, y: 35 }, { label: 'IN-', x: 0, y: 65 }, { label: 'Vcc', x: 96, y: 0 }, { label: 'GND', x: 96, y: 100 }, { label: 'OUT', x: 192, y: 50 }]);
       state = { gain: 100000, name: 'LM358' };
       break;
     case 'lm7805':
-      terminals = makeTerminals(id, [{ label: 'IN', x: 20, y: 55 }, { label: 'GND', x: 96, y: 85 }, { label: 'OUT', x: 176, y: 55 }]);
+      terminals = makeTerminals(id, [{ label: 'IN', x: 0, y: 55 }, { label: 'GND', x: 96, y: 100 }, { label: 'OUT', x: 192, y: 55 }]);
       state = { vout: 5.0, name: 'LM7805' };
       break;
     case 'lm317':
-      terminals = makeTerminals(id, [{ label: 'IN', x: 20, y: 55 }, { label: 'ADJ', x: 96, y: 85 }, { label: 'OUT', x: 176, y: 55 }]);
+      terminals = makeTerminals(id, [{ label: 'IN', x: 0, y: 55 }, { label: 'ADJ', x: 96, y: 100 }, { label: 'OUT', x: 192, y: 55 }]);
       state = { r1: 240, r2: 2400, vout: 12.0, name: 'LM317' };
       break;
     case 'thermistor':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { temp: 25, b: 3950, r25: 10000, name: 'NTC 10kΩ' };
       break;
     case 'ldr':
-      terminals = makeTerminals(id, [{ label: 'A', x: 16, y: 62 }, { label: 'B', x: 176, y: 62 }]);
+      terminals = makeTerminals(id, [{ label: 'A', x: 0, y: 62 }, { label: 'B', x: 192, y: 62 }]);
       state = { lightPct: 50, name: 'LDR GL5539' };
       break;
     case 'spst_switch':
-      terminals = makeTerminals(id, [{ label: 'In', x: 22, y: 50 }, { label: 'Out', x: 152, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: 'In', x: 0, y: 50 }, { label: 'Out', x: 192, y: 50 }]);
       state = { closed: false, name: 'SPST' };
       break;
     case 'pushbutton':
-      terminals = makeTerminals(id, [{ label: '1', x: 22, y: 50 }, { label: '2', x: 152, y: 50 }]);
+      terminals = makeTerminals(id, [{ label: '1', x: 0, y: 50 }, { label: '2', x: 192, y: 50 }]);
       state = { pressed: false, name: 'Pushbutton' };
       break;
     case 'seven_seg':
@@ -390,19 +418,19 @@ function buildComponent(type, id, existingComponents) {
       state = { name: '7-Seg' };
       break;
     case 'buzzer':
-      terminals = makeTerminals(id, [{ label: '+', x: 28, y: 72 }, { label: '-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 72 }, { label: '-', x: 192, y: 72 }]);
       state = { freq: 2300, active: false, name: 'Buzzer 5V' };
       break;
     case 'speaker':
-      terminals = makeTerminals(id, [{ label: '+', x: 28, y: 72 }, { label: '-', x: 148, y: 72 }]);
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 72 }, { label: '-', x: 192, y: 72 }]);
       state = { impedance: 8, power: 0.25, active: false, name: '8Ω Speaker' };
       break;
     case 'multimeter':
-      terminals = makeTerminals(id, [{ label: 'VΩ+', x: 38, y: 130 }, { label: 'COM-', x: 138, y: 130 }]);
+      terminals = makeTerminals(id, [{ label: 'VΩ+', x: 0, y: 130 }, { label: 'COM-', x: 176, y: 130 }]);
       state = { mode: 'voltage', value: 0.0, name: 'DMM' };
       break;
     case 'oscilloscope':
-      terminals = makeTerminals(id, [{ label: 'CH1', x: 30, y: 130 }, { label: 'GND', x: 96, y: 130 }, { label: 'CH2', x: 162, y: 130 }]);
+      terminals = makeTerminals(id, [{ label: 'CH1', x: 0, y: 130 }, { label: 'GND', x: 96, y: 130 }, { label: 'CH2', x: 192, y: 130 }]);
       state = { timebase: 0.5, gain: 1.0, name: 'Oscilloscope' };
       if (!oscData[id]) oscData[id] = { ch1: [], ch2: [] };
       break;
@@ -563,7 +591,10 @@ function buildCardBody(comp) {
          </div>`;
     case 'npn_bc547': case 'pnp_bc557':
     case 'npn_transistor': case 'pnp_transistor':
-      const polarity = comp.type === 'npn_transistor' ? 'NPN' : 'PNP';
+    case 'npn_2n3904': case 'pnp_2n3906':
+    case 'npn_c2001':
+    case 'npn_c1815':
+      const polarity = (comp.type.startsWith('npn')) ? 'NPN' : 'PNP';
       return `<div class="flex flex-col gap-1.5 items-center">
            <div class="font-mono" style="font-size:9px;color:var(--text-secondary)">${comp.state.name} – ${polarity} BJT</div>
            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;width:100%">
@@ -811,7 +842,7 @@ function renderComponent(comp) {
   container.appendChild(div);
 
   // Custom drag binding for Headerless components (like Solder Joint)
-  if (comp.type === 'solder_joint' || comp.type === 'earth_gnd') {
+  if (comp.type === 'solder_joint') {
     div.addEventListener('mousedown', e => {
       if (e.button === 0) startDrag(e, comp.id);
     });
@@ -1849,18 +1880,6 @@ function getCompactGraphicHTML(comp) {
     `;
   }
 
-  // 13.8 Earth Ground Reference Symbols
-  if (type === 'earth_gnd') {
-    return `
-      <svg viewBox="0 0 40 40" width="32" height="32" style="position: absolute; top: -14px; left: 0;">
-        <line x1="20" y1="5" x2="20" y2="24" stroke="var(--sky)" stroke-width="2.5" />
-        <line x1="10" y1="24" x2="30" y2="24" stroke="var(--sky)" stroke-width="2.5" />
-        <line x1="14" y1="29" x2="26" y2="29" stroke="var(--sky)" stroke-width="2.5" />
-        <line x1="18" y1="34" x2="22" y2="34" stroke="var(--sky)" stroke-width="2.5" />
-      </svg>
-    `;
-  }
-
   // 14. Raw Materials (Salt Water Cells, Copper Wire coils)
   if (type === 'salt_water' || type === 'wire_copper' || type === 'wire_nichrome') {
     if (type === 'salt_water') {
@@ -1963,7 +1982,7 @@ function updateWorkspaceHUD() {
   } else if (type.startsWith('battery') || type === 'diy_cell' || type === 'lemon_battery') {
     const vA = comp.terminals[0]?.voltage || 0;
     const vC = comp.terminals[1]?.voltage || 0;
-    const cellV = (comp.state.voltage || 1.5) * ((comp.state.charge || 100) / 100);
+    const cellV = getBatteryEMF(type, comp.state.charge || 100);
 
     // Check if terminals are connected
     const termA = comp.terminals[0]?.id;
@@ -2183,6 +2202,169 @@ function deleteProjectFromUI(name) {
   }
 }
 
+// ─── CHEMICAL EMF PROFILE CALCULATOR ──────────────────────────────────────────
+function getBatteryEMF(type, charge) {
+  const pct = Math.max(0, Math.min(100, charge)) / 100;
+
+  // 1. 18650 Li-ion & LiPo (3.7V Nominal, 4.2V Max, 3.0V Cut-off)
+  if (type === 'battery_18650' || type === 'battery_lipo') {
+    if (pct >= 0.9) {
+      return 4.0 + (pct - 0.9) * 2.0; // Rapid curve upward to 4.2V
+    } else if (pct >= 0.15) {
+      return 3.6 + (pct - 0.15) * (0.4 / 0.75); // Stable 3.7V nominal plateau
+    } else {
+      return 3.0 + pct * (0.6 / 0.15); // Drop-off curve under 3.0V
+    }
+  }
+
+  // 2. AA, AAA, & D Alkaline Cells (1.5V Nominal, 1.6V Max, 0.9V Cut-off)
+  if (type === 'battery_aa' || type === 'battery_aaa' || type === 'battery_d') {
+    if (pct >= 0.9) {
+      return 1.5 + (pct - 0.9) * 1.0; // Curve upward to 1.6V
+    } else if (pct >= 0.2) {
+      return 1.15 + (pct - 0.2) * (0.35 / 0.7); // Plateau
+    } else {
+      return 0.9 + pct * (0.25 / 0.2); // Depleted drop-off
+    }
+  }
+
+  // 3. Lead-Acid AGM (12.0V Nominal, 12.8V Max, 10.5V Cut-off)
+  if (type === 'battery_lead') {
+    return 10.5 + pct * 2.3;
+  }
+
+  // 4. 9V PP3 Alkaline (9.0V Nominal, 9.6V Max, 6.0V Cut-off)
+  if (type === 'battery_9v') {
+    return 6.0 + pct * 3.6;
+  }
+
+  // 5. CR2032 Lithium Coin (3.0V Nominal, 3.2V Max, 2.0V Cut-off)
+  if (type === 'battery_cr2032') {
+    return 2.0 + pct * 1.2;
+  }
+
+  // 6. Lemon Battery (0.9V Nominal, 0.95V Max, 0.4V Cut-off)
+  if (type === 'lemon_battery') {
+    return 0.4 + pct * 0.55;
+  }
+
+  // Fallback defaults if unspecified
+  const defaultVoltages = {
+    battery_18650: 3.7, battery_lipo: 3.7, battery_aa: 1.5, battery_aaa: 1.5,
+    battery_d: 1.5, battery_lead: 12.0, battery_9v: 9.0, battery_cr2032: 3.0,
+    lemon_battery: 0.9
+  };
+  return (defaultVoltages[type] || 1.5) * pct;
+}
+
+// ─── FLOATING GESTURE SHORTCUT BAR CONTROLS ──────────────────────────────────
+function toggleGestureShortcutBar() {
+  const bar = document.getElementById('gesture-shortcut-bar');
+  if (bar) bar.classList.toggle('visible');
+}
+
+function triggerShortcutAction(action) {
+  if (action === 'select_mode') {
+    selectionModeActive = !selectionModeActive;
+
+    const btn = document.getElementById('sh-btn-select');
+    if (btn) btn.classList.toggle('active', selectionModeActive);
+
+    if (!selectionModeActive) {
+      selectedComponents.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('selected');
+      });
+      selectedComponents.clear();
+    }
+
+    showToast(selectionModeActive ? 'Selection Tool ON' : 'Selection Tool OFF (Panning Active)', 'info');
+  } else if (action === 'undo') {
+    showToast('Undo', 'info');
+  } else if (action === 'redo') {
+    showToast('Redo', 'info');
+  } else if (action === 'cut') {
+    executeCut();
+  } else if (action === 'copy') {
+    executeCopy();
+  } else if (action === 'paste') {
+    executePaste();
+  }
+}
+
+// ─── THREE-FINGER TOUCH GESTURE TRACKER ────────────────────────────────────────
+function handleThreeFingerTouchStart(e) {
+  if (e.touches.length === 3) {
+    threeFingerStartTime = Date.now();
+    threeFingerStartPoints = Array.from(e.touches).map(t => ({ x: t.clientX, y: t.clientY }));
+  }
+}
+
+function handleThreeFingerTouchEnd(e) {
+  if (threeFingerStartPoints.length === 3) {
+    const duration = Date.now() - threeFingerStartTime;
+    const endPoints = Array.from(e.changedTouches || []).concat(Array.from(e.touches || []));
+
+    if (duration < 250) {
+      // 1. Three-Finger Tap: Toggle floating shortcuts
+      toggleGestureShortcutBar();
+    } else if (endPoints.length >= 3) {
+      // 2. Three-Finger Horizontal Swipe (Undo / Redo)
+      const dx = endPoints[0].clientX - threeFingerStartPoints[0].x;
+      if (Math.abs(dx) > 60) {
+        if (dx > 0) triggerShortcutAction('redo');
+        else triggerShortcutAction('undo');
+      }
+    }
+    threeFingerStartPoints = [];
+  }
+}
+
+// ─── CLIPBOARD CUT, COPY, & PASTE ENGINES ──────────────────────────────────────
+let clipboardComponentType = null;
+
+function executeCut() {
+  if (!selectedComponentId) {
+    showToast('Select a component card to Cut', 'warn');
+    return;
+  }
+  const comp = components.find(c => c.id === selectedComponentId);
+  if (comp) {
+    clipboardComponentType = comp.type;
+    removeComponent(selectedComponentId); // Safely deletes from board
+    selectedComponentId = null;
+    updateWorkspaceHUD();
+    showToast(`Cut ${comp.type.replace(/_/g, ' ')} to clipboard`, 'info');
+  }
+}
+
+function executeCopy() {
+  if (!selectedComponentId) {
+    showToast('Select a component card to Copy', 'warn');
+    return;
+  }
+  const comp = components.find(c => c.id === selectedComponentId);
+  if (comp) {
+    clipboardComponentType = comp.type;
+    showToast(`Copied ${comp.type.replace(/_/g, ' ')} to clipboard`, 'info');
+  }
+}
+
+function executePaste() {
+  if (!clipboardComponentType) {
+    showToast('Clipboard is empty', 'warn');
+    return;
+  }
+
+  // Paste exactly at the user's hovering mouse pointer or touch point
+  const pasteX = Math.max(10, mousePosition.x - 96);
+  const pasteY = Math.max(10, mousePosition.y - 50);
+
+  // Spawns a brand-new, non-mirrored default instance of that part
+  addComponent(clipboardComponentType, pasteX, pasteY);
+  showToast(`Pasted fresh ${clipboardComponentType.replace(/_/g, ' ')} ✓`, 'success');
+}
+
 function getCustomCircuitMetrics() {
   let html = '';
   const sources = components.filter(c => ['usb_power', 'bench_psu', 'battery_9v', 'battery_aa', 'battery_cr2032', 'battery_lipo', 'battery_lead', 'battery_18650', 'battery_aaa', 'battery_d', 'diy_cell'].includes(c.type));
@@ -2218,80 +2400,6 @@ function getCustomCircuitMetrics() {
   });
 
   return html || '<div class="metric-row" style="color:var(--text-secondary)">Build a closed loop to monitor paths.</div>';
-}
-
-// ─── COMPONENT GLOSSARY DATABASE ──────────────────────────────────────────────
-const GLOSSARY_DB = [
-  {
-    name: "🔋 18650 Li-ion / AAA Battery",
-    desc: "Stores energy chemically. <strong>EMF (Electromotive Force)</strong> is the resting open-circuit voltage, while <strong>Internal Resistance</strong> acts as a small parasite resistor that drops voltage when current is drawn under load."
-  },
-  {
-    name: "🔌 Solder Joint / Junction",
-    desc: "A zero-impedance node used to split or merge electrical connections. Wires connected to the same solder joint are brought to equal voltage levels, acting like a breadboard power bus."
-  },
-  {
-    name: "🔌 Custom Load (Appliance)",
-    desc: "A configurable power appliance. Calculates equivalent resistance dynamically using the formula <strong>R = V² / P</strong>. Blows/fuses if applied voltage exceeds nominal requirements by 20%."
-  },
-  {
-    name: "Ω Resistors & Potentiometers",
-    desc: "Limits current flow using Ohm's Law: <strong>V = I × R</strong>. Converts excess electrical energy into heat. Potentiometers use a sliding wiper to divide resistance proportionally across 3 terminals."
-  },
-  {
-    name: "◫ Capacitors (CAP)",
-    desc: "Stores electrostatic energy inside an electric field. Blocks DC currents once charged but acts as a low-impedance path to transient/high-frequency AC waveforms."
-  },
-  {
-    name: "▶ Diodes & LEDs",
-    desc: "Semiconductor PN junctions. Allows current to flow in only one direction (Anode to Cathode). LEDs emit photons when current flows, and will blow if currents exceed maximum ratings."
-  },
-  {
-    name: "📉 Transistors (BJTs & MOSFETs)",
-    desc: "Three-terminal active switches. Small input currents (Base on BJTs) or gate voltages (Gate on MOSFETs) control larger output paths, enabling digital switches and analog amplifiers."
-  },
-  {
-    name: "📟 Multimeters & Oscilloscopes",
-    desc: "Measurement instruments. Multimeters measure Voltages (in parallel) and Currents (in series using shunts). Oscilloscopes track and plot rapid voltage variations over time."
-  }
-];
-
-function switchRightSidebarTab(mode) {
-  const tracker = document.getElementById('step-tracker');
-  const glossary = document.getElementById('glossary-tracker');
-  const btnGuide = document.getElementById('subtab-guide');
-  const btnGlossary = document.getElementById('subtab-glossary');
-
-  if (!tracker || !glossary) return;
-
-  if (mode === 'glossary') {
-    tracker.classList.add('hidden');
-    glossary.classList.remove('hidden');
-    btnGuide.classList.remove('btn-teal');
-    btnGuide.classList.add('btn-secondary');
-    btnGlossary.classList.add('btn-teal');
-    btnGlossary.classList.remove('btn-secondary');
-    renderGlossary();
-  } else {
-    tracker.classList.remove('hidden');
-    glossary.classList.add('hidden');
-    btnGuide.classList.add('btn-teal');
-    btnGuide.classList.remove('btn-secondary');
-    btnGlossary.classList.remove('btn-teal');
-    btnGlossary.classList.add('btn-secondary');
-  }
-}
-
-function renderGlossary() {
-  const container = document.getElementById('glossary-tracker');
-  if (!container) return;
-
-  container.innerHTML = GLOSSARY_DB.map(item => `
-    <div class="glossary-item">
-      <div class="glossary-name">${item.name}</div>
-      <div class="glossary-text">${item.desc}</div>
-    </div>
-  `).join('');
 }
 
 function switchTutorial(key) {
@@ -2454,18 +2562,6 @@ function evaluateActiveTutorial(nodeMap) {
 // ─── SIMULATION SOLVER ────────────────────────────────────────────────────────
 function simulationTick() {
   if (!simulationRunning) return;
-
-  // Defensive Check: Instantly purge any "ghost wires" pointing to non-existent terminals
-  const validTerminalIds = new Set();
-  components.forEach(c => c.terminals.forEach(t => validTerminalIds.add(t.id)));
-  const initialWireCount = wires.length;
-  wires = wires.filter(w => validTerminalIds.has(w.from) && validTerminalIds.has(w.to));
-
-  // If any ghost wires were purged, refresh the visual wire layer immediately
-  if (wires.length !== initialWireCount) {
-    updateWires();
-  }
-
   simulationTime += 0.1;
 
   // Build union-find graph
@@ -2494,55 +2590,27 @@ function simulationTick() {
 
   if (!nodeCount) return;
 
-  // Dynamic Multi-Island Ground Detection
-  const islandGnds = {};
-  const gndTypes = ['earth_gnd', 'usb_power', 'bench_psu', 'solar_panel', 'signal_generator', 'battery_9v', 'battery_aa', 'battery_cr2032', 'battery_lipo', 'battery_lead', 'battery_18650', 'battery_aaa', 'battery_d', 'lemon_battery'];
-
-  // 1. Scan all active components to find and assign local grounds for each isolated circuit island
-  components.forEach(c => {
-    const gndTerm = c.terminals.find(t => t.label === 'GND' || t.label === '-');
-    if (gndTerm && gndTypes.includes(c.type)) {
-      const root = find(gndTerm.id);
-      const rootIdx = nodeMap[root];
-      const gndNodeIdx = nodeMap[gndTerm.id];
-
-      // Explicit earth grounds override default battery grounds
-      if (c.type === 'earth_gnd') {
-        islandGnds[rootIdx] = gndNodeIdx;
-      } else if (islandGnds[rootIdx] === undefined) {
-        islandGnds[rootIdx] = gndNodeIdx;
-      }
+  // Find ground node
+  let gndIdx = -1;
+  const gndTypes = ['usb_power', 'bench_psu', 'solar_panel', 'signal_generator', 'battery_9v', 'battery_aa', 'battery_cr2032', 'battery_lipo', 'battery_lead', 'battery_18650', 'battery_aaa', 'battery_d', 'lemon_battery'];
+  for (let t of gndTypes) {
+    const c = components.find(c => c.type === t);
+    if (c) {
+      const gnd = c.terminals.find(t => t.label === 'GND' || t.label === '-');
+      if (gnd) { gndIdx = nodeMap[gnd.id]; break; }
     }
-  });
-
-  // 2. Fallback: Ensure every connected island has a locked reference node to prevent singular matrices
-  const uniqueRoots = new Set();
-  allTerminals.forEach(tid => {
-    uniqueRoots.add(nodeMap[find(tid)]);
-  });
-
-  // Assign a reference ground index only to the actual roots of independent islands
-  uniqueRoots.forEach(rootIdx => {
-    if (islandGnds[rootIdx] === undefined) {
-      islandGnds[rootIdx] = rootIdx; // Lock the root node of this isolated island to 0V as a baseline
-    }
-  });
-
-  const lockedGndNodes = new Set(Object.values(islandGnds));
+  }
+  if (gndIdx === -1) gndIdx = 0;
 
   const V = new Array(nodeCount).fill(0.0);
-  if (lastVoltages && lastVoltages.length === nodeCount) {
-    V.forEach((_, i) => { V[i] = lastVoltages[i]; });
-  }
+  if (lastVoltages && lastVoltages.length === nodeCount) V.forEach((_, i) => { V[i] = lastVoltages[i]; });
+  V[gndIdx] = 0.0;
 
-  // Lock all designated island ground reference nodes to exactly 0.0V
-  lockedGndNodes.forEach(idx => { V[idx] = 0.0; });
-
-  // Iterative nodal analysis (Gauss-Seidel) with locked multi-ground reference sets
+  // Iterative nodal analysis (Gauss-Seidel)
   for (let iter = 0; iter < 200; iter++) {
     const nV = [...V];
     for (let i = 0; i < nodeCount; i++) {
-      if (lockedGndNodes.has(i)) continue; // Skip and lock local ground nodes at 0V
+      if (i === gndIdx) continue;
       let sumG = 0, sumGV = 0;
 
       components.forEach(comp => {
@@ -2560,7 +2628,7 @@ function simulationTick() {
         if (type === 'usb_power') twoPort(T('5V'), T('GND'), 5.0, 0.2);
         else if (type === 'bench_psu') twoPort(T('+'), T('GND'), state.voltage, 0.5);
         else if (type === 'battery_9v' || type === 'battery_aa' || type === 'battery_cr2032' || type === 'battery_lipo' || type === 'battery_lead' || type === 'battery_18650' || type === 'battery_aaa' || type === 'battery_d' || type === 'lemon_battery')
-          twoPort(T('+'), T('-'), state.voltage * (state.charge / 100), state.internalR);
+          twoPort(T('+'), T('-'), getBatteryEMF(type, state.charge), state.internalR);
         else if (type === 'solar_panel') twoPort(T('+'), T('-'), state.voltage, 5.0 + 50 * (1 - state.sunlight / 100));
         else if (type === 'signal_generator') {
           const wf = state.waveform || 'sine';
@@ -2697,7 +2765,7 @@ function simulationTick() {
           const R = state.pressed ? 0.01 : 1e8; const G = 1 / R; const nb = (n1 === i) ? n2 : n1;
           if (n1 === i || n2 === i) { sumG += G; sumGV += G * V[nb]; }
         }
-        else if (type === 'npn_transistor' || type === 'npn_bc547') {
+        else if (type === 'npn_transistor' || type === 'npn_bc547' || type === 'npn_2n3904' || type === 'npn_c2001' || type === 'npn_c1815') {
           const nC = T('C'), nB = T('B'), nE = T('E'); if (nC === undefined || nB === undefined || nE === undefined) return;
           // B-E junction
           const vbe = V[nB] - V[nE], active = vbe > 0.7;
@@ -2705,7 +2773,7 @@ function simulationTick() {
           // C-E channel
           if (nC === i || nE === i) { const Ib = Math.max(0, (vbe - 0.7) / 50); state.current_b = Ib; const Rce = Math.max(2, 1 / (state.beta * Ib + 1e-9)); const G = 1 / Rce; const nb = (nC === i) ? nE : nC; sumG += G; sumGV += G * V[nb]; }
         }
-        else if (type === 'pnp_transistor' || type === 'pnp_bc557') {
+        else if (type === 'pnp_transistor' || type === 'pnp_bc557' || type === 'pnp_2n3906') {
           const nC = T('C'), nB = T('B'), nE = T('E'); if (nC === undefined || nB === undefined || nE === undefined) return;
           const veb = V[nE] - V[nB], active = veb > 0.7;
           if (nE === i || nB === i) { const G = active ? 1 / 50 : 1 / 1e7; const nb = (nE === i) ? nB : nE; const Veff = (nE === i) ? (V[nB] + 0.7) : (V[nE] - 0.7); sumG += G; sumGV += G * (active ? Veff : V[nb]); }
@@ -2790,13 +2858,13 @@ function simulationTick() {
 
       if (sumG > 0) nV[i] = sumGV / sumG; else nV[i] = 0;
     }
-    // Update non-ground nodes with the newly relaxed iterations
-    V.forEach((_, i) => { if (!lockedGndNodes.has(i)) V[i] = nV[i]; });
+    V.forEach((_, i) => { if (i !== gndIdx) V[i] = nV[i]; });
   }
 
-  // Force reference ground potentials to exactly 0V
-  lockedGndNodes.forEach(idx => { V[idx] = 0.0; });
+  V[gndIdx] = 0.0;
   lastVoltages = V;
+
+  // Update terminal voltages
   components.forEach(c => { c.terminals.forEach(t => { t.voltage = V[nodeMap[t.id]] || 0; }); });
 
   // Post-process updates
@@ -2846,7 +2914,9 @@ function simulationTick() {
     }
     else if (type === 'battery_9v' || type === 'battery_aa' || type === 'battery_cr2032' || type === 'battery_lipo' || type === 'battery_lead' || type === 'battery_18650' || type === 'battery_aaa' || type === 'battery_d' || type === 'lemon_battery') {
       const vp = tv('+'), vn = tv('-');
-      const emf = state.voltage * (state.charge / 100);
+
+      // Extract non-linear EMF matching active battery chemistry specifications
+      const emf = getBatteryEMF(type, state.charge);
 
       // Check if terminals are connected to active wires to prevent floating node calculations
       const termA = comp.terminals[0]?.id;
@@ -2854,20 +2924,25 @@ function simulationTick() {
       const isConnected = wires.some(w => w.from === termA || w.to === termA) &&
         wires.some(w => w.from === termB || w.to === termB);
 
-      // Damped resistance (min 0.5 ohms) for numerical integration stability
-      const R_safe = Math.max(0.5, state.internalR);
-      const I = isConnected ? ((emf - (vp - vn)) / R_safe) : 0.0;
+      // Calculate EXACT physical current using the battery's real internal resistance
+      const R_int = Math.max(0.01, state.internalR || 0.1);
+      const I = isConnected ? ((emf - (vp - vn)) / R_int) : 0.0;
 
       // True physical discharge equation: Delta % = (I * dt * 100) / (Capacity_mAh * 3.6)
-      const capacity = state.capacity || 2000; // Falls back to 2000mAh if not specified
-      const simSpeedMultiplier = 20;
-      const deltaCharge = ((I * 2.778) / capacity) * simSpeedMultiplier;
+      const capacity = state.capacity || 2000;
+
+      // 300X Time Dilation Factor (Adjust this value here to speed up or slow down visual drainage)
+      const simSpeedMultiplier = 300;
+      let deltaCharge = ((I * 2.778) / capacity) * simSpeedMultiplier;
+
+      // Clamp the maximum charge change per tick to prevent numerical oscillations in parallel networks
+      deltaCharge = Math.max(-0.5, Math.min(0.5, deltaCharge));
 
       if (I > 0.001) {
         // Discharging
         state.charge = Math.max(0, state.charge - deltaCharge);
       } else if (I < -0.001) {
-        // Charging
+        // Charging (replenishing SoC)
         state.charge = Math.min(100, state.charge - deltaCharge);
       }
 
@@ -2941,7 +3016,7 @@ function simulationTick() {
       if (oscData[id].ch1.length > 200) { oscData[id].ch1.shift(); oscData[id].ch2.shift(); }
       drawScope(id);
     }
-    else if (type === 'npn_transistor' || type === 'pnp_transistor') {
+    else if (type === 'npn_transistor' || type === 'pnp_transistor' || type === 'npn_bc547' || type === 'pnp_bc557' || type === 'npn_2n3904' || type === 'pnp_2n3906' || type === 'npn_c2001' || type === 'npn_c1815') {
       const vB = tv('B'), vC = tv('C'), vE = tv('E');
       const vbe = type === 'npn_transistor' ? (vB - vE) : (vE - vB);
       const vce = vC - vE;
@@ -2975,7 +3050,7 @@ function simulationTick() {
       const out = document.getElementById(`${id}-out`); if (out) { out.innerText = state.out ? 'HIGH' : 'LOW'; out.style.color = state.out ? 'var(--teal)' : 'var(--rose)'; }
       const cv = document.getElementById(`${id}-cv`); if (cv) { const vThr = tv('THR'); cv.innerText = vThr.toFixed(1) + 'V'; }
     }
-    else if (type === 'diode' || type === 'zener') {
+    else if (type === 'diode' || type === 'zener' || type === 'diode_1n4148' || type === 'diode_1n5819') {
       const vA = tv('A+'), vK = tv('K-');
       const fwd = vA - vK > state.vf;
       const el = document.getElementById(`${id}-state`);
@@ -3121,11 +3196,11 @@ function handleWorkspaceWheel(e) {
 }
 
 function startWorkspacePan(e) {
-  // Lock out panning during active drags or wiring adjustments
+  // Lock out panning during active wire draws or card drags
   if (draggedComponent || isDragging || activeWireStart) return;
   const src = e.touches ? e.touches[0] : e;
 
-  // 2-Finger or middle click/empty space touch triggers panning
+  // Two-finger touch on mobile always handles panning and zooming
   if (e.touches && e.touches.length === 2) {
     isPanningWorkspace = true;
     lastTouchDistance = getTouchDistance(e);
@@ -3134,11 +3209,9 @@ function startWorkspacePan(e) {
     return;
   }
 
-  if (e.button === 1 || e.button === 2 || !e.touches) {
-    isPanningWorkspace = true;
-    panStart.x = src.clientX - transformState.x;
-    panStart.y = src.clientY - transformState.y;
-  }
+  isPanningWorkspace = true;
+  panStart.x = src.clientX - transformState.x;
+  panStart.y = src.clientY - transformState.y;
 }
 
 function handleWorkspacePanAndZoom(e) {
@@ -3188,7 +3261,11 @@ function getTouchDistance(e) {
 // ─── SELECTION BOX LOGIC ──────────────────────────────────────────────────────
 function startWorkspaceSelect(e) {
   // Lock out selection boxes during active drags or wiring adjustments
-  if (draggedComponent || isDragging || activeWireStart || e.button !== 0 || e.shiftKey) return;
+  if (draggedComponent || isDragging || activeWireStart) return;
+
+  // Safely allow single-touch events on mobile and bypass desktop e.button checks
+  const isTouch = !!e.touches;
+  if (!isTouch && e.button !== 0) return;
 
   isSelecting = true;
   const coords = getPointerCoords(e);
@@ -3324,8 +3401,22 @@ function initKeyboardShortcuts() {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
     if (e.key === 'Escape') { activeWireStart = null; closeContextMenu(); updateWires(); }
     if (e.key === ' ') { e.preventDefault(); simulationRunning = !simulationRunning; updatePlayButton(); }
+
+    // Catch Option/Alt (Mac), Win/Cmd (Meta), or Ctrl modifiers
+    const isModifier = e.altKey || e.metaKey || e.ctrlKey;
+    if (isModifier) {
+      const key = e.key.toLowerCase();
+      if (key === 'x') { e.preventDefault(); executeCut(); }
+      if (key === 'c') { e.preventDefault(); executeCopy(); }
+      if (key === 'v') { e.preventDefault(); executePaste(); }
+    }
+
     if (e.key === 'Delete' || e.key === 'Backspace') {
-      // delete selected component if any
+      if (selectedComponentId) {
+        removeComponent(selectedComponentId);
+        selectedComponentId = null;
+        updateWorkspaceHUD();
+      }
     }
   });
 }
@@ -3418,14 +3509,32 @@ window.addEventListener('DOMContentLoaded', () => {
   // Canvas Navigation Listeners (Zoom & Pan)
   workspace.addEventListener('wheel', handleWorkspaceWheel, { passive: false });
 
-  // Direct Left-click to select boxes, and Right/Middle clicks to pan
+  // Direct gesture event router (Left-clicks / touches)
   workspace.addEventListener('mousedown', e => {
-    if (e.button === 0) startWorkspaceSelect(e);
-    else startWorkspacePan(e);
+    if (e.button === 0) {
+      // Shift + Left Click OR toggled selection mode button triggers selection box on desktop
+      if (e.shiftKey || selectionModeActive) {
+        startWorkspaceSelect(e);
+      } else {
+        startWorkspacePan(e);
+      }
+    } else {
+      startWorkspacePan(e); // Right/Middle clicks always pan
+    }
   });
+
   workspace.addEventListener('touchstart', e => {
-    if (e.touches.length === 2) startWorkspacePan(e);
-    else startWorkspaceSelect(e);
+    if (e.touches.length === 3) {
+      handleThreeFingerTouchStart(e); // Track three-finger tap/swipe
+    } else if (e.touches.length === 2) {
+      startWorkspacePan(e); // Two-finger touch always pans/zooms
+    } else {
+      if (selectionModeActive) {
+        startWorkspaceSelect(e);
+      } else {
+        startWorkspacePan(e); // Single-finger panning by default
+      }
+    }
   }, { passive: false });
 
   document.addEventListener('mousemove', e => {
@@ -3441,7 +3550,8 @@ window.addEventListener('DOMContentLoaded', () => {
     endWorkspaceSelect();
     stopWorkspacePan();
   });
-  document.addEventListener('touchend', () => {
+  document.addEventListener('touchend', e => {
+    handleThreeFingerTouchEnd(e);
     endWorkspaceSelect();
     stopWorkspacePan();
   });
@@ -3468,27 +3578,29 @@ window.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-wires')?.addEventListener('click', openWireManager);
 
-  // Mount Sub-Tabs and Glossary container inside the Right Sidebar Header
-  const guideHeader = document.querySelector('#panel-guide .sidebar-header');
-  if (guideHeader) {
-    const tabContainer = document.createElement('div');
-    tabContainer.className = 'sub-tab-bar';
-    tabContainer.style = 'display:flex; gap:4px; margin-top:8px;';
-    tabContainer.innerHTML = `
-      <button id="subtab-guide" class="btn btn-teal w-full" style="padding:4px 8px; font-size:10px; justify-content:center;" onclick="switchRightSidebarTab('guide')">📖 Guide</button>
-      <button id="subtab-glossary" class="btn btn-secondary w-full" style="padding:4px 8px; font-size:10px; justify-content:center;" onclick="switchRightSidebarTab('glossary')">🧠 Glossary</button>
-    `;
-    guideHeader.appendChild(tabContainer);
-  }
+  // Programmatically generate and inject the iOS-like Floating Gesture Menu
+  const shortcutBar = document.createElement('div');
+  shortcutBar.id = 'gesture-shortcut-bar';
+  shortcutBar.className = 'gesture-shortcut-bar';
+  shortcutBar.innerHTML = `
+    <button id="sh-btn-undo" class="shortcut-btn" title="Undo (Three-finger swipe left)">↶</button>
+    <button id="sh-btn-cut" class="shortcut-btn" title="Cut">✂️</button>
+    <button id="sh-btn-copy" class="shortcut-btn" title="Copy">📋</button>
+    <button id="sh-btn-paste" class="shortcut-btn" title="Paste">📥</button>
+    <div class="shortcut-divider"></div>
+    <button id="sh-btn-select" class="shortcut-btn" title="Selection Tool Toggle">🎯</button>
+    <div class="shortcut-divider"></div>
+    <button id="sh-btn-redo" class="shortcut-btn" title="Redo (Three-finger swipe right)">↷</button>
+  `;
+  document.body.appendChild(shortcutBar);
 
-  const guideBody = document.querySelector('#panel-guide .sidebar-body');
-  if (guideBody) {
-    const glossTracker = document.createElement('div');
-    glossTracker.id = 'glossary-tracker';
-    glossTracker.className = 'hidden';
-    glossTracker.style = 'display:flex; flex-direction:column; gap:8px; max-height: 400px; overflow-y: auto;';
-    guideBody.insertBefore(glossTracker, guideBody.firstChild);
-  }
+  // Programmatic event listeners to prevent modular scope wrapping issues
+  document.getElementById('sh-btn-undo')?.addEventListener('click', () => triggerShortcutAction('undo'));
+  document.getElementById('sh-btn-cut')?.addEventListener('click', () => triggerShortcutAction('cut'));
+  document.getElementById('sh-btn-copy')?.addEventListener('click', () => triggerShortcutAction('copy'));
+  document.getElementById('sh-btn-paste')?.addEventListener('click', () => triggerShortcutAction('paste'));
+  document.getElementById('sh-btn-select')?.addEventListener('click', () => triggerShortcutAction('select_mode'));
+  document.getElementById('sh-btn-redo')?.addEventListener('click', () => triggerShortcutAction('redo'));
 
   // Programmatically mount the Telemetry HUD element inside the workspace viewport
   const hud = document.createElement('div');
