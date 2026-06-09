@@ -222,6 +222,10 @@ function buildComponent(type, id, existingComponents) {
       terminals = makeTerminals(id, [{ label: 'Node', x: 16, y: 16 }]);
       state = { name: 'Solder Joint' };
       break;
+    case 'reroute_node':
+      terminals = makeTerminals(id, [{ label: 'Pin', x: 8, y: 8 }]);
+      state = { name: 'Reroute' };
+      break;
     case 'usb_power':
       terminals = makeTerminals(id, [{ label: '5V', x: 192, y: 32 }, { label: 'GND', x: 192, y: 68 }]);
       state = { name: 'USB 5V' };
@@ -901,15 +905,17 @@ function renderComponent(comp) {
 
   container.appendChild(div);
 
-  // Custom drag binding for Headerless components (like Solder Joint)
-  if (comp.type === 'solder_joint') {
+  // Custom drag binding for Headerless components (like Solder Joint & Reroute Nodes)
+  if (comp.type === 'solder_joint' || comp.type === 'reroute_node') {
     div.addEventListener('mousedown', e => {
       if (e.button === 0) startDrag(e, comp.id);
     });
     div.addEventListener('touchstart', e => {
       startDrag(e, comp.id);
     });
+  }
 
+  if (comp.type === 'solder_joint') {
     // Append direct-edit text input beneath the junction pad
     const labelDiv = document.createElement('div');
     labelDiv.style = 'position: absolute; top: 32px; left: 50%; transform: translateX(-50%); width: 120px; text-align: center; pointer-events: auto;';
@@ -1287,12 +1293,12 @@ function startWire(e, termId) {
     return;
   }
 
-  // Solder Joint Check: Find the component associated with this terminal
+  // Solder Joint & Reroute Checks: Find the component associated with this terminal
   const comp = components.find(c => c.terminals.some(t => t.id === termId));
-  const isSolderJoint = comp && comp.type === 'solder_joint';
+  const isSolderOrReroute = comp && (comp.type === 'solder_joint' || comp.type === 'reroute_node');
 
-  // UE5-Style Detach: Skip detach logic entirely if this is a solder joint terminal
-  const connectedWireIdx = isSolderJoint ? -1 : wires.findIndex(w => w.from === termId || w.to === termId);
+  // UE5-Style Detach: Skip detach logic entirely if this is a solder joint or a reroute node
+  const connectedWireIdx = isSolderOrReroute ? -1 : wires.findIndex(w => w.from === termId || w.to === termId);
 
   if (connectedWireIdx !== -1) {
     const wire = wires[connectedWireIdx];
@@ -1438,6 +1444,12 @@ function updateWires() {
     if (termData && Math.abs(termData.voltage) > 0.1) {
       path.classList.add('wire-animated');
     }
+
+    // UE5-Style Double-Click Reroute Node Splitter
+    hitPath.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      splitWireWithRerouteNode(wire, e);
+    });
 
     // Desktop right-click to disconnect
     hitPath.addEventListener('contextmenu', e => {
@@ -4006,6 +4018,47 @@ function deleteAllWires() {
 function deleteWire(index) {
   wires.splice(index, 1);
   updateWires();
+}
+
+function splitWireWithRerouteNode(wire, e) {
+  // 1. Calculate the pointer coordinates relative to your transform viewport
+  const rect = workspace.getBoundingClientRect();
+  const rx = e.clientX - rect.left;
+  const ry = e.clientY - rect.top;
+  const x = (rx - transformState.x) / transformState.scale;
+  const y = (ry - transformState.y) / transformState.scale;
+
+  const rerouteId = 'reroute_' + Date.now();
+
+  // 2. Programmatically generate the lightweight Reroute Node
+  const { terminals, state } = buildComponent('reroute_node', rerouteId, components);
+  const comp = {
+    id: rerouteId,
+    type: 'reroute_node',
+    x: x - 8, // Centers the 16px circular pad on your cursor
+    y: y - 8,
+    rotation: 0,
+    terminals,
+    state
+  };
+
+  components.push(comp);
+  renderComponent(comp);
+
+  const rTermId = terminals[0].id;
+
+  // 3. Remove the original straight wire segment
+  const idx = wires.indexOf(wire);
+  if (idx !== -1) wires.splice(idx, 1);
+
+  // 4. Connect the new wire segments
+  wires.push({ from: wire.from, to: rTermId, color: wire.color });
+  wires.push({ from: rTermId, to: wire.to, color: wire.color });
+
+  // 5. Redraw wires and auto-save
+  updateWires();
+  saveWorkspaceToLocalStorage();
+  showToast('Reroute Node Added ✓', 'success');
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────────

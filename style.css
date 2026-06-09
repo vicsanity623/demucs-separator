@@ -1541,6 +1541,45 @@ select:focus {
   /* Hide node labels */
 }
 
+/* === WIRE REROUTE NODE OVERRIDES === */
+.comp-card[data-type="reroute_node"] {
+  width: 16px !important;
+  height: 16px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: grab;
+  overflow: visible !important;
+}
+
+.comp-card[data-type="reroute_node"] .comp-header {
+  display: none !important;
+}
+
+.comp-card[data-type="reroute_node"] .comp-body {
+  padding: 0 !important;
+  min-height: auto !important;
+}
+
+.comp-card[data-type="reroute_node"] .term-node {
+  left: -3px !important;
+  top: -3px !important;
+  width: 22px !important;
+  height: 22px !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  border: 2px solid var(--text-secondary) !important;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+}
+
+.comp-card[data-type="reroute_node"] .term-node span {
+  display: none !important;
+}
+
+.comp-card[data-type="reroute_node"]:hover .term-node {
+  border-color: var(--teal) !important;
+  box-shadow: 0 0 10px var(--teal-glow);
+}
+
 /* === WORKSPACE METRICS HUD === */
 .workspace-metrics-hud {
   position: absolute;
