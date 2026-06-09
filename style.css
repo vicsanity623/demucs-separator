@@ -114,6 +114,7 @@ body {
   flex-shrink: 0;
   z-index: 30;
   gap: 12px;
+  transition: padding-top 0.2s, height 0.2s;
 }
 
 .header-brand {
@@ -124,6 +125,11 @@ body {
 }
 
 @media (min-width: 768px) {
+  .app-header {
+    padding-top: 14px;
+    height: 64px;
+  }
+
   .header-brand {
     margin-left: 76px;
   }
