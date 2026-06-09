@@ -124,7 +124,7 @@ const PARTS_CATALOGUE = [
       { type: 'led_white', icon: '🤍', iconClass: 'icon-active', name: 'LED White 5mm', desc: 'Vf 3.3V, If 20mA' },
       { type: 'npn_bc547', icon: '📉', iconClass: 'icon-active', name: 'NPN BC547', desc: 'Small signal BJT' },
       { type: 'pnp_bc557', icon: '📈', iconClass: 'icon-active', name: 'PNP BC557', desc: 'Small signal BJT' },
-      type: 'npn_2n3904', icon: '📉', iconClass: 'icon-active', name: 'NPN 2N3904', desc: 'Workbench general-purpose NPN BJT' },
+      { type: 'npn_2n3904', icon: '📉', iconClass: 'icon-active', name: 'NPN 2N3904', desc: 'Workbench general-purpose NPN BJT' },
       { type: 'pnp_2n3906', icon: '📈', iconClass: 'icon-active', name: 'PNP 2N3906', desc: 'Workbench general-purpose PNP BJT' },
       { type: 'npn_c2001', icon: '📉', iconClass: 'icon-active', name: 'NPN C2001', desc: 'Silicon NPN, 700mA AF Power Amp' },
       { type: 'pnp_2n3906', icon: '📈', iconClass: 'icon-active', name: 'PNP 2N3906', desc: 'Workbench general-purpose PNP BJT' },
