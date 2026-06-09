@@ -105,6 +105,9 @@ const PARTS_CATALOGUE = [
       { type: 'resistor_100', icon: 'Ω', iconClass: 'icon-passive', name: 'Resistor 100Ω', desc: '±5% tolerance, fixed' },
       { type: 'pot', icon: '🎚️', iconClass: 'icon-passive', name: 'Potentiometer 10kΩ', desc: 'Linear taper, 3-terminal' },
       { type: 'capacitor', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 1000µF', desc: 'Electrolytic, 25V rated' },
+      { type: 'cap_22p', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 22pF', desc: 'Ceramic disc, RF/Oscillator load' },
+      { type: 'cap_100p', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 100pF', desc: 'Ceramic disc, High-frequency filter' },
+      { type: 'cap_4n7', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 4.7nF', desc: 'Ceramic disc, coupling/decoupling' },
       { type: 'cap_100n', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 100nF', desc: 'Ceramic disc, 50V rated' },
       { type: 'cap_10u', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 10µF', desc: 'Electrolytic, 50V rated' },
       { type: 'inductor', icon: '⊂⊃', iconClass: 'icon-passive', name: 'Inductor 100µH', desc: 'Ferrite core, DCR 0.4Ω, Isat 0.5A' },
@@ -291,6 +294,18 @@ function buildComponent(type, id, existingComponents) {
     case 'capacitor':
       terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { capacitance: 1000e-6, storedVoltage: 0.0, name: '1000µF' };
+      break;
+    case 'cap_22p':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 22e-12, storedVoltage: 0.0, name: '22pF' };
+      break;
+    case 'cap_100p':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 100e-12, storedVoltage: 0.0, name: '100pF' };
+      break;
+    case 'cap_4n7':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 4.7e-9, storedVoltage: 0.0, name: '4.7nF' };
       break;
     case 'cap_100n':
       terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
@@ -548,6 +563,7 @@ function buildCardBody(comp) {
          </div>`;
     case 'cap_1u': case 'cap_100u':
     case 'capacitor': case 'cap_100n': case 'cap_10u':
+    case 'cap_22p': case 'cap_100p': case 'cap_4n7':
       const cLabel = comp.state.name || '1000µF';
       return `<div class="flex flex-col gap-1.5">
            <div class="flex justify-between"><span class="text-muted" style="font-size:9px">Value</span><span class="font-mono" style="font-size:10px">${cLabel}</span></div>
@@ -2793,7 +2809,7 @@ function simulationTick() {
           if (nA !== undefined && nW !== undefined) { const G = 1 / Raw; if (nA === i) { sumG += G; sumGV += G * V[nW]; } if (nW === i) { sumG += G; sumGV += G * V[nA]; } }
           if (nW !== undefined && nB !== undefined) { const G = 1 / Rwb; if (nW === i) { sumG += G; sumGV += G * V[nB]; } if (nB === i) { sumG += G; sumGV += G * V[nW]; } }
         }
-        else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u') {
+        else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7') {
           const C = state.capacitance, dt = 0.1;
           const Req = dt / C; const G = 1 / Req; const capV = state.storedVoltage;
           twoPort(T('+'), T('-'), capV, Req);
@@ -3003,7 +3019,7 @@ function simulationTick() {
     if (type === 'signal_generator') {
       const el = document.getElementById(`${id}-disp`); if (el) el.innerText = state.outputVoltage.toFixed(2) + ' V';
     }
-    else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u') {
+    else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7') {
       const vp = tv('+'), vn = tv('-');
 
       state.storedVoltage = vp - vn;
