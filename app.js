@@ -63,20 +63,21 @@ const PARTS_CATALOGUE = [
   {
     group: 'Power Sources',
     parts: [
+      { type: 'bench_psu', icon: '⚡', iconClass: 'icon-power', name: 'Bench PSU (0-30V adj)', desc: 'Adjustable lab supply with CC/CV' },
+      { type: 'usb_power', icon: '🔌', iconClass: 'icon-power', name: '5V USB Power Supply', desc: 'Fixed 5V DC VBUS / GND rails' },
+      { type: 'solar_panel', icon: '☀️', iconClass: 'icon-power', name: '12V Solar Panel', desc: 'Pmax 10W, Voc 18V, Isc 0.66A' },
       { type: 'battery_18650', icon: '🔋', iconClass: 'icon-battery', name: '18650 Li-ion', desc: '3.7V, 2600mAh, 40mΩ' },
       { type: 'battery_aaa', icon: '🔋', iconClass: 'icon-battery', name: 'AAA Battery', desc: '1.5V Alkaline' },
-      { type: 'battery_d', icon: '🔋', iconClass: 'icon-battery', name: 'D Cell Battery', desc: '1.5V, 10000mAh' },
-      { type: 'lemon_battery', icon: '🍋', iconClass: 'icon-battery', name: 'Lemon Battery', desc: '0.9V, High IR' },
-      { type: 'usb_power', icon: '🔌', iconClass: 'icon-power', name: '5V USB Power Supply', desc: 'Fixed 5V DC VBUS / GND rails' },
-      { type: 'bench_psu', icon: '⚡', iconClass: 'icon-power', name: 'Bench PSU (0-30V adj)', desc: 'Adjustable lab supply with CC/CV' },
-      { type: 'battery_9v', icon: '🔋', iconClass: 'icon-battery', name: '9V PP3 Battery', desc: 'Zinc-carbon 6F22, 500mAh' },
       { type: 'battery_aa', icon: '🔋', iconClass: 'icon-battery', name: 'AA Battery (1.5V)', desc: 'Alkaline LR6, 2850mAh' },
+      { type: 'battery_d', icon: '🔋', iconClass: 'icon-battery', name: 'D Cell Battery', desc: '1.5V, 10000mAh' },
+      { type: 'battery_9v', icon: '🔋', iconClass: 'icon-battery', name: '9V PP3 Battery', desc: 'Zinc-carbon 6F22, 500mAh' },
       { type: 'battery_cr2032', icon: '🔋', iconClass: 'icon-battery', name: 'CR2032 Coin Cell', desc: '3V Lithium, 210mAh' },
       { type: 'battery_lipo', icon: '🔋', iconClass: 'icon-battery', name: 'LiPo 3.7V Cell', desc: 'Li-Polymer 1000mAh, internal resistance 80mΩ' },
       { type: 'battery_lead', icon: '🔋', iconClass: 'icon-battery', name: '12V Lead Acid', desc: 'VRLA 7Ah, SLA AGM type' },
-      { type: 'solar_panel', icon: '☀️', iconClass: 'icon-power', name: '12V Solar Panel', desc: 'Pmax 10W, Voc 18V, Isc 0.66A' },
-      { type: 'signal_generator', icon: '〰️', iconClass: 'icon-power', name: 'AC Signal Generator', desc: 'Sine/Square/Saw, 0.1Hz–20kHz' },
+      { type: 'lemon_battery', icon: '🍋', iconClass: 'icon-battery', name: 'Lemon Battery', desc: '0.9V, High IR' },
       { type: 'diy_cell', icon: '🧪', iconClass: 'icon-battery', name: 'DIY Epsom-Salt Cell', desc: 'Modified Planté lead chemistry' },
+      { type: 'signal_generator', icon: '〰️', iconClass: 'icon-power', name: 'AC Signal Generator', desc: 'Sine/Square/Saw, 0.1Hz–20kHz' },
+      { type: 'tone_generator', icon: '🔊', iconClass: 'icon-power', name: 'Tone Generator', desc: '1Hz to 20kHz dynamic audio source' },
     ]
   },
   // ── RAW MATERIALS ──────────────────────────────────────────────────────────
@@ -207,7 +208,12 @@ function makeTerminals(id, defs) {
 
 function buildComponent(type, id, existingComponents) {
   let terminals = [], state = {};
+
   switch (type) {
+    case 'tone_generator':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { frequency: 440.0, amplitude: 2.0, phase: 0.0, name: 'Tone Gen' };
+      break;
     case 'custom_load':
       terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { vNom: 12.0, pNom: 10.0, blown: false, name: 'Custom Load' };
@@ -766,6 +772,20 @@ function buildCardBody(comp) {
            </div>
          </div>`;
 
+    case 'tone_generator':
+      return `<div class="flex flex-col gap-1.5" style="background:#090d16; border:1px solid #1e293b; border-radius:var(--radius); padding:8px;">
+           <div class="text-center font-mono text-xs text-teal font-bold" id="${id}-display" style="background:#020617; border:1px solid #111b27; border-radius:4px; padding:6px 0; color:#00ff88; text-shadow:0 0 4px rgba(0,255,136,0.3); letter-spacing:0.5px;">${comp.state.frequency.toFixed(1)} Hz</div>
+           <div class="flex justify-between items-center" style="margin-top:4px;">
+             <span class="text-muted" style="font-size:9px">Frequency (Hz)</span>
+             <input type="number" id="${id}-freq-text" min="1" max="20000" step="1" value="${comp.state.frequency}" style="width:65px; padding:2px; font-size:10px;" onchange="updateToneGenerator('${id}','frequency',this.value)">
+           </div>
+           <input type="range" id="${id}-freq-slide" min="1" max="5000" step="1" value="${comp.state.frequency}" style="width:100%; margin-top:2px;" oninput="updateToneGenerator('${id}','frequency',this.value)">
+           <div class="flex justify-between items-center" style="margin-top:2px;">
+             <span class="text-muted" style="font-size:9px">Amplitude (V)</span>
+             <input type="number" id="${id}-amp-text" min="0.0" max="12.0" step="0.1" value="${comp.state.amplitude}" style="width:65px; padding:2px; font-size:10px;" onchange="updateToneGenerator('${id}','amplitude',this.value)">
+           </div>
+         </div>`;
+
     case 'custom_load':
       return `<div class="flex flex-col gap-1.5">
            <div class="flex justify-between items-center"><span class="text-muted" style="font-size:9px">Req. Volts (V)</span>
@@ -1006,6 +1026,13 @@ function toggleDip(id, num) {
   comp.state['sw' + num] = !comp.state['sw' + num];
   const thumb = document.getElementById(`${id}-th${num}`);
   if (thumb) thumb.style.transform = `translateY(${comp.state['sw' + num] ? 0 : 20}px)`;
+}
+
+function updateToneGenerator(id, field, val) {
+  const comp = components.find(c => c.id === id);
+  if (!comp) return;
+  comp.state[field] = parseFloat(val) || 1.0;
+  saveWorkspaceToLocalStorage();
 }
 
 function updateCustomLoad(id, field, val) {
@@ -1908,6 +1935,17 @@ function getCompactGraphicHTML(comp) {
     `;
   }
 
+  // 13.4 Tone Waveform Generators
+  if (type === 'tone_generator') {
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <rect x="10" y="10" width="30" height="30" rx="6" fill="#090d16" stroke="#00ff88" stroke-width="2" />
+        <path d="M 15 25 Q 20 15, 25 25 T 35 25" fill="none" stroke="#00ff88" stroke-width="2" stroke-linecap="round" />
+        <text x="25" y="44" fill="var(--text-muted)" font-size="5" font-family="monospace" text-anchor="middle">TONE GEN</text>
+      </svg>
+    `;
+  }
+
   // 13.5 Configurable Appliance Loads
   if (type === 'custom_load') {
     return `
@@ -2794,6 +2832,14 @@ function simulationTick() {
         };
 
         if (type === 'usb_power') twoPort(T('5V'), T('GND'), 5.0, 0.2);
+        else if (type === 'tone_generator') {
+          const dt = 0.1;
+          state.phase = (state.phase || 0) + 2 * Math.PI * state.frequency * dt;
+          if (state.phase > 2 * Math.PI) state.phase -= 2 * Math.PI; // Keep phase bound to avoid overflow
+          state.outputVoltage = Math.sin(state.phase) * state.amplitude;
+
+          twoPort(T('+'), T('-'), state.outputVoltage, 50); // 50 ohm source impedance
+        }
         else if (type === 'bench_psu') twoPort(T('+'), T('GND'), state.voltage, 0.5);
         else if (type === 'battery_9v' || type === 'battery_aa' || type === 'battery_cr2032' || type === 'battery_lipo' || type === 'battery_lead' || type === 'battery_18650' || type === 'battery_aaa' || type === 'battery_d' || type === 'lemon_battery')
           twoPort(T('+'), T('-'), getBatteryEMF(type, state.charge), state.internalR);
@@ -2812,6 +2858,16 @@ function simulationTick() {
           const cellV = fr * (1.5 + 0.5 * cr);
           const Rint = 150 - 146 * fr;
           twoPort(T('+'), T('-'), cellV, Rint);
+        }
+        else if (type === 'tone_generator') {
+          const disp = document.getElementById(`${id}-display`);
+          if (disp) disp.textContent = state.frequency.toFixed(1) + ' Hz';
+          const slide = document.getElementById(`${id}-freq-slide`);
+          if (slide) slide.value = state.frequency;
+          const text = document.getElementById(`${id}-freq-text`);
+          if (text) text.value = state.frequency;
+          const amp = document.getElementById(`${id}-amp-text`);
+          if (amp) amp.value = state.amplitude;
         }
         else if (type === 'custom_load') {
           if (state.blown) return;
