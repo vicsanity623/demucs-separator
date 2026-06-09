@@ -1615,7 +1615,7 @@ function toggleSidebar(panelId) {
 // ─── TUTORIAL GUIDE ───────────────────────────────────────────────────────────
 const tutorialGuides = {
   lead_acid: {
-    title: "1. DIY 4.0V Epsom-Salt Battery",
+    title: "DIY 4.0V Epsom-Salt Battery",
     steps: [
       { id: 'step-1', title: "Step 1: Placement", desc: "Place 1× USB Power Supply and 2× DIY Epsom-Salt Cells onto the workspace." },
       { id: 'step-2', title: "Step 2: Series Connection", desc: "Connect Cell 1 (+) to Cell 2 (−) to build a 2-cell series battery." },
@@ -1637,7 +1637,7 @@ const tutorialGuides = {
     }
   },
   solar_charge: {
-    title: "2. 12V Solar Charging Regulator",
+    title: "12V Solar Charging Regulator",
     steps: [
       { id: 'step-1', title: "Step 1: Place Components", desc: "Add 1× 12V Solar Panel, 1× Capacitor, 1× SPST Switch." },
       { id: 'step-2', title: "Step 2: Wire Circuit", desc: "Solar (+) → Switch In, Switch Out → Cap (+), Solar (−) → Cap (−)." },
@@ -1656,7 +1656,7 @@ const tutorialGuides = {
     }
   },
   class_a_amp: {
-    title: "3. Class-A BJT Amplifier",
+    title: "Class-A BJT Amplifier",
     steps: [
       { id: 'step-1', title: "Step 1: Place Parts", desc: "Add Signal Generator, NPN Transistor, 2× Resistors, Multimeter." },
       { id: 'step-2', title: "Step 2: Pull-Up Network", desc: "USB 5V → R1-A, R1-B → Transistor C. Emitter (E) → USB GND." },
@@ -1682,7 +1682,7 @@ const tutorialGuides = {
     }
   },
   voltage_divider: {
-    title: "4. Voltage Divider + LED",
+    title: "Voltage Divider + LED",
     steps: [
       { id: 'step-1', title: "Step 1: Place Parts", desc: "Add USB 5V Supply, 2× Resistors, 1× LED Red." },
       { id: 'step-2', title: "Step 2: Divider", desc: "USB 5V → R1-A, R1-B → R2-A, R2-B → GND." },
@@ -1699,7 +1699,7 @@ const tutorialGuides = {
     }
   },
   voltage_reg: {
-    title: "5. LM7805 5V Regulator",
+    title: "LM7805 5V Regulator",
     steps: [
       { id: 'step-1', title: "Step 1: Place Parts", desc: "Place an LM7805 Voltage Regulator, a 12V Bench PSU, and a Solder Joint (Common GND)." },
       { id: 'step-2', title: "Step 2: Input Power", desc: "Connect PSU (+) to LM7805 IN, and PSU (GND) to your Solder Joint." },
@@ -1719,7 +1719,7 @@ const tutorialGuides = {
     }
   },
   led_blink: {
-    title: "6. NE555 LED Blinker",
+    title: "NE555 LED Blinker",
     steps: [
       { id: 'step-1', title: "Step 1: Core Parts", desc: "Place an NE555 Timer, 10µF Capacitor, 2× resistors, and an LED." },
       { id: 'step-2', title: "Step 2: Astable Wiring", desc: "Wire the NE555 in astable oscillation configuration (Trigger to Threshold, discharge resistors in series)." },
@@ -1736,7 +1736,7 @@ const tutorialGuides = {
     }
   },
   spectrum_analyzer: {
-    title: "7. 3-Band Spectrum Analyzer",
+    title: "3-Band Spectrum Analyzer",
     steps: [
       { id: 'step-1', title: "Step 1: Frame Rails", desc: "Place a 12V Bench PSU, a Tone Generator, and three Solder Joints (Common ground and audio rails)." },
       { id: 'step-2', title: "Step 2: Pre-Amplifier", desc: "Place an NPN transistor (C1815), 10kΩ and 33kΩ Resistors, and a 10µF Capacitor. Wire Tone Gen (+) → Capacitor → Base (B). Bias the base with resistors." },
@@ -1768,7 +1768,7 @@ const tutorialGuides = {
     }
   },
   custom: {
-    title: "8. Custom Sandbox (Free Play)",
+    title: "Custom Sandbox (Free Play)",
     steps: [
       { id: 'step-1', title: "Sandbox Active", desc: "Build any circuit you like! Active connections and loops will print out live analytics down below." }
     ],
