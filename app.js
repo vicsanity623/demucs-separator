@@ -63,20 +63,21 @@ const PARTS_CATALOGUE = [
   {
     group: 'Power Sources',
     parts: [
+      { type: 'bench_psu', icon: '⚡', iconClass: 'icon-power', name: 'Bench PSU (0-30V adj)', desc: 'Adjustable lab supply with CC/CV' },
+      { type: 'usb_power', icon: '🔌', iconClass: 'icon-power', name: '5V USB Power Supply', desc: 'Fixed 5V DC VBUS / GND rails' },
+      { type: 'solar_panel', icon: '☀️', iconClass: 'icon-power', name: '12V Solar Panel', desc: 'Pmax 10W, Voc 18V, Isc 0.66A' },
       { type: 'battery_18650', icon: '🔋', iconClass: 'icon-battery', name: '18650 Li-ion', desc: '3.7V, 2600mAh, 40mΩ' },
       { type: 'battery_aaa', icon: '🔋', iconClass: 'icon-battery', name: 'AAA Battery', desc: '1.5V Alkaline' },
-      { type: 'battery_d', icon: '🔋', iconClass: 'icon-battery', name: 'D Cell Battery', desc: '1.5V, 10000mAh' },
-      { type: 'lemon_battery', icon: '🍋', iconClass: 'icon-battery', name: 'Lemon Battery', desc: '0.9V, High IR' },
-      { type: 'usb_power', icon: '🔌', iconClass: 'icon-power', name: '5V USB Power Supply', desc: 'Fixed 5V DC VBUS / GND rails' },
-      { type: 'bench_psu', icon: '⚡', iconClass: 'icon-power', name: 'Bench PSU (0-30V adj)', desc: 'Adjustable lab supply with CC/CV' },
-      { type: 'battery_9v', icon: '🔋', iconClass: 'icon-battery', name: '9V PP3 Battery', desc: 'Zinc-carbon 6F22, 500mAh' },
       { type: 'battery_aa', icon: '🔋', iconClass: 'icon-battery', name: 'AA Battery (1.5V)', desc: 'Alkaline LR6, 2850mAh' },
+      { type: 'battery_d', icon: '🔋', iconClass: 'icon-battery', name: 'D Cell Battery', desc: '1.5V, 10000mAh' },
+      { type: 'battery_9v', icon: '🔋', iconClass: 'icon-battery', name: '9V PP3 Battery', desc: 'Zinc-carbon 6F22, 500mAh' },
       { type: 'battery_cr2032', icon: '🔋', iconClass: 'icon-battery', name: 'CR2032 Coin Cell', desc: '3V Lithium, 210mAh' },
       { type: 'battery_lipo', icon: '🔋', iconClass: 'icon-battery', name: 'LiPo 3.7V Cell', desc: 'Li-Polymer 1000mAh, internal resistance 80mΩ' },
       { type: 'battery_lead', icon: '🔋', iconClass: 'icon-battery', name: '12V Lead Acid', desc: 'VRLA 7Ah, SLA AGM type' },
-      { type: 'solar_panel', icon: '☀️', iconClass: 'icon-power', name: '12V Solar Panel', desc: 'Pmax 10W, Voc 18V, Isc 0.66A' },
-      { type: 'signal_generator', icon: '〰️', iconClass: 'icon-power', name: 'AC Signal Generator', desc: 'Sine/Square/Saw, 0.1Hz–20kHz' },
+      { type: 'lemon_battery', icon: '🍋', iconClass: 'icon-battery', name: 'Lemon Battery', desc: '0.9V, High IR' },
       { type: 'diy_cell', icon: '🧪', iconClass: 'icon-battery', name: 'DIY Epsom-Salt Cell', desc: 'Modified Planté lead chemistry' },
+      { type: 'signal_generator', icon: '〰️', iconClass: 'icon-power', name: 'AC Signal Generator', desc: 'Sine/Square/Saw, 0.1Hz–20kHz' },
+      { type: 'tone_generator', icon: '🔊', iconClass: 'icon-power', name: 'Tone Generator', desc: '1Hz to 20kHz dynamic audio source' },
     ]
   },
   // ── RAW MATERIALS ──────────────────────────────────────────────────────────
@@ -105,6 +106,10 @@ const PARTS_CATALOGUE = [
       { type: 'resistor_100', icon: 'Ω', iconClass: 'icon-passive', name: 'Resistor 100Ω', desc: '±5% tolerance, fixed' },
       { type: 'pot', icon: '🎚️', iconClass: 'icon-passive', name: 'Potentiometer 10kΩ', desc: 'Linear taper, 3-terminal' },
       { type: 'capacitor', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 1000µF', desc: 'Electrolytic, 25V rated' },
+      { type: 'cap_2n2', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 2.2nF', desc: 'Ceramic disc, decoupling/coupling' },
+      { type: 'cap_33n', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 33nF', desc: 'Metal film (333J100V), analog filters' },
+      { type: 'cap_470p', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 470pF', desc: 'Ceramic disc, RF bypass/coupling' },
+      { type: 'cap_0u47', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 0.47µF', desc: 'Electrolytic, 50V polarized' },
       { type: 'cap_22p', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 22pF', desc: 'Ceramic disc, RF/Oscillator load' },
       { type: 'cap_100p', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 100pF', desc: 'Ceramic disc, High-frequency filter' },
       { type: 'cap_4n7', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 4.7nF', desc: 'Ceramic disc, coupling/decoupling' },
@@ -203,7 +208,12 @@ function makeTerminals(id, defs) {
 
 function buildComponent(type, id, existingComponents) {
   let terminals = [], state = {};
+
   switch (type) {
+    case 'tone_generator':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { frequency: 440.0, amplitude: 2.0, phase: 0.0, name: 'Tone Gen' };
+      break;
     case 'custom_load':
       terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { vNom: 12.0, pNom: 10.0, blown: false, name: 'Custom Load' };
@@ -294,6 +304,22 @@ function buildComponent(type, id, existingComponents) {
     case 'capacitor':
       terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { capacitance: 1000e-6, storedVoltage: 0.0, name: '1000µF' };
+      break;
+    case 'cap_2n2':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 2.2e-9, storedVoltage: 0.0, name: '2.2nF' };
+      break;
+    case 'cap_33n':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 33e-9, storedVoltage: 0.0, name: '33nF' };
+      break;
+    case 'cap_470p':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 470e-12, storedVoltage: 0.0, name: '470pF' };
+      break;
+    case 'cap_0u47':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 0.47e-6, storedVoltage: 0.0, name: '0.47µF' };
       break;
     case 'cap_22p':
       terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
@@ -564,6 +590,10 @@ function buildCardBody(comp) {
     case 'cap_1u': case 'cap_100u':
     case 'capacitor': case 'cap_100n': case 'cap_10u':
     case 'cap_22p': case 'cap_100p': case 'cap_4n7':
+    case 'cap_0u47':
+    case 'cap_470p':
+    case 'cap_2n2':
+    case 'cap_33n':
       const cLabel = comp.state.name || '1000µF';
       return `<div class="flex flex-col gap-1.5">
            <div class="flex justify-between"><span class="text-muted" style="font-size:9px">Value</span><span class="font-mono" style="font-size:10px">${cLabel}</span></div>
@@ -742,6 +772,20 @@ function buildCardBody(comp) {
            </div>
          </div>`;
 
+    case 'tone_generator':
+      return `<div class="flex flex-col gap-1.5" style="background:#090d16; border:1px solid #1e293b; border-radius:var(--radius); padding:8px;">
+           <div class="text-center font-mono text-xs text-teal font-bold" id="${id}-display" style="background:#020617; border:1px solid #111b27; border-radius:4px; padding:6px 0; color:#00ff88; text-shadow:0 0 4px rgba(0,255,136,0.3); letter-spacing:0.5px;">${comp.state.frequency.toFixed(1)} Hz</div>
+           <div class="flex justify-between items-center" style="margin-top:4px;">
+             <span class="text-muted" style="font-size:9px">Frequency (Hz)</span>
+             <input type="number" id="${id}-freq-text" min="1" max="20000" step="1" value="${comp.state.frequency}" style="width:65px; padding:2px; font-size:10px;" onchange="updateToneGenerator('${id}','frequency',this.value)">
+           </div>
+           <input type="range" id="${id}-freq-slide" min="1" max="5000" step="1" value="${comp.state.frequency}" style="width:100%; margin-top:2px;" oninput="updateToneGenerator('${id}','frequency',this.value)">
+           <div class="flex justify-between items-center" style="margin-top:2px;">
+             <span class="text-muted" style="font-size:9px">Amplitude (V)</span>
+             <input type="number" id="${id}-amp-text" min="0.0" max="12.0" step="0.1" value="${comp.state.amplitude}" style="width:65px; padding:2px; font-size:10px;" onchange="updateToneGenerator('${id}','amplitude',this.value)">
+           </div>
+         </div>`;
+
     case 'custom_load':
       return `<div class="flex flex-col gap-1.5">
            <div class="flex justify-between items-center"><span class="text-muted" style="font-size:9px">Req. Volts (V)</span>
@@ -867,8 +911,18 @@ function renderComponent(comp) {
     });
   }
 
+  // Prevent sliding, typing, and button clicks from bubbling up and triggering workspace panning
+  div.querySelectorAll('input, select, button').forEach(el => {
+    const stop = e => e.stopPropagation();
+    el.addEventListener('mousedown', stop);
+    el.addEventListener('touchstart', stop);
+    el.addEventListener('mousemove', stop);
+    el.addEventListener('touchmove', stop);
+  });
+  
   updateResistorBandsForComp(comp);
 }
+
 
 // ─── COMPONENT-SPECIFIC UPDATE HELPERS ────────────────────────────────────────
 function formatResistance(r) {
@@ -982,6 +1036,19 @@ function toggleDip(id, num) {
   comp.state['sw' + num] = !comp.state['sw' + num];
   const thumb = document.getElementById(`${id}-th${num}`);
   if (thumb) thumb.style.transform = `translateY(${comp.state['sw' + num] ? 0 : 20}px)`;
+}
+
+function updateToneGenerator(id, field, val) {
+  const comp = components.find(c => c.id === id);
+  if (!comp) return;
+  comp.state[field] = parseFloat(val) || 1.0;
+  
+  // Real-time UI updates
+  if (field === 'frequency') {
+    safeSetText(`${id}-display`, comp.state.frequency.toFixed(1) + ' Hz');
+  }
+  
+  saveWorkspaceToLocalStorage();
 }
 
 function updateCustomLoad(id, field, val) {
@@ -1185,18 +1252,21 @@ function startWire(e, termId) {
   if (isDragging) return;
   e.stopPropagation();
   e.preventDefault();
-
+  
   // Cancel any active wire if clicking same terminal twice
-  if (activeWireStart === termId) {
-    activeWireStart = null;
-    updateWires();
-    saveWorkspaceToLocalStorage();
-    return;
+  if (activeWireStart === termId) { 
+    activeWireStart = null; 
+    updateWires(); 
+    return; 
   }
 
-  // UE5-Style Detach: Check if this terminal already has a wire connected to it
-  const connectedWireIdx = wires.findIndex(w => w.from === termId || w.to === termId);
+  // Solder Joint Check: Find the component associated with this terminal
+  const comp = components.find(c => c.terminals.some(t => t.id === termId));
+  const isSolderJoint = comp && comp.type === 'solder_joint';
 
+  // UE5-Style Detach: Skip detach logic entirely if this is a solder joint terminal
+  const connectedWireIdx = isSolderJoint ? -1 : wires.findIndex(w => w.from === termId || w.to === termId);
+  
   if (connectedWireIdx !== -1) {
     const wire = wires[connectedWireIdx];
 
@@ -1562,15 +1632,16 @@ function toggleSidebar(panelId) {
 }
 
 // ─── TUTORIAL GUIDE ───────────────────────────────────────────────────────────
+// ─── TUTORIAL GUIDE ───────────────────────────────────────────────────────────
 const tutorialGuides = {
   lead_acid: {
-    title: "4.0V DIY Epsom-Salt Battery",
+    title: "1. DIY 4.0V Epsom-Salt Battery",
     steps: [
       { id: 'step-1', title: "Step 1: Placement", desc: "Place 1× USB Power Supply and 2× DIY Epsom-Salt Cells onto the workspace." },
-      { id: 'step-2', title: "Step 2: Series Connection", desc: "Connect Cell 1 (+) to Cell 2 (−) to build a 2-cell series battery." },
-      { id: 'step-3', title: "Step 3: Protection Resistor", desc: "Add a Resistor and set it to 81Ω to limit forming current." },
-      { id: 'step-4', title: "Step 4: Forming Charge", desc: "Connect USB 5V → Resistor A, Resistor B → Cell 2 (+), USB GND → Cell 1 (−). Wait for 100% forming." },
-      { id: 'step-5', title: "Step 5: Load Test", desc: "Disconnect charger. Set Resistor to 330Ω, add LED. Connect Cell 2 (+) → Resistor A → LED (+) → LED (−) → Cell 1 (−)." },
+      { id: 'step-2', title: "Step 2: Series Connection", desc: "Connect the Positive terminal (+) of Cell 1 to the Negative terminal (−) of Cell 2 with a blue wire to build a 2-cell series battery." },
+      { id: 'step-3', title: "Step 3: Protection Resistor", desc: "Place a Resistor on the board and set its value to 81Ω to limit the active forming charge current." },
+      { id: 'step-4', title: "Step 4: Forming Charge", desc: "Connect USB 5V (+) to Resistor Terminal A with a red wire, then Resistor Terminal B to Cell 2 (+). Connect USB GND (−) to Cell 1 (−) with a blue wire. Turn on the simulation and wait for forming to reach 100%." },
+      { id: 'step-5', title: "Step 5: Load Test", desc: "Disconnect the charger wires. Set the Resistor to 330Ω and add a Red LED. Connect Cell 2 (+) to Resistor Terminal A, Resistor Terminal B to LED Anode (+), and LED Cathode (−) back to Cell 1 (−)." },
     ],
     liveMetrics: () => {
       const cells = components.filter(c => c.type === 'diy_cell');
@@ -1586,15 +1657,15 @@ const tutorialGuides = {
     }
   },
   solar_charge: {
-    title: "12V Solar Charging Regulator",
+    title: "2. 12V Solar Charging Regulator",
     steps: [
-      { id: 'step-1', title: "Step 1: Place Components", desc: "Add 1× 12V Solar Panel, 1× Capacitor, 1× SPST Switch." },
-      { id: 'step-2', title: "Step 2: Wire Circuit", desc: "Solar (+) → Switch In, Switch Out → Cap (+), Solar (−) → Cap (−)." },
-      { id: 'step-3', title: "Step 3: Max Sunlight", desc: "Drag the Sunlight slider to 100% → 12.0V output." },
-      { id: 'step-4', title: "Step 4: Close Switch", desc: "Tap the SPST switch ON. Watch capacitor charge to 12V." },
+      { id: 'step-1', title: "Step 1: Place Components", desc: "Add 1× 12V Solar Panel, 1× 1000µF Capacitor, and 1× SPST Switch onto the workspace." },
+      { id: 'step-2', title: "Step 2: Wire Circuit", desc: "Connect Solar Panel (+) to Switch 'In' terminal with an orange wire, Switch 'Out' terminal to Capacitor (+) with an orange wire, and Solar Panel (−) directly to Capacitor (−) with a blue wire." },
+      { id: 'step-3', title: "Step 3: Max Sunlight", desc: "Select the Solar Panel and drag its Sunlight slider up to 100% to output a steady 12.0V." },
+      { id: 'step-4', title: "Step 4: Close Switch", desc: "Tap the SPST switch ON (Closed). Watch the capacitor charge up to 12V." },
     ],
     liveMetrics: () => {
-      const caps = components.filter(c => ['capacitor', 'cap_100n', 'cap_10u'].includes(c.type));
+      const caps = components.filter(c => ['capacitor', 'cap_100n', 'cap_10u', 'cap_0u47', 'cap_2n2', 'cap_33n'].includes(c.type));
       const solar = components.find(c => c.type === 'solar_panel');
       let html = '';
       if (solar) html += `<div class="metric-row"><span>Solar Voltage</span><span class="metric-val">${solar.state.voltage.toFixed(2)} V</span></div>`;
@@ -1605,16 +1676,16 @@ const tutorialGuides = {
     }
   },
   class_a_amp: {
-    title: "Class-A Common-Emitter Amplifier",
+    title: "3. Class-A BJT Amplifier",
     steps: [
-      { id: 'step-1', title: "Step 1: Place Parts", desc: "Add Signal Generator, NPN Transistor, 2× Resistors, Multimeter." },
-      { id: 'step-2', title: "Step 2: Pull-Up Network", desc: "USB 5V → R1-A, R1-B → Transistor C. Emitter (E) → USB GND." },
-      { id: 'step-3', title: "Step 3: Signal Input", desc: "Signal Gen (+) → Base (B). Signal Gen (−) → USB GND." },
-      { id: 'step-4', title: "Step 4: Measure Output", desc: "DMM Red → Collector (C). DMM Black → GND. Set DMM to V." },
-      { id: 'step-5', title: "Step 5: Observe Gain", desc: "Set R1 to 1kΩ. Collector swings inverse to Base — signal inversion!" },
+      { id: 'step-1', title: "Step 1: Place Parts", desc: "Add 1× USB 5V, 1× Signal Generator, 1× NPN Transistor (C1815), 1× 1kΩ Resistor, and 1× Multimeter." },
+      { id: 'step-2', title: "Step 2: Pull-Up Network", desc: "Connect USB 5V (+) to Resistor Terminal A, Resistor Terminal B to Transistor Collector (C), and Transistor Emitter (E) directly to USB GND (−) using a blue wire." },
+      { id: 'step-3', title: "Step 3: Signal Input", desc: "Connect Signal Generator (+) to Transistor Base (B) with an orange wire, and Signal Generator (−) to USB GND (−) with a blue wire." },
+      { id: 'step-4', title: "Step 4: Measure Output", desc: "Connect Multimeter Red (VΩ+) to Transistor Collector (C), and Multimeter Black (COM-) to USB GND (−). Set the Multimeter to Voltage (V) mode." },
+      { id: 'step-5', title: "Step 5: Observe Gain", desc: "Set R1 to 1kΩ. Turn simulation ON and observe the output voltage at the Collector swinging inversely to the input signal — classic signal inversion!" },
     ],
     liveMetrics: () => {
-      const npn = components.find(c => c.type === 'npn_transistor');
+      const npn = components.find(c => ['npn_transistor', 'npn_bc547', 'npn_2n3904', 'npn_c2001', 'npn_c1815'].includes(c.type));
       const gen = components.find(c => c.type === 'signal_generator');
       let html = '';
       if (gen) html += `<div class="metric-row"><span>Signal In</span><span class="metric-val" style="color:var(--purple)">${(gen.state.outputVoltage || 0).toFixed(2)} V</span></div>`;
@@ -1626,17 +1697,17 @@ const tutorialGuides = {
         html += `<div class="metric-row"><span>Vc (Collector)</span><span class="metric-val text-rose">${vC.toFixed(2)} V</span></div>`;
         html += `<div class="metric-row"><span>Ve (Emitter)</span><span class="metric-val">${vE.toFixed(2)} V</span></div>`;
         html += `<div class="metric-row"><span>Ib</span><span class="metric-val">${((npn.state.current_b || 0) * 1e6).toFixed(1)} µA</span></div>`;
-      } else html += '<div class="metric-row" style="color:var(--text-muted)">No NPN detected.</div>';
+      } else html += '<div class="metric-row" style="color:var(--text-muted)">No NPN BJT detected.</div>';
       return html;
     }
   },
   voltage_divider: {
-    title: "Voltage Divider + LED",
+    title: "4. Voltage Divider + LED",
     steps: [
-      { id: 'step-1', title: "Step 1: Place Parts", desc: "Add USB 5V Supply, 2× Resistors, 1× LED Red." },
-      { id: 'step-2', title: "Step 2: Divider", desc: "USB 5V → R1-A, R1-B → R2-A, R2-B → GND." },
-      { id: 'step-3', title: "Step 3: Set Values", desc: "Set R1=220Ω. The midpoint (R1-B/R2-A) ≈ 2.5V." },
-      { id: 'step-4', title: "Step 4: Light the LED", desc: "R1-B → LED Anode (+), LED Cathode (−) → R2-A." },
+      { id: 'step-1', title: "Step 1: Place Parts", desc: "Add 1× USB 5V, 2× Resistors (R1 and R2), and 1× Red LED onto the workspace." },
+      { id: 'step-2', title: "Step 2: Divider", desc: "Connect USB 5V (+) to R1-A, R1-B to R2-A, and R2-B to USB GND (−) to form a series voltage divider path." },
+      { id: 'step-3', title: "Step 3: Set Values", desc: "Set R1 to 220Ω, and set R2 to 220Ω. The midpoint voltage (R1-B/R2-A junction) will divide the 5V rail exactly down to 2.50V." },
+      { id: 'step-4', title: "Step 4: Light the LED", desc: "Connect R1-B to LED Anode (+), and LED Cathode (−) to R2-A. The LED will illuminate under a controlled current." },
     ],
     liveMetrics: () => {
       const rs = components.filter(c => c.type.startsWith('resistor'));
@@ -1647,8 +1718,77 @@ const tutorialGuides = {
       return html || '<div class="metric-row" style="color:var(--text-muted)">No components.</div>';
     }
   },
+  voltage_reg: {
+    title: "5. LM7805 5V Regulator",
+    steps: [
+      { id: 'step-1', title: "Step 1: Place Parts", desc: "Place 1× 12V Bench PSU, 1× LM7805 Regulator, 1× Solder Joint (Common GND), and 1× Multimeter." },
+      { id: 'step-2', title: "Step 2: Input Power", desc: "Connect Bench PSU (+) to LM7805 IN terminal with a red wire, and Bench PSU (GND) to your Solder Joint with a blue wire." },
+      { id: 'step-3', title: "Step 3: Ground LM7805", desc: "Connect the LM7805 GND terminal directly to your Solder Joint (Common GND) with a blue wire." },
+      { id: 'step-4', title: "Step 4: Measure", desc: "Connect Multimeter Red (VΩ+) to LM7805 OUT terminal, and Multimeter Black (COM-) to your Solder Joint. Turn PSU on to observe a steady 5.00V output!" }
+    ],
+    liveMetrics: () => {
+      const reg = components.find(c => c.type === 'lm7805');
+      let html = '';
+      if (reg) {
+        const vIn = reg.terminals.find(t => t.label === 'IN')?.voltage || 0;
+        const vOut = reg.terminals.find(t => t.label === 'OUT')?.voltage || 0;
+        html += `<div class="metric-row"><span>Regulator Input</span><span class="metric-val text-rose">${vIn.toFixed(2)} V</span></div>`;
+        html += `<div class="metric-row"><span>Regulated Output</span><span class="metric-val text-teal" style="font-weight:700;">${vOut.toFixed(2)} V</span></div>`;
+      } else html += '<div class="metric-row" style="color:var(--text-muted)">No LM7805 Regulator detected.</div>';
+      return html;
+    }
+  },
+  led_blink: {
+    title: "6. NE555 LED Blinker",
+    steps: [
+      { id: 'step-1', title: "Step 1: Core Parts", desc: "Place 1× USB 5V, 1× NE555 Timer, 1× 10µF Capacitor, 2× Resistors (R1 and R2), and 1× Red LED." },
+      { id: 'step-2', title: "Step 2: Astable Wiring", desc: "Connect NE555 Trigger (TRG) directly to Threshold (THR). Connect Vcc to USB 5V (+) and GND to USB GND (−). Wire charging resistors in series to the threshold pin." },
+      { id: 'step-3', title: "Step 3: Output Load", desc: "Connect NE555 OUT to LED Anode (+), and LED Cathode (−) through a resistor to USB GND (−). Watch the LED pulse!" }
+    ],
+    liveMetrics: () => {
+      const timer = components.find(c => c.type === 'ne555');
+      let html = '';
+      if (timer) {
+        html += `<div class="metric-row"><span>Timer Out Status</span><span class="metric-val text-sky" style="font-weight:700;">${timer.state.out ? 'HIGH (5V)' : 'LOW (0V)'}</span></div>`;
+        html += `<div class="metric-row"><span>Timer Cap V</span><span class="metric-val text-teal">${(timer.state.capV || 0).toFixed(2)} V</span></div>`;
+      } else html += '<div class="metric-row" style="color:var(--text-muted)">No NE555 Timer detected.</div>';
+      return html;
+    }
+  },
+  spectrum_analyzer: {
+    title: "7. 3-Band Spectrum Analyzer",
+    steps: [
+      { id: 'step-1', title: "Step 1: Frame Rails", desc: "Place a 12V Bench PSU, a Tone Generator, and three Solder Joints (Label them: Common Ground, Preamp Output, and VCC Rail). Connect Bench PSU (GND) to the Ground Solder Joint, and Bench PSU (+) to the VCC Rail Joint." },
+      { id: 'step-2', title: "Step 2: Pre-Amplifier", desc: "Place a C1815 NPN Transistor, 10kΩ and 33kΩ Resistors, and a 10µF Capacitor. Wire Tone Generator (+) to Capacitor (+) terminal, Capacitor (−) to Transistor Base (B). Connect a 33kΩ resistor from Base to VCC, and a 10kΩ resistor from Base to GND." },
+      { id: 'step-3', title: "Step 3: Bass Channel", desc: "Form a Low-Pass Filter (LPF) using a 33nF Capacitor and 10kΩ Resistor. Wire the capacitor from your preamp Collector to a new C1815 driver Base (B), and pull down with the resistor to GND. Connect the LED column's Cathode (−) to this driver's Collector (C)." },
+      { id: 'step-4', title: "Step 4: Mid Channel", desc: "Build a Band-Pass Filter (BPF) using 4.7nF and 2.2nF Capacitors with a 4.7kΩ Resistor. Wire the capacitors in series to isolate mids, route to a C1815 driver Base (B), and connect its Collector (C) to the Mid LED column Cathode (−)." },
+      { id: 'step-5', title: "Step 5: Treble Channel", desc: "Create a High-Pass Filter (HPF) using a 470pF Capacitor and 1kΩ Resistor. Wire the capacitor from the preamp Collector to the Base (B) of a C1815 driver, pull down with the resistor to GND, and connect its Collector (C) to the Treble LED column Cathode (−)." },
+      { id: 'step-6', title: "Step 6: Output Array", desc: "Connect the Anodes (A+) of all three LED columns to your +12V VCC Rail. Connect all three driver Emitter (E) terminals directly to your Common Ground Solder Joint." },
+      { id: 'step-7', title: "Step 7: Audio Test", desc: "Switch the circuit ON. Vary the Tone Generator frequency: Lows (20-150Hz) trigger Bass; Mids (400-2kHz) trigger Midrange; Highs (4k-15kHz) trigger Treble!" }
+    ],
+    liveMetrics: () => {
+      const psu = components.find(c => c.type === 'bench_psu');
+      const gen = components.find(c => c.type === 'tone_generator');
+      const psuV = psu ? psu.state.voltage || 0.0 : 0.0;
+      const genF = gen ? gen.state.frequency || 0.0 : 0.0;
+      
+      let bandText = "OFFLINE";
+      if (genF > 0) {
+        if (genF >= 20 && genF <= 250) bandText = "BASS ACTIVE (LPF Channel)";
+        else if (genF > 250 && genF <= 3000) bandText = "MIDRANGE ACTIVE (BPF Channel)";
+        else if (genF > 3000 && genF <= 20000) bandText = "TREBLE ACTIVE (HPF Channel)";
+        else bandText = "OUT OF SPECTRUM";
+      }
+
+      return `
+        <div class="metric-row"><span>Rail Voltage</span><span class="metric-val text-teal">${psuV.toFixed(1)} V</span></div>
+        <div class="metric-row"><span>Audio Frequency</span><span class="metric-val text-sky">${genF.toFixed(0)} Hz</span></div>
+        <div class="metric-row"><span>Active Channel</span><span class="metric-val text-emerald" style="font-weight:700;">${bandText}</span></div>
+      `;
+    }
+  },
   custom: {
-    title: "Custom Sandbox (Free Play)",
+    title: "8. Custom Sandbox (Free Play)",
     steps: [
       { id: 'step-1', title: "Sandbox Active", desc: "Build any circuit you like! Active connections and loops will print out live analytics down below." }
     ],
@@ -1880,6 +2020,17 @@ function getCompactGraphicHTML(comp) {
     return `
       <svg viewBox="0 0 50 50" width="48" height="48">
         <path d="M 12 25 Q 16 12 20 25 Q 24 12 28 25 Q 32 12 36 25" fill="none" stroke="#ea580c" stroke-width="2.5" stroke-linecap="round" />
+      </svg>
+    `;
+  }
+
+  // 13.4 Tone Waveform Generators
+  if (type === 'tone_generator') {
+    return `
+      <svg viewBox="0 0 50 50" width="48" height="48">
+        <rect x="10" y="10" width="30" height="30" rx="6" fill="#090d16" stroke="#00ff88" stroke-width="2" />
+        <path d="M 15 25 Q 20 15, 25 25 T 35 25" fill="none" stroke="#00ff88" stroke-width="2" stroke-linecap="round" />
+        <text x="25" y="44" fill="var(--text-muted)" font-size="5" font-family="monospace" text-anchor="middle">TONE GEN</text>
       </svg>
     `;
   }
@@ -2336,49 +2487,177 @@ function handleThreeFingerTouchEnd(e) {
   }
 }
 
-// ─── CLIPBOARD CUT, COPY, & PASTE ENGINES ──────────────────────────────────────
-let clipboardComponentType = null;
+// ─── CLIPBOARD SUB-CIRCUIT CLONING ENGINES ─────────────────────────────────────
+let clipboardSnapshot = null;
 
 function executeCut() {
-  if (!selectedComponentId) {
-    showToast('Select a component card to Cut', 'warn');
+  // Collect target IDs (supports both multi-selection and single-card selection)
+  const targetIds = selectedComponents.size > 0 ? new Set(selectedComponents) :
+    selectedComponentId ? new Set([selectedComponentId]) : null;
+
+  if (!targetIds || targetIds.size === 0) {
+    showToast('Select components to Cut', 'warn');
     return;
   }
-  const comp = components.find(c => c.id === selectedComponentId);
-  if (comp) {
-    clipboardComponentType = comp.type;
-    removeComponent(selectedComponentId); // Safely deletes from board
-    selectedComponentId = null;
-    updateWorkspaceHUD();
-    showToast(`Cut ${comp.type.replace(/_/g, ' ')} to clipboard`, 'info');
-  }
+
+  // Create a snapshot copy of the selection group before deleting
+  executeCopy();
+
+  // Safely delete selected cards from the board
+  targetIds.forEach(id => removeComponent(id));
+
+  selectedComponents.clear();
+  selectedComponentId = null;
+  updateWorkspaceHUD();
+  showToast('Selection cut to clipboard', 'info');
 }
 
 function executeCopy() {
-  if (!selectedComponentId) {
-    showToast('Select a component card to Copy', 'warn');
+  const targetIds = selectedComponents.size > 0 ? new Set(selectedComponents) :
+    selectedComponentId ? new Set([selectedComponentId]) : null;
+
+  if (!targetIds || targetIds.size === 0) {
+    showToast('Select components to Copy', 'warn');
     return;
   }
-  const comp = components.find(c => c.id === selectedComponentId);
-  if (comp) {
-    clipboardComponentType = comp.type;
-    showToast(`Copied ${comp.type.replace(/_/g, ' ')} to clipboard`, 'info');
-  }
+
+  // 1. Determine the relative origin of the selected group
+  let minX = Infinity, minY = Infinity;
+  targetIds.forEach(id => {
+    const comp = components.find(c => c.id === id);
+    if (comp) {
+      minX = Math.min(minX, comp.x);
+      minY = Math.min(minY, comp.y);
+    }
+  });
+
+  // 2. Clone component states and relative positions
+  const copiedComps = [];
+  targetIds.forEach(id => {
+    const c = components.find(comp => comp.id === id);
+    if (c) {
+      copiedComps.push({
+        type: c.type,
+        x: c.x - minX, // Offset relative to the group origin
+        y: c.y - minY,
+        rotation: c.rotation || 0,
+        state: JSON.parse(JSON.stringify(c.state)), // Deep clone parameters
+        oldId: c.id
+      });
+    }
+  });
+
+  // 3. Clone wires connecting *exclusively* between these copied components
+  const copiedWires = [];
+  wires.forEach(w => {
+    const compFrom = components.find(c => c.terminals.some(t => t.id === w.from));
+    const compTo = components.find(c => c.terminals.some(t => t.id === w.to));
+    if (compFrom && compTo && targetIds.has(compFrom.id) && targetIds.has(compTo.id)) {
+      const termFrom = compFrom.terminals.find(t => t.id === w.from);
+      const termTo = compTo.terminals.find(t => t.id === w.to);
+      if (termFrom && termTo) {
+        copiedWires.push({
+          fromCompOldId: compFrom.id,
+          fromTermLabel: termFrom.label,
+          toCompOldId: compTo.id,
+          toTermLabel: termTo.label,
+          color: w.color
+        });
+      }
+    }
+  });
+
+  // Store entire sub-circuit package in clipboard
+  clipboardSnapshot = {
+    components: copiedComps,
+    wires: copiedWires
+  };
+
+  showToast(`Copied ${copiedComps.length} component(s) to clipboard`, 'info');
 }
 
 function executePaste() {
-  if (!clipboardComponentType) {
+  if (!clipboardSnapshot || clipboardSnapshot.components.length === 0) {
     showToast('Clipboard is empty', 'warn');
     return;
   }
 
-  // Paste exactly at the user's hovering mouse pointer or touch point
-  const pasteX = Math.max(10, mousePosition.x - 96);
-  const pasteY = Math.max(10, mousePosition.y - 50);
+  const idMap = {}; // Maps old component IDs to the new pasted IDs for re-wiring
+  const newlyPastedIds = new Set();
+  const gridSize = 24;
 
-  // Spawns a brand-new, non-mirrored default instance of that part
-  addComponent(clipboardComponentType, pasteX, pasteY);
-  showToast(`Pasted fresh ${clipboardComponentType.replace(/_/g, ' ')} ✓`, 'success');
+  // Clear active selection states to focus on the newly pasted block
+  selectedComponents.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('selected');
+  });
+  selectedComponents.clear();
+
+  // 1. Rebuild and render components with exact cloned states
+  clipboardSnapshot.components.forEach(c => {
+    const newId = c.type + '_' + Math.random().toString(36).substr(2, 9);
+    idMap[c.oldId] = newId;
+    newlyPastedIds.add(newId);
+
+    // Snap coordinate placement to the nearest 24px grid dot relative to mouse pointer
+    const nx = Math.round((mousePosition.x + c.x) / gridSize) * gridSize;
+    const ny = Math.round((mousePosition.y + c.y) / gridSize) * gridSize;
+
+    const { terminals, state } = buildComponent(c.type, newId, components);
+    const mergedState = JSON.parse(JSON.stringify(c.state)); // Retain configurations
+
+    const newComp = {
+      id: newId,
+      type: c.type,
+      x: nx,
+      y: ny,
+      rotation: c.rotation || 0,
+      terminals,
+      state: mergedState
+    };
+
+    components.push(newComp);
+    renderComponent(newComp);
+  });
+
+  // 2. Re-route and establish wire connections matching the relative port labels
+  clipboardSnapshot.wires.forEach(w => {
+    const newFromId = idMap[w.fromCompOldId];
+    const newToId = idMap[w.toCompOldId];
+    if (newFromId && newToId) {
+      const compFrom = components.find(c => c.id === newFromId);
+      const compTo = components.find(c => c.id === newToId);
+      if (compFrom && compTo) {
+        const termFrom = compFrom.terminals.find(t => t.label === w.fromTermLabel);
+        const termTo = compTo.terminals.find(t => t.label === w.toTermLabel);
+        if (termFrom && termTo) {
+          wires.push({
+            from: termFrom.id,
+            to: termTo.id,
+            color: w.color
+          });
+        }
+      }
+    }
+  });
+
+  // 3. Highlight the newly pasted circuit block as the active selection
+  newlyPastedIds.forEach(id => {
+    selectedComponents.add(id);
+    const el = document.getElementById(id);
+    if (el) el.classList.add('selected');
+  });
+
+  if (newlyPastedIds.size === 1) {
+    selectedComponentId = Array.from(newlyPastedIds)[0];
+  } else {
+    selectedComponentId = null;
+  }
+
+  updateWires();
+  updateWorkspaceHUD();
+  saveWorkspaceToLocalStorage(); // Auto-save changes
+  showToast(`Pasted sub-circuit block ✓`, 'success');
 }
 
 function getCustomCircuitMetrics() {
@@ -2478,6 +2757,7 @@ function updateStepStyle(id, passed, locked = false) {
 
 function evaluateActiveTutorial(nodeMap) {
   const steps = tutorialGuides[currentTutorial].steps;
+  
   if (currentTutorial === 'lead_acid') {
     const cells = components.filter(c => c.type === 'diy_cell');
     const pwr = components.find(c => c.type === 'usb_power');
@@ -2488,8 +2768,10 @@ function evaluateActiveTutorial(nodeMap) {
     if (!s1) { ['step-2', 'step-3', 'step-4', 'step-5'].forEach(s => updateStepStyle(s, false, true)); return; }
     let series = false;
     if (cells.length >= 2) {
-      const c1p = nodeMap[cells[0].terminals.find(t => t.label === '+')?.id], c1n = nodeMap[cells[0].terminals.find(t => t.label === '-')?.id];
-      const c2p = nodeMap[cells[1].terminals.find(t => t.label === '+')?.id], c2n = nodeMap[cells[1].terminals.find(t => t.label === '-')?.id];
+      const c1p = nodeMap[cells[0].terminals.find(t => t.label === '+')?.id];
+      const c1n = nodeMap[cells[0].terminals.find(t => t.label === '-')?.id];
+      const c2p = nodeMap[cells[1].terminals.find(t => t.label === '+')?.id];
+      const c2n = nodeMap[cells[1].terminals.find(t => t.label === '-')?.id];
       if ((c1n === c2p && c1n !== undefined) || (c2n === c1p && c2n !== undefined)) series = true;
     }
     updateStepStyle('step-2', series, !s1);
@@ -2505,7 +2787,7 @@ function evaluateActiveTutorial(nodeMap) {
   }
   else if (currentTutorial === 'solar_charge') {
     const solar = components.find(c => c.type === 'solar_panel');
-    const caps = components.filter(c => ['capacitor', 'cap_100n', 'cap_10u'].includes(c.type));
+    const caps = components.filter(c => ['capacitor', 'cap_100n', 'cap_10u', 'cap_0u47', 'cap_2n2', 'cap_33n'].includes(c.type));
     const sw = components.filter(c => c.type === 'spst_switch');
     const s1 = !!(solar && caps.length > 0 && sw.length > 0);
     updateStepStyle('step-1', s1);
@@ -2530,7 +2812,7 @@ function evaluateActiveTutorial(nodeMap) {
   }
   else if (currentTutorial === 'class_a_amp') {
     const gen = components.find(c => c.type === 'signal_generator');
-    const npn = components.find(c => c.type === 'npn_transistor');
+    const npn = components.find(c => ['npn_transistor', 'npn_bc547', 'npn_2n3904', 'npn_c2001', 'npn_c1815'].includes(c.type));
     const rs = components.filter(c => c.type.startsWith('resistor'));
     const mm = components.filter(c => c.type === 'multimeter');
     const pwr = components.find(c => c.type === 'usb_power');
@@ -2572,6 +2854,150 @@ function evaluateActiveTutorial(nodeMap) {
     const vC = npn.terminals.find(t => t.label === 'C')?.voltage || 0;
     const s5 = rs[0].state.resistance >= 800 && rs[0].state.resistance <= 1200 && vC > 0.5 && vC < 4.5;
     updateStepStyle('step-5', s5, !s4);
+  }
+  else if (currentTutorial === 'voltage_divider') {
+    const pwr = components.find(c => c.type === 'usb_power');
+    const rs = components.filter(c => c.type.startsWith('resistor'));
+    const leds = components.filter(c => c.type.startsWith('led'));
+    const s1 = !!(pwr && rs.length >= 2 && leds.length >= 1);
+    updateStepStyle('step-1', s1);
+    if (!s1) { ['step-2', 'step-3', 'step-4'].forEach(s => updateStepStyle(s, false, true)); return; }
+    
+    let s2 = false;
+    if (pwr && rs.length >= 2) {
+      const v5 = nodeMap[pwr.terminals.find(t => t.label === '5V')?.id];
+      const vg = nodeMap[pwr.terminals.find(t => t.label === 'GND')?.id];
+      const r1a = nodeMap[rs[0].terminals.find(t => t.label === 'A')?.id];
+      const r1b = nodeMap[rs[0].terminals.find(t => t.label === 'B')?.id];
+      const r2a = nodeMap[rs[1].terminals.find(t => t.label === 'A')?.id];
+      const r2b = nodeMap[rs[1].terminals.find(t => t.label === 'B')?.id];
+      
+      if (((v5 === r1a && r1b === r2a && r2b === vg) || (v5 === r1b && r1a === r2a && r2b === vg) ||
+           (v5 === r1a && r1b === r2b && r2a === vg) || (v5 === r1b && r1a === r2b && r2a === vg)) && v5 !== undefined) {
+        s2 = true;
+      }
+    }
+    updateStepStyle('step-2', s2, !s1);
+    if (!s2) { ['step-3', 'step-4'].forEach(s => updateStepStyle(s, false, true)); return; }
+
+    const s3 = rs.some(r => Math.abs(r.state.resistance - 220) < 20);
+    updateStepStyle('step-3', s3, !s2);
+    if (!s3) { updateStepStyle('step-4', false, true); return; }
+
+    const s4 = leds.some(l => l.state.current > 0.001);
+    updateStepStyle('step-4', s4, !s3);
+
+  } else if (currentTutorial === 'voltage_reg') {
+    const psu = components.find(c => c.type === 'bench_psu');
+    const reg = components.find(c => c.type === 'lm7805');
+    const joint = components.find(c => c.type === 'solder_joint');
+    const s1 = !!(psu && reg && joint);
+    updateStepStyle('step-1', s1);
+    if (!s1) { ['step-2', 'step-3', 'step-4'].forEach(s => updateStepStyle(s, false, true)); return; }
+
+    let s2 = false;
+    if (psu && reg && joint) {
+      const pp = nodeMap[psu.terminals.find(t => t.label === '+')?.id];
+      const pg = nodeMap[psu.terminals.find(t => t.label === 'GND')?.id];
+      const ri = nodeMap[reg.terminals.find(t => t.label === 'IN')?.id];
+      const jn = nodeMap[joint.terminals[0]?.id];
+      if (pp === ri && pg === jn && pp !== undefined) s2 = true;
+    }
+    updateStepStyle('step-2', s2, !s1);
+    if (!s2) { ['step-3', 'step-4'].forEach(s => updateStepStyle(s, false, true)); return; }
+
+    let s3 = false;
+    if (reg && joint) {
+      const rg = nodeMap[reg.terminals.find(t => t.label === 'GND')?.id];
+      const jn = nodeMap[joint.terminals[0]?.id];
+      if (rg === jn && rg !== undefined) s3 = true;
+    }
+    updateStepStyle('step-3', s3, !s2);
+    if (!s3) { updateStepStyle('step-4', false, true); return; }
+
+    let s4 = false;
+    const dmm = components.find(c => c.type === 'multimeter');
+    if (reg && joint && dmm) {
+      const ro = nodeMap[reg.terminals.find(t => t.label === 'OUT')?.id];
+      const jn = nodeMap[joint.terminals[0]?.id];
+      const mr = nodeMap[mm[0]?.terminals.find(t => t.label === 'VΩ+')?.id];
+      const mb = nodeMap[mm[0]?.terminals.find(t => t.label === 'COM-')?.id];
+      if (mr === ro && mb === jn && mr !== undefined && dmm.state.mode === 'voltage' && Math.abs(dmm.state.value - 5.0) < 0.2) s4 = true;
+    }
+    updateStepStyle('step-4', s4, !s3);
+
+  } else if (currentTutorial === 'led_blink') {
+    const timer = components.find(c => c.type === 'ne555');
+    const cap = components.find(c => ['capacitor', 'cap_10u', 'cap_0u47', 'cap_2n2', 'cap_33n'].includes(c.type));
+    const rs = components.filter(c => c.type.startsWith('resistor'));
+    const leds = components.filter(c => c.type.startsWith('led'));
+    const s1 = !!(timer && cap && rs.length >= 2 && leds.length >= 1);
+    updateStepStyle('step-1', s1);
+    if (!s1) { ['step-2', 'step-3'].forEach(s => updateStepStyle(s, false, true)); return; }
+
+    let s2 = false;
+    if (timer) {
+      const trg = nodeMap[timer.terminals.find(t => t.label === 'TRG')?.id];
+      const thr = nodeMap[timer.terminals.find(t => t.label === 'THR')?.id];
+      if (trg === thr && trg !== undefined) s2 = true;
+    }
+    updateStepStyle('step-2', s2, !s1);
+    if (!s2) { updateStepStyle('step-3', false, true); return; }
+
+    let s3 = false;
+    if (timer && leds.length) {
+      const out = nodeMap[timer.terminals.find(t => t.label === 'OUT')?.id];
+      const la = nodeMap[leds[0].terminals.find(t => t.label === 'A+')?.id];
+      if (out === la && out !== undefined) s3 = true;
+    }
+    updateStepStyle('step-3', s3, !s2);
+
+  } else if (currentTutorial === 'spectrum_analyzer') {
+    const psu = components.find(c => c.type === 'bench_psu');
+    const gen = components.find(c => c.type === 'tone_generator');
+    const joints = components.filter(c => c.type === 'solder_joint');
+    const s1 = !!(psu && gen && joints.length >= 3);
+    updateStepStyle('step-1', s1);
+    if (!s1) { ['step-2', 'step-3', 'step-4', 'step-5', 'step-6', 'step-7'].forEach(s => updateStepStyle(s, false, true)); return; }
+
+    const hasPre = components.some(c => ['npn_c1815', 'npn_transistor', 'npn_2n3904', 'npn_c2001'].includes(c.type));
+    const hasCap = components.some(c => ['cap_10u', 'capacitor'].includes(c.type));
+    const s2 = s1 && hasPre && hasCap;
+    updateStepStyle('step-2', s2, !s1);
+    if (!s2) { ['step-3', 'step-4', 'step-5', 'step-6', 'step-7'].forEach(s => updateStepStyle(s, false, true)); return; }
+
+    const s3 = s2 && components.some(c => c.type === 'cap_33n');
+    updateStepStyle('step-3', s3, !s2);
+    if (!s3) { ['step-4', 'step-5', 'step-6', 'step-7'].forEach(s => updateStepStyle(s, false, true)); return; }
+
+    const s4 = s3 && components.some(c => c.type === 'cap_4n7') && components.some(c => c.type === 'cap_2n2');
+    updateStepStyle('step-4', s4, !s3);
+    if (!s4) { ['step-5', 'step-6', 'step-7'].forEach(s => updateStepStyle(s, false, true)); return; }
+
+    const s5 = s4 && components.some(c => c.type === 'cap_470p');
+    updateStepStyle('step-5', s5, !s4);
+    if (!s5) { ['step-6', 'step-7'].forEach(s => updateStepStyle(s, false, true)); return; }
+
+    const leds = components.filter(c => c.type.startsWith('led'));
+    const s6 = s5 && leds.length >= 3;
+    updateStepStyle('step-6', s6, !s5);
+    if (!s6) { updateStepStyle('step-7', false, true); return; }
+
+    const s7 = s6; // test complete
+    updateStepStyle('step-7', s7, !s6);
+  }
+}
+
+// High-performance DOM helper to prevent layout thrashing
+function safeSetText(id, text, color) {
+  const el = document.getElementById(id);
+  if (el) {
+    if (el.textContent !== text) {
+      el.textContent = text;
+    }
+    if (color && el.style.color !== color) {
+      el.style.color = color;
+    }
   }
 }
 
@@ -2622,7 +3048,7 @@ function simulationTick() {
   if (lastVoltages && lastVoltages.length === nodeCount) V.forEach((_, i) => { V[i] = lastVoltages[i]; });
   V[gndIdx] = 0.0;
 
-  // Iterative nodal analysis (Gauss-Seidel)
+  // Iterative nodal analysis (Gauss-Seidel) with early convergence exit optimization
   for (let iter = 0; iter < 200; iter++) {
     const nV = [...V];
     for (let i = 0; i < nodeCount; i++) {
@@ -2642,6 +3068,14 @@ function simulationTick() {
         };
 
         if (type === 'usb_power') twoPort(T('5V'), T('GND'), 5.0, 0.2);
+        else if (type === 'tone_generator') {
+          const dt = 0.1;
+          state.phase = (state.phase || 0) + 2 * Math.PI * state.frequency * dt;
+          if (state.phase > 2 * Math.PI) state.phase -= 2 * Math.PI; // Keep phase bound to avoid overflow
+          state.outputVoltage = Math.sin(state.phase) * state.amplitude;
+
+          twoPort(T('+'), T('-'), state.outputVoltage, 50); // 50 ohm source impedance
+        }
         else if (type === 'bench_psu') twoPort(T('+'), T('GND'), state.voltage, 0.5);
         else if (type === 'battery_9v' || type === 'battery_aa' || type === 'battery_cr2032' || type === 'battery_lipo' || type === 'battery_lead' || type === 'battery_18650' || type === 'battery_aaa' || type === 'battery_d' || type === 'lemon_battery')
           twoPort(T('+'), T('-'), getBatteryEMF(type, state.charge), state.internalR);
@@ -2660,6 +3094,19 @@ function simulationTick() {
           const cellV = fr * (1.5 + 0.5 * cr);
           const Rint = 150 - 146 * fr;
           twoPort(T('+'), T('-'), cellV, Rint);
+        }
+        else if (type === 'tone_generator') {
+          const termA = terminals[0]?.id;
+          const termB = terminals[1]?.id;
+          const isConnected = wires.some(w => w.from === termA || w.to === termA) &&
+                              wires.some(w => w.from === termB || w.to === termB);
+          
+          if (isConnected) {
+            twoPort(T('+'), T('-'), state.outputVoltage, 50);
+          } else {
+            // Ground floating terminals to prevent calculation fluctuations
+            twoPort(T('+'), T('-'), 0.0, 1e8);
+          }
         }
         else if (type === 'custom_load') {
           if (state.blown) return;
@@ -2681,7 +3128,7 @@ function simulationTick() {
           if (nA !== undefined && nW !== undefined) { const G = 1 / Raw; if (nA === i) { sumG += G; sumGV += G * V[nW]; } if (nW === i) { sumG += G; sumGV += G * V[nA]; } }
           if (nW !== undefined && nB !== undefined) { const G = 1 / Rwb; if (nW === i) { sumG += G; sumGV += G * V[nB]; } if (nB === i) { sumG += G; sumGV += G * V[nW]; } }
         }
-        else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7') {
+        else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7' || type === 'cap_0u47' || type === 'cap_470p' || type === 'cap_2n2' || type === 'cap_33n') {
           const C = state.capacitance, dt = 0.1;
           const Req = dt / C; const G = 1 / Req; const capV = state.storedVoltage;
           twoPort(T('+'), T('-'), capV, Req);
@@ -2891,9 +3338,23 @@ function simulationTick() {
     if (type === 'signal_generator') {
       const el = document.getElementById(`${id}-disp`); if (el) el.innerText = state.outputVoltage.toFixed(2) + ' V';
     }
-    else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7') {
+    else if (type === 'tone_generator') {
+      safeSetText(`${id}-display`, state.frequency.toFixed(1) + ' Hz');
+      
+      // Update inputs dynamically without interrupting active typing/focus states
+      const slide = document.getElementById(`${id}-freq-slide`);
+      if (slide && document.activeElement !== slide) slide.value = state.frequency;
+      
+      const text = document.getElementById(`${id}-freq-text`);
+      if (text && document.activeElement !== text) text.value = state.frequency;
+      
+      const amp = document.getElementById(`${id}-amp-text`);
+      if (amp && document.activeElement !== amp) amp.value = state.amplitude;
+    }
+    else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7' || type === 'cap_0u47' || type === 'cap_470p' || type === 'cap_2n2' || type === 'cap_33n') {
       const vp = tv('+'), vn = tv('-');
 
+      // Calibrate integration math so the capacitor state matches the transient step solution
       state.storedVoltage = vp - vn;
       state.storedVoltage = Math.max(-50, Math.min(50, state.storedVoltage));
 

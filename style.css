@@ -703,6 +703,20 @@ body {
   transform: translateY(-50%) scale(0.85) !important;
 }
 
+/* 4.4 Tone Generator (+ Left, - Right) */
+.compact-view .comp-card[data-type="tone_generator"] .term-node[data-label="+"] {
+  left: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) scale(0.85) !important;
+}
+
+.compact-view .comp-card[data-type="tone_generator"] .term-node[data-label="-"] {
+  left: auto !important;
+  right: 6px !important;
+  top: 50% !important;
+  transform: translateY(-50%) scale(0.85) !important;
+}
+
 /* 4.5 Custom Loads (+ Left, - Right) */
 .compact-view .comp-card[data-type="custom_load"] .term-node[data-label="+"] {
   left: 6px !important;
@@ -912,6 +926,7 @@ body {
 /* === RANGE INPUTS === */
 input[type="range"] {
   -webkit-appearance: none;
+  appearance: none;
   width: 100%;
   height: 4px;
   border-radius: 99px;
@@ -949,6 +964,7 @@ input[type="text"] {
   outline: none;
   transition: border-color 0.15s;
   -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 input[type="number"]::-webkit-inner-spin-button {
