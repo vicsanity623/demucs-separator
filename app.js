@@ -105,6 +105,10 @@ const PARTS_CATALOGUE = [
       { type: 'resistor_100', icon: 'Ω', iconClass: 'icon-passive', name: 'Resistor 100Ω', desc: '±5% tolerance, fixed' },
       { type: 'pot', icon: '🎚️', iconClass: 'icon-passive', name: 'Potentiometer 10kΩ', desc: 'Linear taper, 3-terminal' },
       { type: 'capacitor', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 1000µF', desc: 'Electrolytic, 25V rated' },
+      { type: 'cap_2n2', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 2.2nF', desc: 'Ceramic disc, decoupling/coupling' },
+      { type: 'cap_33n', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 33nF', desc: 'Metal film (333J100V), analog filters' },
+      { type: 'cap_470p', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 470pF', desc: 'Ceramic disc, RF bypass/coupling' },
+      { type: 'cap_0u47', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 0.47µF', desc: 'Electrolytic, 50V polarized' },
       { type: 'cap_22p', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 22pF', desc: 'Ceramic disc, RF/Oscillator load' },
       { type: 'cap_100p', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 100pF', desc: 'Ceramic disc, High-frequency filter' },
       { type: 'cap_4n7', icon: '◫', iconClass: 'icon-passive', name: 'Capacitor 4.7nF', desc: 'Ceramic disc, coupling/decoupling' },
@@ -294,6 +298,22 @@ function buildComponent(type, id, existingComponents) {
     case 'capacitor':
       terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
       state = { capacitance: 1000e-6, storedVoltage: 0.0, name: '1000µF' };
+      break;
+    case 'cap_2n2':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 2.2e-9, storedVoltage: 0.0, name: '2.2nF' };
+      break;
+    case 'cap_33n':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 33e-9, storedVoltage: 0.0, name: '33nF' };
+      break;
+    case 'cap_470p':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 470e-12, storedVoltage: 0.0, name: '470pF' };
+      break;
+    case 'cap_0u47':
+      terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
+      state = { capacitance: 0.47e-6, storedVoltage: 0.0, name: '0.47µF' };
       break;
     case 'cap_22p':
       terminals = makeTerminals(id, [{ label: '+', x: 0, y: 50 }, { label: '-', x: 192, y: 50 }]);
@@ -564,6 +584,10 @@ function buildCardBody(comp) {
     case 'cap_1u': case 'cap_100u':
     case 'capacitor': case 'cap_100n': case 'cap_10u':
     case 'cap_22p': case 'cap_100p': case 'cap_4n7':
+    case 'cap_0u47':
+    case 'cap_470p':
+    case 'cap_2n2':
+    case 'cap_33n':
       const cLabel = comp.state.name || '1000µF';
       return `<div class="flex flex-col gap-1.5">
            <div class="flex justify-between"><span class="text-muted" style="font-size:9px">Value</span><span class="font-mono" style="font-size:10px">${cLabel}</span></div>
@@ -2336,49 +2360,177 @@ function handleThreeFingerTouchEnd(e) {
   }
 }
 
-// ─── CLIPBOARD CUT, COPY, & PASTE ENGINES ──────────────────────────────────────
-let clipboardComponentType = null;
+// ─── CLIPBOARD SUB-CIRCUIT CLONING ENGINES ─────────────────────────────────────
+let clipboardSnapshot = null;
 
 function executeCut() {
-  if (!selectedComponentId) {
-    showToast('Select a component card to Cut', 'warn');
+  // Collect target IDs (supports both multi-selection and single-card selection)
+  const targetIds = selectedComponents.size > 0 ? new Set(selectedComponents) :
+    selectedComponentId ? new Set([selectedComponentId]) : null;
+
+  if (!targetIds || targetIds.size === 0) {
+    showToast('Select components to Cut', 'warn');
     return;
   }
-  const comp = components.find(c => c.id === selectedComponentId);
-  if (comp) {
-    clipboardComponentType = comp.type;
-    removeComponent(selectedComponentId); // Safely deletes from board
-    selectedComponentId = null;
-    updateWorkspaceHUD();
-    showToast(`Cut ${comp.type.replace(/_/g, ' ')} to clipboard`, 'info');
-  }
+
+  // Create a snapshot copy of the selection group before deleting
+  executeCopy();
+
+  // Safely delete selected cards from the board
+  targetIds.forEach(id => removeComponent(id));
+
+  selectedComponents.clear();
+  selectedComponentId = null;
+  updateWorkspaceHUD();
+  showToast('Selection cut to clipboard', 'info');
 }
 
 function executeCopy() {
-  if (!selectedComponentId) {
-    showToast('Select a component card to Copy', 'warn');
+  const targetIds = selectedComponents.size > 0 ? new Set(selectedComponents) :
+    selectedComponentId ? new Set([selectedComponentId]) : null;
+
+  if (!targetIds || targetIds.size === 0) {
+    showToast('Select components to Copy', 'warn');
     return;
   }
-  const comp = components.find(c => c.id === selectedComponentId);
-  if (comp) {
-    clipboardComponentType = comp.type;
-    showToast(`Copied ${comp.type.replace(/_/g, ' ')} to clipboard`, 'info');
-  }
+
+  // 1. Determine the relative origin of the selected group
+  let minX = Infinity, minY = Infinity;
+  targetIds.forEach(id => {
+    const comp = components.find(c => c.id === id);
+    if (comp) {
+      minX = Math.min(minX, comp.x);
+      minY = Math.min(minY, comp.y);
+    }
+  });
+
+  // 2. Clone component states and relative positions
+  const copiedComps = [];
+  targetIds.forEach(id => {
+    const c = components.find(comp => comp.id === id);
+    if (c) {
+      copiedComps.push({
+        type: c.type,
+        x: c.x - minX, // Offset relative to the group origin
+        y: c.y - minY,
+        rotation: c.rotation || 0,
+        state: JSON.parse(JSON.stringify(c.state)), // Deep clone parameters
+        oldId: c.id
+      });
+    }
+  });
+
+  // 3. Clone wires connecting *exclusively* between these copied components
+  const copiedWires = [];
+  wires.forEach(w => {
+    const compFrom = components.find(c => c.terminals.some(t => t.id === w.from));
+    const compTo = components.find(c => c.terminals.some(t => t.id === w.to));
+    if (compFrom && compTo && targetIds.has(compFrom.id) && targetIds.has(compTo.id)) {
+      const termFrom = compFrom.terminals.find(t => t.id === w.from);
+      const termTo = compTo.terminals.find(t => t.id === w.to);
+      if (termFrom && termTo) {
+        copiedWires.push({
+          fromCompOldId: compFrom.id,
+          fromTermLabel: termFrom.label,
+          toCompOldId: compTo.id,
+          toTermLabel: termTo.label,
+          color: w.color
+        });
+      }
+    }
+  });
+
+  // Store entire sub-circuit package in clipboard
+  clipboardSnapshot = {
+    components: copiedComps,
+    wires: copiedWires
+  };
+
+  showToast(`Copied ${copiedComps.length} component(s) to clipboard`, 'info');
 }
 
 function executePaste() {
-  if (!clipboardComponentType) {
+  if (!clipboardSnapshot || clipboardSnapshot.components.length === 0) {
     showToast('Clipboard is empty', 'warn');
     return;
   }
 
-  // Paste exactly at the user's hovering mouse pointer or touch point
-  const pasteX = Math.max(10, mousePosition.x - 96);
-  const pasteY = Math.max(10, mousePosition.y - 50);
+  const idMap = {}; // Maps old component IDs to the new pasted IDs for re-wiring
+  const newlyPastedIds = new Set();
+  const gridSize = 24;
 
-  // Spawns a brand-new, non-mirrored default instance of that part
-  addComponent(clipboardComponentType, pasteX, pasteY);
-  showToast(`Pasted fresh ${clipboardComponentType.replace(/_/g, ' ')} ✓`, 'success');
+  // Clear active selection states to focus on the newly pasted block
+  selectedComponents.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('selected');
+  });
+  selectedComponents.clear();
+
+  // 1. Rebuild and render components with exact cloned states
+  clipboardSnapshot.components.forEach(c => {
+    const newId = c.type + '_' + Math.random().toString(36).substr(2, 9);
+    idMap[c.oldId] = newId;
+    newlyPastedIds.add(newId);
+
+    // Snap coordinate placement to the nearest 24px grid dot relative to mouse pointer
+    const nx = Math.round((mousePosition.x + c.x) / gridSize) * gridSize;
+    const ny = Math.round((mousePosition.y + c.y) / gridSize) * gridSize;
+
+    const { terminals, state } = buildComponent(c.type, newId, components);
+    const mergedState = JSON.parse(JSON.stringify(c.state)); // Retain configurations
+
+    const newComp = {
+      id: newId,
+      type: c.type,
+      x: nx,
+      y: ny,
+      rotation: c.rotation || 0,
+      terminals,
+      state: mergedState
+    };
+
+    components.push(newComp);
+    renderComponent(newComp);
+  });
+
+  // 2. Re-route and establish wire connections matching the relative port labels
+  clipboardSnapshot.wires.forEach(w => {
+    const newFromId = idMap[w.fromCompOldId];
+    const newToId = idMap[w.toCompOldId];
+    if (newFromId && newToId) {
+      const compFrom = components.find(c => c.id === newFromId);
+      const compTo = components.find(c => c.id === newToId);
+      if (compFrom && compTo) {
+        const termFrom = compFrom.terminals.find(t => t.label === w.fromTermLabel);
+        const termTo = compTo.terminals.find(t => t.label === w.toTermLabel);
+        if (termFrom && termTo) {
+          wires.push({
+            from: termFrom.id,
+            to: termTo.id,
+            color: w.color
+          });
+        }
+      }
+    }
+  });
+
+  // 3. Highlight the newly pasted circuit block as the active selection
+  newlyPastedIds.forEach(id => {
+    selectedComponents.add(id);
+    const el = document.getElementById(id);
+    if (el) el.classList.add('selected');
+  });
+
+  if (newlyPastedIds.size === 1) {
+    selectedComponentId = Array.from(newlyPastedIds)[0];
+  } else {
+    selectedComponentId = null;
+  }
+
+  updateWires();
+  updateWorkspaceHUD();
+  saveWorkspaceToLocalStorage(); // Auto-save changes
+  showToast(`Pasted sub-circuit block ✓`, 'success');
 }
 
 function getCustomCircuitMetrics() {
@@ -2681,7 +2833,7 @@ function simulationTick() {
           if (nA !== undefined && nW !== undefined) { const G = 1 / Raw; if (nA === i) { sumG += G; sumGV += G * V[nW]; } if (nW === i) { sumG += G; sumGV += G * V[nA]; } }
           if (nW !== undefined && nB !== undefined) { const G = 1 / Rwb; if (nW === i) { sumG += G; sumGV += G * V[nB]; } if (nB === i) { sumG += G; sumGV += G * V[nW]; } }
         }
-        else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7') {
+        else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7' || type === 'cap_0u47' || type === 'cap_470p' || type === 'cap_2n2' || type === 'cap_33n') {
           const C = state.capacitance, dt = 0.1;
           const Req = dt / C; const G = 1 / Req; const capV = state.storedVoltage;
           twoPort(T('+'), T('-'), capV, Req);
@@ -2891,9 +3043,10 @@ function simulationTick() {
     if (type === 'signal_generator') {
       const el = document.getElementById(`${id}-disp`); if (el) el.innerText = state.outputVoltage.toFixed(2) + ' V';
     }
-    else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7') {
+    else if (type === 'capacitor' || type === 'cap_100n' || type === 'cap_10u' || type === 'cap_1u' || type === 'cap_100u' || type === 'cap_22p' || type === 'cap_100p' || type === 'cap_4n7' || type === 'cap_0u47' || type === 'cap_470p' || type === 'cap_2n2' || type === 'cap_33n') {
       const vp = tv('+'), vn = tv('-');
 
+      // Calibrate integration math so the capacitor state matches the transient step solution
       state.storedVoltage = vp - vn;
       state.storedVoltage = Math.max(-50, Math.min(50, state.storedVoltage));
 
