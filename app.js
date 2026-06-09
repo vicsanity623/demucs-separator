@@ -2267,11 +2267,9 @@ function triggerShortcutAction(action) {
   if (action === 'select_mode') {
     selectionModeActive = !selectionModeActive;
 
-    // Toggle active visual states on button
     const btn = document.getElementById('sh-btn-select');
     if (btn) btn.classList.toggle('active', selectionModeActive);
 
-    // Clear selections if disabling mode
     if (!selectionModeActive) {
       selectedComponents.forEach(id => {
         const el = document.getElementById(id);
@@ -2283,16 +2281,14 @@ function triggerShortcutAction(action) {
     showToast(selectionModeActive ? 'Selection Tool ON' : 'Selection Tool OFF (Panning Active)', 'info');
   } else if (action === 'undo') {
     showToast('Undo', 'info');
-    // Call your local Undo handler here if available
   } else if (action === 'redo') {
     showToast('Redo', 'info');
-    // Call your local Redo handler here if available
   } else if (action === 'cut') {
-    showToast('Cut', 'info');
+    executeCut();
   } else if (action === 'copy') {
-    showToast('Copy', 'info');
+    executeCopy();
   } else if (action === 'paste') {
-    showToast('Paste', 'info');
+    executePaste();
   }
 }
 
@@ -2322,6 +2318,51 @@ function handleThreeFingerTouchEnd(e) {
     }
     threeFingerStartPoints = [];
   }
+}
+
+// ─── CLIPBOARD CUT, COPY, & PASTE ENGINES ──────────────────────────────────────
+let clipboardComponentType = null;
+
+function executeCut() {
+  if (!selectedComponentId) {
+    showToast('Select a component card to Cut', 'warn');
+    return;
+  }
+  const comp = components.find(c => c.id === selectedComponentId);
+  if (comp) {
+    clipboardComponentType = comp.type;
+    removeComponent(selectedComponentId); // Safely deletes from board
+    selectedComponentId = null;
+    updateWorkspaceHUD();
+    showToast(`Cut ${comp.type.replace(/_/g, ' ')} to clipboard`, 'info');
+  }
+}
+
+function executeCopy() {
+  if (!selectedComponentId) {
+    showToast('Select a component card to Copy', 'warn');
+    return;
+  }
+  const comp = components.find(c => c.id === selectedComponentId);
+  if (comp) {
+    clipboardComponentType = comp.type;
+    showToast(`Copied ${comp.type.replace(/_/g, ' ')} to clipboard`, 'info');
+  }
+}
+
+function executePaste() {
+  if (!clipboardComponentType) {
+    showToast('Clipboard is empty', 'warn');
+    return;
+  }
+
+  // Paste exactly at the user's hovering mouse pointer or touch point
+  const pasteX = Math.max(10, mousePosition.x - 96);
+  const pasteY = Math.max(10, mousePosition.y - 50);
+
+  // Spawns a brand-new, non-mirrored default instance of that part
+  addComponent(clipboardComponentType, pasteX, pasteY);
+  showToast(`Pasted fresh ${clipboardComponentType.replace(/_/g, ' ')} ✓`, 'success');
 }
 
 function getCustomCircuitMetrics() {
@@ -3360,8 +3401,22 @@ function initKeyboardShortcuts() {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
     if (e.key === 'Escape') { activeWireStart = null; closeContextMenu(); updateWires(); }
     if (e.key === ' ') { e.preventDefault(); simulationRunning = !simulationRunning; updatePlayButton(); }
+
+    // Catch Option/Alt (Mac), Win/Cmd (Meta), or Ctrl modifiers
+    const isModifier = e.altKey || e.metaKey || e.ctrlKey;
+    if (isModifier) {
+      const key = e.key.toLowerCase();
+      if (key === 'x') { e.preventDefault(); executeCut(); }
+      if (key === 'c') { e.preventDefault(); executeCopy(); }
+      if (key === 'v') { e.preventDefault(); executePaste(); }
+    }
+
     if (e.key === 'Delete' || e.key === 'Backspace') {
-      // delete selected component if any
+      if (selectedComponentId) {
+        removeComponent(selectedComponentId);
+        selectedComponentId = null;
+        updateWorkspaceHUD();
+      }
     }
   });
 }
