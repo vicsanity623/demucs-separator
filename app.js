@@ -1873,7 +1873,7 @@ const tutorialGuides = {
       { id: 'step-1', title: "Step 1: Place Parts", desc: "Add 1× USB 5V, 2× Resistors (R1 and R2), and 1× Red LED onto the workspace." },
       { id: 'step-2', title: "Step 2: Divider", desc: "Connect USB 5V (+) to R1-A, R1-B to R2-A, and R2-B to USB GND (−) to form a series voltage divider path." },
       { id: 'step-3', title: "Step 3: Set Values", desc: "Set R1 to 220Ω, and set R2 to 220Ω. The midpoint voltage (R1-B/R2-A junction) will divide the 5V rail exactly down to 2.50V." },
-      { id: 'step-4', title: "Step 4: Light the LED", desc: "Connect R1-B to LED Anode (+), and LED Cathode (−) to R2-A. The LED will illuminate under a controlled current." },
+      { id: 'step-4', title: "Step 4: Light the LED", desc: "Connect R1-B to LED Anode (+), and LED Cathode (−) to USB GND (−). The LED will illuminate under a controlled current." },
     ],
     liveMetrics: () => {
       const rs = components.filter(c => c.type.startsWith('resistor'));
@@ -1896,8 +1896,8 @@ const tutorialGuides = {
       const reg = components.find(c => c.type === 'lm7805');
       let html = '';
       if (reg) {
-        const vIn = reg.terminals.find(t => t.label === 'IN')?.voltage || 0;
-        const vOut = reg.terminals.find(t => t.label === 'OUT')?.voltage || 0;
+        const vIn = reg.terminals.find(t => t.label === 'IN')?.voltage ?? 0;
+        const vOut = reg.terminals.find(t => t.label === 'OUT')?.voltage ?? 0;
         html += `<div class="metric-row"><span>Regulator Input</span><span class="metric-val text-rose">${vIn.toFixed(2)} V</span></div>`;
         html += `<div class="metric-row"><span>Regulated Output</span><span class="metric-val text-teal" style="font-weight:700;">${vOut.toFixed(2)} V</span></div>`;
       } else html += '<div class="metric-row" style="color:var(--text-muted)">No LM7805 Regulator detected.</div>';
@@ -3086,8 +3086,8 @@ function evaluateActiveTutorial(nodeMap) {
     if (reg && joint && dmm) {
       const ro = nodeMap[reg.terminals.find(t => t.label === 'OUT')?.id];
       const jn = nodeMap[joint.terminals[0]?.id];
-      const mr = nodeMap[mm[0]?.terminals.find(t => t.label === 'VΩ+')?.id];
-      const mb = nodeMap[mm[0]?.terminals.find(t => t.label === 'COM-')?.id];
+      const mr = nodeMap[dmm.terminals.find(t => t.label === 'VΩ+')?.id];
+      const mb = nodeMap[dmm.terminals.find(t => t.label === 'COM-')?.id];
       if (mr === ro && mb === jn && mr !== undefined && dmm.state.mode === 'voltage' && Math.abs(dmm.state.value - 5.0) < 0.2) s4 = true;
     }
     updateStepStyle('step-4', s4, !s3);
@@ -3421,7 +3421,7 @@ function simulationTick() {
           if (nS === i || nD === i) { const Rds = on ? state.rds_on : 1e7; const G = 1 / Rds; const nb = (nS === i) ? nD : nS; sumG += G; sumGV += G * V[nb]; }
         }
         else if (type === 'lm7805') {
-          const nI = T('IN'), nG = T('GND'), nO = T('OUT'); if (!nI || !nG || !nO) return;
+          const nI = T('IN'), nG = T('GND'), nO = T('OUT'); if (nI === undefined || nG === undefined || nO === undefined) return;
           const vin = V[nI] - V[nG];
           const vout = vin > 7 ? 5.0 : 0;
           twoPort(nO, nG, vout, 2.0);
