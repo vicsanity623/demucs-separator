@@ -1,7 +1,7 @@
 {
-  "name": "BreadBoard",
-  "short_name": "BreadBoard",
-  "description": "Digital Breadboard",
+  "name": "UFO",
+  "short_name": "UFO",
+  "description": "UFOArchive",
   "start_url": "./index.html",
   "scope": "/",
   "display": "standalone",
