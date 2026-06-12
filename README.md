@@ -4,3 +4,6 @@ With this application, you can drag and drop common components like transistors,
 
 How to use it:
 To run the workbench, simply open the index.html file in any modern web browser. You do not need to install any external software or packages. To run the automated quality checks before deploying your changes, open a terminal window in the project folder and run the check.sh command. This will verify that all required files exist and contain valid code.
+
+There is other brances that are completely different repos
+one for UFO vid gallery, the other is for a musicplayer.
