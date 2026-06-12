@@ -884,14 +884,14 @@
 
     // Patch renderNext to observe new cards
     const origRenderNext = renderNext;
-    function renderNext() {
+    renderNext = function() {
       const before = document.getElementById('grid').children.length;
       origRenderNext.call(this);
       const cards = document.getElementById('grid').children;
       for (let i = before; i < cards.length; i++) {
         wallObserver.observe(cards[i]);
       }
-    }
+    };
 
     /* ── INFINITE SCROLL ────────────────────────────────────────────────────── */
     new IntersectionObserver(entries => {
