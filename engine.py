@@ -393,8 +393,7 @@ def build_ledger():
         existing.add(s["source_url"])
         added += 1
 
-    if added:
-        save_ledger(ledger)
+    save_ledger(ledger) # Always save the ledger, even if no new items were added or if it's empty
 
     check_and_zip_if_full()
     print(f"\n✅  Done — {added} new video sightings archived.")
