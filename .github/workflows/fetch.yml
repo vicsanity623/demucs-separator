@@ -22,7 +22,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install playwright playwright-stealth moviepy
+          pip install requests playwright playwright-stealth moviepy
           playwright install chromium --with-deps
 
       - name: Run Scraper (Scan Reddit & 4chan for UFO Media)
