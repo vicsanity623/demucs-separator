@@ -16,14 +16,13 @@ from ledger_manager import load_ledger, save_ledger
 # CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 MEDIA_FOLDER = "media"
-MAX_FILE_BYTES = 100 * 1024 * 1024  # 100 MB cap per file
-REPO_WARN_BYTES = 950 * 1024 * 1024  # Zip folder when near 950 MB
+MAX_FILE_BYTES = 100 * 1024 * 1024
+REPO_WARN_BYTES = 950 * 1024 * 1024
 ZIP_PREFIX = "media_archive"
-MIN_VIDEO_BYTES = 40 * 1024  # Reject corrupt files < 40 KB
-MIN_SCORE = 10  # Minimum upvotes for validation
+MIN_VIDEO_BYTES = 40 * 1024
+MIN_SCORE = 10
 os.makedirs(MEDIA_FOLDER, exist_ok=True)
 
-# Reddit targets
 REDDIT_SUBS = [
     "UFOs", "UAP", "Aliens", "UFObelievers", "UFOdocumentaries",
     "UFOscience", "Mufon", "Experiencers", "TheUAPReport", "Skies_Above",
@@ -31,7 +30,7 @@ REDDIT_SUBS = [
     "StrangeEarth", "UnexplainedPhenomena"
 ]
 
-# CURRENT WORKING REDLIB INSTANCES (June 2026) - from official list
+# Fresh list from redlib-org/redlib-instances (June 2026)
 REDLIB_INSTANCES = [
     "https://redlib.catsarch.com",
     "https://redlib.perennialte.ch",
@@ -42,50 +41,38 @@ REDLIB_INSTANCES = [
     "https://redlib.nadeko.net",
     "https://redlib.orangenet.cc",
     "https://redlib.privadency.com",
-    "https://safereddit.com",  # Still commonly referenced
+    "https://safereddit.com",
     "https://redlib.zaggy.nl",
+    "https://l.opnxng.com",
 ]
 
-# Lemmy
+# Lemmy and 4chan unchanged (they are more stable)
 LEMMY_INSTANCES = ["https://lemmy.world", "https://lemmy.ml"]
 LEMMY_COMMUNITIES = ["ufos", "aliens", "uap", "strangeearth", "paranormal", "conspiracy"]
-
-# 4chan
 FOURCHAN_BOARD = "x"
-POSITIVE_KEYWORDS = [
-    "ufo", "uap", "orb", "saucer", "tic tac", "tic-tac", "triangle",
-    "sighting", "craft", "phenomenon", "footage", "video", "nhi",
-    "unidentified", "aerial", "anomalous", "encounter", "lights in the sky"
-]
-NEGATIVE_KEYWORDS = [
-    "furry", "meme", "cgi", "vfx", "blender", "movie", "game", "art",
-    "drawing", "tattoo", "fiction", "joke", "animation", "render",
-    "satire", "deepfake", "photoshop", "minecraft"
-]
 
-# Expanded realistic User-Agent + browser fingerprint pool
+POSITIVE_KEYWORDS = ["ufo", "uap", "orb", "saucer", "tic tac", "tic-tac", "triangle", "sighting", "craft", "phenomenon", "footage", "video", "nhi", "unidentified", "aerial", "anomalous", "encounter", "lights in the sky"]
+NEGATIVE_KEYWORDS = ["furry", "meme", "cgi", "vfx", "blender", "movie", "game", "art", "drawing", "tattoo", "fiction", "joke", "animation", "render", "satire", "deepfake", "photoshop", "minecraft"]
+
 USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:127.0) Gecko/20100101 Firefox/127.0",
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
 ]
 
 def get_random_headers(referer: Optional[str] = None) -> Dict[str, str]:
-    """Generate highly randomized realistic browser headers."""
     ua = random.choice(USER_AGENTS)
     headers = {
         "User-Agent": ua,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
-        "Accept-Language": random.choice(["en-US,en;q=0.9", "en-GB,en;q=0.8", "en-CA,en;q=0.9"]),
+        "Accept-Language": random.choice(["en-US,en;q=0.9", "en-GB,en;q=0.8"]),
         "Accept-Encoding": "gzip, deflate, br",
         "DNT": "1",
         "Connection": "keep-alive",
         "Upgrade-Insecure-Requests": "1",
-        "Sec-Fetch-Site": random.choice(["none", "same-origin"]),
+        "Sec-Fetch-Site": "none",
         "Sec-Fetch-Mode": "navigate",
         "Sec-Fetch-User": "?1",
         "Sec-Fetch-Dest": "document",
@@ -102,11 +89,10 @@ def get_random_headers(referer: Optional[str] = None) -> Dict[str, str]:
 # DOWNLOAD HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
 def _download(url: str, dest: str, max_bytes: int = MAX_FILE_BYTES, referer: Optional[str] = None) -> bool:
-    """Stream-download with retries, jitter, and randomized headers."""
     headers = get_random_headers(referer)
-    for attempt in range(4):
+    for attempt in range(5):
         try:
-            r = requests.get(url, stream=True, timeout=30, headers=headers)
+            r = requests.get(url, stream=True, timeout=35, headers=headers)
             if r.status_code == 200:
                 written = 0
                 with open(dest, "wb") as f:
@@ -114,11 +100,10 @@ def _download(url: str, dest: str, max_bytes: int = MAX_FILE_BYTES, referer: Opt
                         f.write(chunk)
                         written += len(chunk)
                         if written > max_bytes:
-                            print(f" ✗ File too large, aborting.")
                             return False
                 return True
-            elif r.status_code in (403, 429, 503):
-                wait = random.uniform(10, 25) * (attempt + 1)
+            elif r.status_code in (403, 429, 418, 503):
+                wait = random.uniform(15, 35) * (attempt + 1)
                 print(f" ✗ Rate-limited ({r.status_code}) — backing off {wait:.1f}s")
                 time.sleep(wait)
                 continue
@@ -127,7 +112,7 @@ def _download(url: str, dest: str, max_bytes: int = MAX_FILE_BYTES, referer: Opt
                 return False
         except Exception as e:
             print(f" ✗ Download error attempt {attempt+1}: {e}")
-        time.sleep(random.uniform(4, 12))
+        time.sleep(random.uniform(5, 15))
     return False
 
 def _valid(path: str) -> bool:
@@ -137,9 +122,7 @@ def _reddit_audio_url(video_url: str) -> str:
     base = video_url.split("?")[0]
     return re.sub(r"/DASH_[^/]+\.mp4$", "/DASH_audio.mp4", base)
 
-# ─────────────────────────────────────────────────────────────────────────────
-# VIDEO MERGING
-# ─────────────────────────────────────────────────────────────────────────────
+# Merge function unchanged (same as previous)
 def merge_reddit_video(video_url: str, audio_url: str, final_path: str) -> bool:
     v_tmp = final_path + ".v.tmp"
     a_tmp = final_path + ".a.tmp"
@@ -154,10 +137,7 @@ def merge_reddit_video(video_url: str, audio_url: str, final_path: str) -> bool:
             vc = VideoFileClip(v_tmp)
             ac = AudioFileClip(a_tmp)
             print(f" ⚙ merging A/V …")
-            vc.with_audio(ac).write_videofile(
-                final_path, fps=30, codec="libx264", audio_codec="aac",
-                audio_bitrate="192k", logger=None
-            )
+            vc.with_audio(ac).write_videofile(final_path, fps=30, codec="libx264", audio_codec="aac", audio_bitrate="192k", logger=None)
             vc.close(); ac.close()
         else:
             shutil.copy(v_tmp, final_path)
@@ -172,7 +152,7 @@ def merge_reddit_video(video_url: str, audio_url: str, final_path: str) -> bool:
     return ok
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SCRAPERS
+# FILTER & EXTRACT (unchanged logic)
 # ─────────────────────────────────────────────────────────────────────────────
 def _passes_filter(title: str, body: str, score: int = MIN_SCORE) -> bool:
     combined = (title + " " + body).lower()
@@ -191,27 +171,18 @@ def _extract_reddit_videos(data: dict, label: str) -> List[Dict]:
         score = p.get("score", 0)
         if not _passes_filter(title, body, score):
             continue
-
+        # Native video
         if p.get("is_video") and p.get("media", {}).get("reddit_video"):
             rv = p["media"]["reddit_video"]
             raw_url = rv.get("fallback_url", "").split("?")[0]
-            if not raw_url:
+            if raw_url:
+                results.append({
+                    "source": label, "author": p.get("author", "Anonymous"), "title": title,
+                    "description": body, "media_url": raw_url, "thumbnail_url": p.get("thumbnail", ""),
+                    "media_type": "video", "audio_url": _reddit_audio_url(raw_url),
+                    "source_url": f"https://reddit.com{p['permalink']}", "score": score, "platform": "reddit_native"
+                })
                 continue
-            results.append({
-                "source": label,
-                "author": p.get("author", "Anonymous"),
-                "title": title,
-                "description": body,
-                "media_url": raw_url,
-                "thumbnail_url": p.get("thumbnail", ""),
-                "media_type": "video",
-                "audio_url": _reddit_audio_url(raw_url),
-                "source_url": f"https://reddit.com{p['permalink']}",
-                "score": score,
-                "platform": "reddit_native"
-            })
-            continue
-
         # Preview MP4
         preview = p.get("preview", {})
         if preview.get("images"):
@@ -221,70 +192,54 @@ def _extract_reddit_videos(data: dict, label: str) -> List[Dict]:
                 res = img.get("resolutions", [])
                 thumb = res[-1]["url"] if res else img["source"]["url"]
                 results.append({
-                    "source": label,
-                    "author": p.get("author", "Anonymous"),
-                    "title": title,
-                    "description": body,
-                    "media_url": mp4_url,
-                    "thumbnail_url": thumb,
-                    "media_type": "video",
-                    "audio_url": "",
-                    "source_url": f"https://reddit.com{p['permalink']}",
-                    "score": score,
-                    "platform": "reddit_preview"
+                    "source": label, "author": p.get("author", "Anonymous"), "title": title,
+                    "description": body, "media_url": mp4_url, "thumbnail_url": thumb,
+                    "media_type": "video", "audio_url": "", 
+                    "source_url": f"https://reddit.com{p['permalink']}", "score": score, "platform": "reddit_preview"
                 })
     return results
 
 def fetch_reddit_sources() -> List[Dict]:
-    """Robust Redlib scraping with heavy randomization and fallbacks."""
     results = []
     subs = REDDIT_SUBS.copy()
     random.shuffle(subs)
-
-    for sub in subs[:3]:  # Reduced to 3 subs per run for stealth
+    for sub in subs[:2]:  # Even fewer subs for stealth
         success = False
         instances = REDLIB_INSTANCES.copy()
         random.shuffle(instances)
-
         for instance in instances:
             sort = random.choice(["hot", "new", "rising", "top"])
-            url = f"{instance}/r/{sub}/{sort}.json?limit=12&t=month"
+            url = f"{instance}/r/{sub}/{sort}.json?limit=10&t=month"
             print(f" 📡 Trying {instance} → /r/{sub}/{sort}")
-
             headers = get_random_headers(referer=instance.rstrip('/'))
             try:
-                time.sleep(random.uniform(2.0, 5.5))  # Human-like pause
-                r = requests.get(url, headers=headers, timeout=20)
-
-                if r.status_code == 200:
-                    try:
-                        data = r.json()
-                        extracted = _extract_reddit_videos(data, f"Reddit /r/{sub}")
-                        if extracted:
-                            results.extend(extracted)
-                            success = True
-                            print(f" ✅ Pulled {len(extracted)} items from {instance}")
-                            break
-                    except json.JSONDecodeError:
-                        print(f" ✗ Invalid JSON from {instance} (likely HTML error page)")
-                        continue
-                elif r.status_code in (403, 429):
-                    print(f" ✗ Blocked ({r.status_code}) on {instance} — rotating")
-                    time.sleep(random.uniform(8, 20))
+                time.sleep(random.uniform(3.5, 8.0))  # Longer human delays
+                r = requests.get(url, headers=headers, timeout=25)
+                if r.status_code != 200:
+                    if r.status_code in (403, 429, 418):
+                        print(f" ✗ Blocked ({r.status_code}) on {instance}")
+                        time.sleep(random.uniform(12, 25))
+                    else:
+                        print(f" ✗ HTTP {r.status_code} on {instance}")
                     continue
-                else:
-                    print(f" ✗ HTTP {r.status_code} on {instance}")
+                # Strong check for actual JSON
+                content_type = r.headers.get("Content-Type", "")
+                if "application/json" not in content_type and not r.text.strip().startswith("{"):
+                    print(f" ✗ Invalid JSON / error page from {instance}")
+                    continue
+                data = r.json()
+                extracted = _extract_reddit_videos(data, f"Reddit /r/{sub}")
+                if extracted:
+                    results.extend(extracted)
+                    success = True
+                    print(f" ✅ Got {len(extracted)} items from {instance}")
+                    break
             except Exception as e:
                 print(f" ✗ Error on {instance}: {e}")
                 continue
-
         if not success:
-            print(f" 📡 /r/{sub} exhausted all Redlib instances this cycle")
-
+            print(f" 📡 /r/{sub} — All instances exhausted")
     return results
-
-# (fetch_lemmy_sources, fetch_4chan_sources, fetch_all_sources, archival functions remain almost identical to previous version)
-# ... [keeping the rest of the file exactly as in the previous upgrade for brevity - only Reddit part heavily improved]
 
 def fetch_lemmy_sources() -> List[Dict]:
     results = []
@@ -299,7 +254,6 @@ def fetch_lemmy_sources() -> List[Dict]:
                 r = requests.get(url, headers=headers, timeout=18)
                 if r.status_code == 200:
                     data = r.json()
-                    # ... (same parsing as before)
                     for item in data.get("posts", []):
                         post_data = item.get("post", {})
                         title = post_data.get("name", "")
@@ -340,7 +294,6 @@ def fetch_lemmy_sources() -> List[Dict]:
     return results
 
 def fetch_4chan_sources() -> List[Dict]:
-    # (unchanged from previous - 4chan is stable)
     print(f" 🍀 4chan /{FOURCHAN_BOARD}/ Deep-Thread Scan")
     results = []
     try:
@@ -411,7 +364,6 @@ def fetch_all_sources() -> List[Dict]:
     random.shuffle(results)
     return results
 
-# ARCHIVAL FUNCTIONS (unchanged from previous)
 def _zip_media_folder():
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     out = f"{ZIP_PREFIX}_{ts}.zip"
@@ -470,7 +422,7 @@ def build_ledger():
         })
         existing.add(s["source_url"])
         added += 1
-        time.sleep(random.uniform(1.8, 5.5))  # Slow down downloads
+        time.sleep(random.uniform(1.8, 5.5))
     save_ledger(ledger)
     check_and_zip_if_full()
     print(f"\n✅ Done — {added} new video sightings archived.")
