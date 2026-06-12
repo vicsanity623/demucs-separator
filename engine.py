@@ -36,8 +36,38 @@ FOURCHAN_BOARD = "x"
 POSITIVE_KEYWORDS = ["ufo", "uap", "orb", "saucer", "tic tac", "tic-tac", "triangle", "sighting", "craft", "phenomenon", "footage", "video", "nhi", "unidentified", "aerial", "anomalous", "encounter", "lights in the sky"]
 NEGATIVE_KEYWORDS = ["furry", "meme", "cgi", "vfx", "blender", "movie", "game", "art", "drawing", "tattoo", "fiction", "joke", "animation", "render", "satire", "deepfake", "photoshop", "minecraft"]
 
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0",
+]
+
+def get_random_headers(referer: Optional[str] = None) -> Dict[str, str]:
+    ua = random.choice(USER_AGENTS)
+    headers = {
+        "User-Agent": ua,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Sec-Fetch-Site": "none",
+        "Sec-Fetch-Mode": "navigate",
+    }
+    if referer:
+        headers["Referer"] = referer
+    return headers
+
+def _passes_filter(title: str, body: str, score: int = MIN_SCORE) -> bool:
+    combined = (title + " " + body).lower()
+    if not any(kw in combined for kw in POSITIVE_KEYWORDS):
+        return False
+    if any(kw in combined for kw in NEGATIVE_KEYWORDS):
+        return False
+    return score >= MIN_SCORE
+
 # ─────────────────────────────────────────────────────────────────────────────
-# PLAYWRIGHT STEALTH REDDIT SCRAPER (v2.x compatible)
+# PLAYWRIGHT STEALTH REDDIT SCRAPER (Updated for 2026 shreddit-post)
 # ─────────────────────────────────────────────────────────────────────────────
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
@@ -46,24 +76,13 @@ def fetch_reddit_sources_playwright() -> List[Dict]:
     results = []
     subs = REDDIT_SUBS.copy()
     random.shuffle(subs)
-    selected_subs = subs[:2]  # Very low load
+    selected_subs = subs[:2]
 
-    with Stealth().use_sync(sync_playwright()) as p:  # Modern v2 API
-        browser = p.chromium.launch(
-            headless=True,
-            args=[
-                "--no-sandbox",
-                "--disable-blink-features=AutomationControlled",
-                "--disable-features=IsolateOrigins,site-per-process",
-            ]
-        )
+    with Stealth().use_sync(sync_playwright()) as p:
+        browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-blink-features=AutomationControlled"])
         context = browser.new_context(
             viewport={"width": 1920, "height": 1080},
-            user_agent=random.choice([
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:127.0) Gecko/20100101 Firefox/127.0"
-            ]),
+            user_agent=random.choice(USER_AGENTS),
             locale="en-US",
             timezone_id="America/New_York"
         )
@@ -76,42 +95,42 @@ def fetch_reddit_sources_playwright() -> List[Dict]:
                 url = f"https://www.reddit.com/r/{sub}/{sort}/"
                 page.goto(url, wait_until="networkidle", timeout=60000)
 
-                # Human-like behavior
                 time.sleep(random.uniform(2, 4))
-                page.evaluate("window.scrollBy(0, 700)")
-                time.sleep(random.uniform(1.5, 3.5))
-                page.evaluate("window.scrollBy(0, 900)")
+                page.evaluate("window.scrollBy(0, 1200)")
+                time.sleep(random.uniform(2, 4))
+                page.evaluate("window.scrollBy(0, 800)")
 
-                # Extract posts
+                # Improved 2026 selector
                 posts = page.evaluate("""() => {
                     const posts = [];
-                    document.querySelectorAll('shreddit-post, div[data-testid="post-container"]').forEach(post => {
-                        const titleEl = post.querySelector('h3, [slot="title"]');
-                        const scoreEl = post.querySelector('[id^="vote-arrows"] span, .score');
+                    document.querySelectorAll('shreddit-post').forEach(post => {
+                        const titleEl = post.querySelector('[slot="title"], h3');
+                        const scoreEl = post.querySelector('.score, [id^="vote-arrows"]');
                         const link = post.querySelector('a');
                         if (titleEl && link) {
                             const title = titleEl.innerText.trim();
                             let score = 0;
                             if (scoreEl) {
-                                const scoreText = scoreEl.innerText.replace(/[^0-9k]/g, '');
-                                score = scoreText.includes('k') ? parseFloat(scoreText) * 1000 : parseInt(scoreText);
+                                const txt = scoreEl.innerText.replace(/[^0-9k]/g, '').toLowerCase();
+                                score = txt.includes('k') ? parseFloat(txt) * 1000 : parseInt(txt) || 0;
                             }
                             const permalink = link.href;
-                            const isVideo = post.querySelector('video') || permalink.includes('v.redd.it') || title.toLowerCase().includes('video');
+                            const isVideo = post.querySelector('video, .video') || 
+                                           permalink.includes('v.redd.it') || 
+                                           title.toLowerCase().includes('video') ||
+                                           title.toLowerCase().includes('footage');
                             if (isVideo && score >= 10) {
                                 posts.push({title, score, permalink, url: permalink});
                             }
                         }
                     });
-                    return posts.slice(0, 6);
+                    return posts.slice(0, 8);
                 }""")
 
                 for post in posts:
                     title = post["title"]
                     body = ""
-                    if not any(kw in (title + body).lower() for kw in POSITIVE_KEYWORDS):
-                        continue
-                    if any(kw in (title + body).lower() for kw in NEGATIVE_KEYWORDS):
+                    if not _passes_filter(title, body, post["score"]):
                         continue
 
                     results.append({
@@ -127,20 +146,21 @@ def fetch_reddit_sources_playwright() -> List[Dict]:
                         "score": post["score"],
                         "platform": "reddit_playwright"
                     })
-                print(f" ✅ Extracted {len(posts)} candidates from /r/{sub}")
+                print(f" ✅ Extracted {len(posts)} video candidates from /r/{sub}")
             except Exception as e:
                 print(f" ✗ Playwright error on /r/{sub}: {e}")
-            time.sleep(random.uniform(10, 20))  # Long cooldown
+            time.sleep(random.uniform(12, 25))
 
         browser.close()
     return results
 
 # ─────────────────────────────────────────────────────────────────────────────
-# HELPERS (Download, Merge, etc.)
+# HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
+import requests  # Global import for Lemmy/4chan
+
 def _download(url: str, dest: str, max_bytes: int = MAX_FILE_BYTES) -> bool:
-    import requests
-    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"}
+    headers = get_random_headers()
     try:
         r = requests.get(url, stream=True, timeout=40, headers=headers)
         if r.status_code == 200:
@@ -188,6 +208,7 @@ def merge_reddit_video(video_url: str, audio_url: str, final_path: str) -> bool:
                 try: os.remove(p)
                 except: pass
 
+# Lemmy & 4chan (now fully functional)
 def fetch_lemmy_sources() -> List[Dict]:
     results = []
     for community in LEMMY_COMMUNITIES:
@@ -311,7 +332,9 @@ def fetch_all_sources() -> List[Dict]:
     random.shuffle(results)
     return results
 
-# Archival functions (copy from your original)
+# ─────────────────────────────────────────────────────────────────────────────
+# ARCHIVAL
+# ─────────────────────────────────────────────────────────────────────────────
 def _zip_media_folder():
     ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     out = f"{ZIP_PREFIX}_{ts}.zip"
@@ -341,13 +364,12 @@ def build_ledger():
         local_url = f"./media/{file_id}.mp4"
         if not os.path.exists(final_path):
             print(f"\n📦 {s['title'][:60]}")
-            if "reddit_playwright" in s.get("platform", ""):
+            if "reddit_playwright" in s.get("platform", "") or "reddit_native" in s.get("platform", ""):
                 archived = merge_reddit_video(s["media_url"], s.get("audio_url", ""), final_path)
             else:
                 archived = _download(s["media_url"], final_path)
             if not archived or not _valid(final_path):
                 local_url = s["media_url"]
-        # Save to ledger (same as before)
         timestamp = datetime.now(timezone.utc).isoformat()
         payload = f"{timestamp}|{s['source']}|{s['title']}|{s['media_url']}|{s['score']}"
         ledger.insert(0, {
