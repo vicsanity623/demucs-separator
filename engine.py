@@ -20,7 +20,7 @@ MAX_FILE_BYTES  = 100 * 1024 * 1024   # 100 MB cap per file
 REPO_WARN_BYTES = 950 * 1024 * 1024   # Zip folder when near 950 MB
 ZIP_PREFIX      = "media_archive"
 MIN_VIDEO_BYTES = 80 * 1024            # Reject stubs / corrupt files < 80 KB
-MIN_SCORE       = 15                   # Minimum Reddit upvotes to accept
+MIN_SCORE       = 15                   # Minimum Reddit upvotes to accept (Reddit likely blocked, so this won't matter much)
 
 os.makedirs(MEDIA_FOLDER, exist_ok=True)
 
@@ -267,7 +267,7 @@ def fetch_all_sources() -> List[Dict]:
             print(f"     skip: Network/Request error: {re_exc}. URL: {url}")
         except Exception as e:
             print(f"     skip: Unexpected error: {e}. URL: {url}")
-        time.sleep(random.uniform(2.0, 4.0))
+        time.sleep(random.uniform(5.0, 10.0)) # Increased delay for Reddit attempts
 
     # ── Search queries ───────────────────────────────────────────────────────
     queries = random.sample(SEARCH_POOL, 5)
@@ -292,7 +292,7 @@ def fetch_all_sources() -> List[Dict]:
             print(f"     skip: Network/Request error: {re_exc}. URL: {url}")
         except Exception as e:
             print(f"     skip: Unexpected error: {e}. URL: {url}")
-        time.sleep(random.uniform(2.0, 4.0))
+        time.sleep(random.uniform(5.0, 10.0)) # Increased delay for Reddit attempts
 
     # ── 4chan /x/ ────────────────────────────────────────────────────────────
     print(f"  🍀 4chan /x/")
@@ -307,31 +307,36 @@ def fetch_all_sources() -> List[Dict]:
 
         random.shuffle(catalog)
         processed_threads = 0
-        for page in catalog[:4]: # Limit to first 4 pages to avoid too many requests
+        # Iterate through more pages or threads if initial results are low
+        # Consider iterating through all pages or a larger subset if performance allows
+        for page in catalog: # Iterate through all available pages in the catalog
             for thread in page.get("threads", []):
                 thread_no = thread.get("no")
                 if not thread_no: continue
 
-                # Check for video extensions
+                # Check for video extensions - keep this as it's for the main file
                 if thread.get("ext") not in (".webm", ".mp4"):
                     # print(f"     skip 4ch thread {thread_no}: No .webm/.mp4 main file.") # Uncomment for verbose debugging
                     continue
 
-                # Check minimum replies
-                if thread.get("replies", 0) < 5:
+                # Relax minimum replies requirement for initial testing
+                # if thread.get("replies", 0) < 5:
                     # print(f"     skip 4ch thread {thread_no}: Less than 5 replies.") # Uncomment for verbose debugging
-                    continue
+                    # continue
 
                 comment  = re.sub(r"<[^>]+>", " ", thread.get("com", ""))
                 combined = (thread.get("sub", "") + " " + comment).lower()
 
-                # Keyword filtering
-                if not any(kw in combined for kw in POSITIVE_KEYWORDS):
+                # Relax keyword filtering for initial testing or broaden keywords
+                # if not any(kw in combined for kw in POSITIVE_KEYWORDS):
                     # print(f"     skip 4ch thread {thread_no}: No positive keywords.") # Uncomment for verbose debugging
-                    continue
-                if any(kw in combined for kw in NEGATIVE_KEYWORDS):
+                    # continue
+                # if any(kw in combined for kw in NEGATIVE_KEYWORDS):
                     # print(f"     skip 4ch thread {thread_no}: Contains negative keywords.") # Uncomment for verbose debugging
-                    continue
+                    # continue
+
+                # If you want to log what's being considered before filtering:
+                # print(f"     Considering 4ch thread {thread_no}: Title='{thread.get('sub', '')[:50]}', Comment='{comment[:50]}'")
 
                 tid, ext = thread["tim"], thread["ext"]
                 results.append({
@@ -351,7 +356,7 @@ def fetch_all_sources() -> List[Dict]:
                 # Add a small delay for each thread processed to avoid hammering 4chan's servers
                 time.sleep(0.1) # Small delay per thread
 
-        print(f"     Found {processed_threads} potential 4chan videos.")
+        print(f"     Found {processed_threads} potential 4chan videos from main posts.")
 
     except json.JSONDecodeError as jde:
         print(f"  ✗ 4chan catalog JSON decode error: {jde}. Raw response: {r.text[:100]}...")
