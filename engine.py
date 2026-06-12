@@ -6,259 +6,399 @@ import zipfile
 import shutil
 from datetime import datetime, timezone
 import random
-import praw
 import time
 import re
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from moviepy import VideoFileClip, AudioFileClip
 from ledger_manager import load_ledger, save_ledger
 
-# ---------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
 # CONFIG
-# ---------------------------------------------------------------------------
-MEDIA_FOLDER = "media"
-MAX_FILE_BYTES   = 100 * 1024 * 1024
-REPO_WARN_BYTES  = 950 * 1024 * 1024
-ZIP_PREFIX       = "media_archive"
+# ─────────────────────────────────────────────────────────────────────────────
+MEDIA_FOLDER    = "media"
+MAX_FILE_BYTES  = 100 * 1024 * 1024   # 100 MB cap per file
+REPO_WARN_BYTES = 950 * 1024 * 1024   # Zip folder when near 950 MB
+ZIP_PREFIX      = "media_archive"
+MIN_VIDEO_BYTES = 80 * 1024            # Reject stubs / corrupt files < 80 KB
+MIN_SCORE       = 15                   # Minimum Reddit upvotes to accept
 
-if not os.path.exists(MEDIA_FOLDER):
-    os.makedirs(MEDIA_FOLDER)
+os.makedirs(MEDIA_FOLDER, exist_ok=True)
 
-REDDIT_SUBS = ["UFOs", "UAP", "Aliens", "UFObelievers", "UFOdocumentaries", "UFOscience", "Mufon", "Experiencers", "TheUAPReport", "Skies_Above"]
-FOURCHAN_BOARD  = "x"
-SEARCH_POOL = [
-    "ufo sighting video", "uap footage", "unidentified aerial", "strange lights sky",
-    "tic tac ufo", "triangle craft", "orb sighting", "night vision ufo",
-    "military uap encounter", "pilot ufo sighting", "dashcam ufo", "security camera uap",
-    "pentagon uap video", "clear ufo footage", "black triangle sky", "fravor tic tac",
-    "skinwalker ranch sighting", "mexico ufo video", "chile uap footage", "navy ufo radar"
+REDDIT_SUBS = [
+    "UFOs", "UAP", "Aliens", "UFObelievers", "UFOdocumentaries",
+    "UFOscience", "Mufon", "Experiencers", "TheUAPReport", "Skies_Above",
+    "ufo", "NHI", "DisclosureFiles", "Paranormal", "conspiracy",
+    "StrangeEarth", "UnexplainedPhenomena"
 ]
-LOCATIONS = ["Arizona", "Nevada", "California", "Texas", "Brazil", "London", "Canada", "Australia", "New Mexico"]
-CRAFT_TYPES = ["Disc", "Orb", "Triangle", "Tic Tac", "Cigar", "Light"]
-POSITIVE_KEYWORDS = ["ufo", "uap", "orb", "saucer", "tic tac", "tic-tac", "triangle", "sighting", "craft", "phenomenon", "footage", "video"]
-NEGATIVE_KEYWORDS = ["furry", "psyop", "meme", "fake", "debunk", "cgi", "vfx", "blender", "movie", "game", "art", "drawing", "tattoo", "fiction", "joke", "project blue beam"]
 
-# ---------------------------------------------------------------------------
-# VIDEO MERGING (With the AAC + Bitrate Fix)
-# ---------------------------------------------------------------------------
+FOURCHAN_BOARD = "x"
 
-def merge_reddit_video(video_url, audio_url, final_path):
-    v_temp = final_path + ".v.mp4"
-    a_temp = final_path + ".a.mp4"
+SEARCH_POOL = [
+    "ufo sighting video", "uap footage",
+    "unidentified aerial phenomenon video", "strange lights in sky",
+    "tic tac ufo", "triangle craft sighting",
+    "orb sighting video", "night vision ufo",
+    "military uap encounter", "pilot ufo sighting",
+    "dashcam ufo footage", "security camera uap",
+    "pentagon uap video", "clear ufo footage",
+    "black triangle aircraft", "fravor tic tac",
+    "skinwalker ranch video", "mexico ufo footage",
+    "chile uap encounter", "navy ufo radar",
+    "real ufo caught on camera", "uap government footage",
+    "craft hovering silent", "sphere anomalous aerial",
+    "ufo fleet formation", "fast moving light uap"
+]
+
+LOCATIONS   = [
+    "Arizona", "Nevada", "California", "Texas", "Brazil", "London",
+    "Canada", "Australia", "New Mexico", "Florida", "Ohio", "Chile",
+    "Mexico", "UK", "Japan", "Turkey", "Israel", "Poland", "Peru", "Argentina"
+]
+CRAFT_TYPES = ["Disc", "Orb", "Triangle", "Tic Tac", "Cigar", "Light", "Sphere", "Chevron", "Cylinder", "Rectangle"]
+
+POSITIVE_KEYWORDS = [
+    "ufo", "uap", "orb", "saucer", "tic tac", "tic-tac", "triangle",
+    "sighting", "craft", "phenomenon", "footage", "video", "nhi",
+    "unidentified", "aerial", "anomalous", "encounter",
+    "unknown object", "lights in the sky", "hovering"
+]
+NEGATIVE_KEYWORDS = [
+    "furry", "meme", "cgi", "vfx", "blender", "movie", "game", "art",
+    "drawing", "tattoo", "fiction", "joke", "animation", "render",
+    "skyrim", "minecraft", "parody", "satire", "deepfake", "photoshop"
+]
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/124.0.0.0 Safari/537.36"
+    )
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DOWNLOAD HELPERS
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _download(url: str, dest: str, max_bytes: int = MAX_FILE_BYTES) -> bool:
+    """Stream-download url → dest. Returns True on success."""
     try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-        # Download tracks
-        for url, p in [(video_url, v_temp), (audio_url, a_temp)]:
-            if url:
-                r = requests.get(url, stream=True, timeout=20, headers=headers)
-                if r.status_code == 200:
-                    with open(p, 'wb') as f:
-                        for chunk in r.iter_content(8192): f.write(chunk)
-
-        if os.path.exists(a_temp) and os.path.getsize(a_temp) > 0:
-            # MOVIEPY v2.0 SYNTAX
-            video_clip = VideoFileClip(v_temp)
-            audio_clip = AudioFileClip(a_temp)
-            
-            # Change 'set_audio' to 'with_audio'
-            final_clip = video_clip.with_audio(audio_clip)
-            
-            print(f"🎬 Processing Video + Audio: {final_path}")
-            
-            # Standard Web-Ready Export
-            final_clip.write_videofile(
-                final_path, 
-                fps=30, 
-                codec="libx264", 
-                audio_codec="aac", 
-                audio_bitrate="192k", 
-                logger=None
-            )
-            
-            video_clip.close()
-            audio_clip.close()
-        else:
-            # Fallback if no audio found
-            os.rename(v_temp, final_path)
-            
+        r = requests.get(url, stream=True, timeout=25, headers=HEADERS)
+        if r.status_code != 200:
+            print(f"   ✗ HTTP {r.status_code} — {url[:70]}")
+            return False
+        written = 0
+        with open(dest, "wb") as f:
+            for chunk in r.iter_content(8192):
+                f.write(chunk)
+                written += len(chunk)
+                if written > max_bytes:
+                    print(f"   ✗ File too large, aborting.")
+                    return False
+        return True
+    except requests.exceptions.Timeout:
+        print(f"   ✗ Timeout: {url[:70]}")
     except Exception as e:
-        print(f"   ⚠️ Merge Error: {e}")
+        print(f"   ✗ Download error: {e}")
+    return False
+
+
+def _valid(path: str) -> bool:
+    """Return True if file exists and is at least MIN_VIDEO_BYTES."""
+    return os.path.exists(path) and os.path.getsize(path) >= MIN_VIDEO_BYTES
+
+
+def _reddit_audio_url(video_url: str) -> str:
+    """
+    Convert a Reddit DASH video URL to its audio track URL.
+    https://v.redd.it/XXXXX/DASH_1080.mp4?source=fallback
+    → https://v.redd.it/XXXXX/DASH_audio.mp4
+    """
+    base = video_url.split("?")[0]
+    return re.sub(r"/DASH_[^/]+\.mp4$", "/DASH_audio.mp4", base)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# VIDEO MERGING
+# ─────────────────────────────────────────────────────────────────────────────
+
+def merge_reddit_video(video_url: str, audio_url: str, final_path: str) -> bool:
+    """Download + merge Reddit's separated video/audio tracks into one MP4."""
+    v_tmp = final_path + ".v.tmp"
+    a_tmp = final_path + ".a.tmp"
+    ok = False
+    try:
+        print(f"   ↓ video track …")
+        if not _download(video_url, v_tmp) or not _valid(v_tmp):
+            return False
+
+        print(f"   ↓ audio track …")
+        has_audio = _download(audio_url, a_tmp) and _valid(a_tmp)
+
+        if has_audio:
+            vc = VideoFileClip(v_tmp)
+            ac = AudioFileClip(a_tmp)
+            print(f"   ⚙  merging A/V …")
+            vc.with_audio(ac).write_videofile(
+                final_path, fps=30,
+                codec="libx264", audio_codec="aac",
+                audio_bitrate="192k", logger=None
+            )
+            vc.close(); ac.close()
+        else:
+            # Audio not available — keep video-only
+            shutil.copy(v_tmp, final_path)
+
+        ok = _valid(final_path)
+    except Exception as e:
+        print(f"   ✗ Merge error: {e}")
     finally:
-        if os.path.exists(v_temp): os.remove(v_temp)
-        if os.path.exists(a_temp): os.remove(a_temp)
+        for p in (v_tmp, a_tmp):
+            if os.path.exists(p):
+                try: os.remove(p)
+                except: pass
+    return ok
 
-# ---------------------------------------------------------------------------
-# SCRAPERS
-# ---------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# SCRAPERS — VIDEO ONLY
+# ─────────────────────────────────────────────────────────────────────────────
 
-def process_reddit_data(data, label):
+def _passes_filter(title: str, body: str, score: int) -> bool:
+    if score < MIN_SCORE:
+        return False
+    combined = (title + " " + body).lower()
+    if not any(kw in combined for kw in POSITIVE_KEYWORDS):
+        return False
+    if any(kw in combined for kw in NEGATIVE_KEYWORDS):
+        return False
+    return True
+
+
+def _extract_reddit_videos(data: dict, label: str) -> List[Dict]:
     results = []
     for post in data.get("data", {}).get("children", []):
-        p = post["data"]
+        p = post.get("data", {})
         title = p.get("title", "")
-        content = (title + p.get("selftext", "")).lower()
-        
-        if p.get("score", 0) < 10: continue
-        if not any(kw in content for kw in POSITIVE_KEYWORDS): continue
-        if any(kw in content for kw in NEGATIVE_KEYWORDS): continue
+        body  = p.get("selftext", "")
+        score = p.get("score", 0)
 
-        media_url, thumb_url, m_type, audio_url = "", "", "", ""
-        
-        if p.get("is_video") and p.get("media") and p["media"].get("reddit_video"):
-            media_url = p["media"]["reddit_video"]["fallback_url"]
+        if not _passes_filter(title, body, score):
+            continue
+
+        # ── Reddit native video ──────────────────────────────────────────────
+        if p.get("is_video") and p.get("media", {}).get("reddit_video"):
+            rv = p["media"]["reddit_video"]
+            raw_url   = rv.get("fallback_url", "").split("?")[0]
+            audio_url = _reddit_audio_url(raw_url)
             thumb_url = p.get("thumbnail", "")
-            m_type = "video"
-            audio_url = re.sub(r"(v.redd.it/\w+/)(\w+)(\.mp4)", r"\1DASH_audio\3", media_url).split('?')[0]
-        elif p.get("preview") and p["preview"].get("images"):
-            img = p["preview"]["images"][0]
-            media_url = img["source"]["url"]
-            res = img.get("resolutions", [])
-            thumb_url = res[2]["url"] if len(res) > 2 else media_url
-            m_type = "image"
-            if "variants" in img and "mp4" in img["variants"]:
-                media_url = img["variants"]["mp4"]["source"]["url"]
-                m_type = "video"
 
-        if media_url:
+            if not raw_url:
+                continue
+
             results.append({
-                "source": label, "author": p.get("author", "Anonymous"),
-                "title": title, "description": p.get("selftext", ""),
-                "media_url": media_url, "thumbnail_url": thumb_url,
-                "media_type": m_type, "audio_url": audio_url,
-                "source_url": f"https://reddit.com{p['permalink']}", "score": p["score"]
+                "source":    label,
+                "author":    p.get("author", "Anonymous"),
+                "title":     title,
+                "description": body,
+                "media_url": raw_url,
+                "thumbnail_url": thumb_url,
+                "media_type": "video",
+                "audio_url": audio_url,
+                "source_url": f"https://reddit.com{p['permalink']}",
+                "score":     score,
+                "platform":  "reddit_native"
             })
+            continue
+
+        # ── Preview MP4 / animated GIF variant ──────────────────────────────
+        preview = p.get("preview", {})
+        if preview.get("images"):
+            img = preview["images"][0]
+            if "variants" in img and "mp4" in img["variants"]:
+                mp4_url   = img["variants"]["mp4"]["source"]["url"]
+                res       = img.get("resolutions", [])
+                thumb_url = res[-1]["url"] if res else img["source"]["url"]
+
+                results.append({
+                    "source":    label,
+                    "author":    p.get("author", "Anonymous"),
+                    "title":     title,
+                    "description": body,
+                    "media_url": mp4_url,
+                    "thumbnail_url": thumb_url,
+                    "media_type": "video",
+                    "audio_url": "",
+                    "source_url": f"https://reddit.com{p['permalink']}",
+                    "score":     score,
+                    "platform":  "reddit_preview"
+                })
+
     return results
 
-def fetch_all_sources():
-    results = []
-    s = requests.Session()
-    s.headers.update({"User-Agent": "Mozilla/5.0 (Android 13; Mobile; rv:109.0) Gecko/114.0 Firefox/114.0"})
-    
-    subs_to_check = REDDIT_SUBS.copy()
-    random.shuffle(subs_to_check)
 
-    for sub in subs_to_check[:6]:
-        sort_method = random.choice(["hot", "rising", "new", "top"])
-        time_filter = "&t=week" if sort_method == "top" else ""
-        
-        print(f"🎲 Random Sort: /r/{sub} ({sort_method})...")
+def fetch_all_sources() -> List[Dict]:
+    results: List[Dict] = []
+    session = requests.Session()
+    session.headers.update({
+        "User-Agent": "Mozilla/5.0 (Android 13; Mobile; rv:120.0) Gecko/120.0 Firefox/120.0"
+    })
+
+    # ── Subreddits ──────────────────────────────────────────────────────────
+    subs = REDDIT_SUBS.copy()
+    random.shuffle(subs)
+    for sub in subs[:8]:
+        sort  = random.choice(["hot", "rising", "new", "top"])
+        extra = "&t=week" if sort == "top" else ""
+        print(f"  📡 /r/{sub}  [{sort}]")
         try:
-            url = f"https://www.reddit.com/r/{sub}/{sort_method}.json?limit=15&raw_json=1{time_filter}"
-            r = s.get(url, timeout=15)
-            results.extend(process_reddit_data(r.json(), f"Reddit (/r/{sub})"))
-        except: pass
-        time.sleep(random.uniform(2, 4))
+            url = (f"https://www.reddit.com/r/{sub}/{sort}.json"
+                   f"?limit=20&raw_json=1{extra}")
+            r = session.get(url, timeout=15)
+            results.extend(_extract_reddit_videos(r.json(), f"Reddit /r/{sub}"))
+        except Exception as e:
+            print(f"     skip: {e}")
+        time.sleep(random.uniform(2.0, 4.0))
 
-    random_queries = random.sample(SEARCH_POOL, 3)
-    
-    dynamic_query_1 = f"{random.choice(LOCATIONS)} {random.choice(CRAFT_TYPES)} Sighting"
-    dynamic_query_2 = f"{random.choice(CRAFT_TYPES)} Footage {random.choice(LOCATIONS)}"
-    random_queries.extend([dynamic_query_1, dynamic_query_2])
-
-    for q in random_queries:
-        sort_type = random.choice(["new", "relevance"])
-        print(f"🔍 Dynamic Search ({sort_type}): '{q}'...")
+    # ── Search queries ───────────────────────────────────────────────────────
+    queries = random.sample(SEARCH_POOL, 5)
+    queries += [
+        f"{random.choice(LOCATIONS)} {random.choice(CRAFT_TYPES).lower()} sighting",
+        f"ufo {random.choice(CRAFT_TYPES).lower()} footage {random.choice(LOCATIONS)}"
+    ]
+    for q in queries:
+        sort = random.choice(["new", "relevance"])
+        print(f"  🔍 search [{sort}]: \"{q}\"")
         try:
-            url = f"https://www.reddit.com/search.json?q={q}&sort={sort_type}&limit=15&raw_json=1"
-            r = s.get(url, timeout=15)
-            results.extend(process_reddit_data(r.json(), "Reddit Discovery"))
-        except: pass
-        time.sleep(random.uniform(2, 4))
+            url = (f"https://www.reddit.com/search.json"
+                   f"?q={requests.utils.quote(q)}&sort={sort}&limit=15&raw_json=1")
+            r = session.get(url, timeout=15)
+            results.extend(_extract_reddit_videos(r.json(), "Reddit Search"))
+        except Exception as e:
+            print(f"     skip: {e}")
+        time.sleep(random.uniform(2.0, 4.0))
 
-    print("Scraping 4chan /x/...")
+    # ── 4chan /x/ ────────────────────────────────────────────────────────────
+    print(f"  🍀 4chan /x/")
     try:
-        r4 = requests.get(f"https://a.4cdn.org/{FOURCHAN_BOARD}/catalog.json", timeout=10)
-        catalog = r4.json()
+        catalog = requests.get(
+            f"https://a.4cdn.org/{FOURCHAN_BOARD}/catalog.json", timeout=10
+        ).json()
         random.shuffle(catalog)
-        for page in catalog[:3]:
+        for page in catalog[:4]:
             for thread in page.get("threads", []):
-                comment = re.sub(r"<[^>]+>", " ", thread.get("com", ""))
-                if thread.get("replies", 0) > 8 and any(kw in (thread.get("sub","")+comment).lower() for kw in POSITIVE_KEYWORDS):
-                    if "tim" in thread:
-                        ext = thread["ext"]
-                        if ext not in [".webm", ".mp4"]:
-                            continue
-                        results.append({
-                            "source": "4chan (/x/)", "author": thread.get("name", "Anonymous"),
-                            "title": thread.get("sub") or "UAP Intel", "description": comment,
-                            "media_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{thread['tim']}{ext}",
-                            "thumbnail_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{thread['tim']}s.jpg",
-                            "media_type": "video",
-                            "audio_url": "", "source_url": f"https://boards.4channel.org/{FOURCHAN_BOARD}/thread/{thread['no']}", "score": 0
-                        })
-    except: pass
-    
+                if thread.get("ext") not in (".webm", ".mp4"):
+                    continue
+                if thread.get("replies", 0) < 5:
+                    continue
+                comment  = re.sub(r"<[^>]+>", " ", thread.get("com", ""))
+                combined = (thread.get("sub", "") + " " + comment).lower()
+                if not any(kw in combined for kw in POSITIVE_KEYWORDS):
+                    continue
+                if any(kw in combined for kw in NEGATIVE_KEYWORDS):
+                    continue
+                tid, ext = thread["tim"], thread["ext"]
+                results.append({
+                    "source":    "4chan /x/",
+                    "author":    thread.get("name", "Anonymous"),
+                    "title":     thread.get("sub") or comment[:80] or "UAP Thread",
+                    "description": comment[:800],
+                    "media_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tid}{ext}",
+                    "thumbnail_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tid}s.jpg",
+                    "media_type": "video",
+                    "audio_url": "",
+                    "source_url": f"https://boards.4channel.org/{FOURCHAN_BOARD}/thread/{thread['no']}",
+                    "score":     0,
+                    "platform":  "4chan"
+                })
+    except Exception as e:
+        print(f"  ✗ 4chan error: {e}")
+
     random.shuffle(results)
     return results
 
-# ---------------------------------------------------------------------------
-# STORAGE & LEDGER
-# ---------------------------------------------------------------------------
+# ─────────────────────────────────────────────────────────────────────────────
+# ARCHIVAL
+# ─────────────────────────────────────────────────────────────────────────────
 
-def check_and_zip_if_full():
-    total = sum(os.path.getsize(os.path.join(MEDIA_FOLDER, f)) for f in os.listdir(MEDIA_FOLDER) if os.path.isfile(os.path.join(MEDIA_FOLDER, f)))
-    if total < REPO_WARN_BYTES: return
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    zip_name = f"{ZIP_PREFIX}_{ts}.zip"
-    print(f"🗜️ Threshold reached. Zipping to {zip_name}...")
-    with zipfile.ZipFile(zip_name, "w", zipfile.ZIP_DEFLATED) as zf:
-        for f in os.listdir(MEDIA_FOLDER): zf.write(os.path.join(MEDIA_FOLDER, f), arcname=f)
+def _zip_media_folder():
+    ts  = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    out = f"{ZIP_PREFIX}_{ts}.zip"
+    print(f"🗜  Threshold reached — archiving → {out}")
+    with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in os.listdir(MEDIA_FOLDER):
+            zf.write(os.path.join(MEDIA_FOLDER, f), arcname=f)
     shutil.rmtree(MEDIA_FOLDER)
     os.makedirs(MEDIA_FOLDER)
 
+
+def check_and_zip_if_full():
+    total = sum(
+        os.path.getsize(os.path.join(MEDIA_FOLDER, f))
+        for f in os.listdir(MEDIA_FOLDER)
+        if os.path.isfile(os.path.join(MEDIA_FOLDER, f))
+    )
+    if total >= REPO_WARN_BYTES:
+        _zip_media_folder()
+
+
 def build_ledger():
-    print("🛸 Initializing High-Discovery Archivist...")
-    ledger = load_ledger()
-    existing = { b["source_url"] for b in ledger }
+    print("🛸  AXIOM UAP — Video Archivist\n")
+    ledger   = load_ledger()
+    existing = {b["source_url"] for b in ledger}
     new_data = fetch_all_sources()
-    added = 0
+    added    = 0
 
     for s in new_data:
-        if s["source_url"] in existing: continue
-        
-        file_id = hashlib.md5(s["media_url"].encode()).hexdigest()
-        
-        if s["media_type"] == "video":
-            ext = ".mp4"
-            final_path = os.path.join(MEDIA_FOLDER, f"{file_id}{ext}")
-            ledger_media_url = f"./media/{file_id}{ext}"
-            
-            if not os.path.exists(final_path):
-                print(f"📦 Archiving Video: {s['title'][:40]}...")
-                if "v.redd.it" in s["media_url"]:
-                    merge_reddit_video(s["media_url"], s["audio_url"], final_path)
-                else:
-                    try:
-                        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-                        r = requests.get(s["media_url"], stream=True, timeout=20, headers=headers)
-                        if r.status_code == 200:
-                            with open(final_path, 'wb') as f:
-                                for chunk in r.iter_content(8192): f.write(chunk)
-                    except Exception as e:
-                        print(f"   ⚠️ Video Download Error: {e}")
-        else:
-            # We are not archiving jpegs
-            ledger_media_url = s["media_url"]
-            
-        # We are not archiving thumbnails
-        ledger_thumb_url = s["thumbnail_url"]
+        if s["source_url"] in existing:
+            continue
+
+        file_id    = hashlib.md5(s["media_url"].encode()).hexdigest()
+        final_path = os.path.join(MEDIA_FOLDER, f"{file_id}.mp4")
+        local_url  = f"./media/{file_id}.mp4"
+
+        if not os.path.exists(final_path):
+            print(f"\n📦  {s['title'][:60]}")
+            print(f"    {s['source']} | score: {s['score']} | {s['platform']}")
+
+            if s["platform"] == "reddit_native":
+                archived = merge_reddit_video(s["media_url"], s["audio_url"], final_path)
+            else:
+                archived = _download(s["media_url"], final_path)
+                if archived and not _valid(final_path):
+                    print(f"   ✗ File too small — discarding.")
+                    try: os.remove(final_path)
+                    except: pass
+                    archived = False
+
+            # If local archival failed, fall back to CDN URL (may expire)
+            if not archived:
+                local_url = s["media_url"]
 
         timestamp = datetime.now(timezone.utc).isoformat()
-        payload = f"{timestamp}|{s['source']}|{s['title']}|{s['media_url']}|{s['score']}"
-        
+        payload   = f"{timestamp}|{s['source']}|{s['title']}|{s['media_url']}|{s['score']}"
+
         ledger.insert(0, {
-            "timestamp": timestamp, "source": s["source"], "author": s["author"],
-            "title": s["title"], "description": s["description"][:800],
-            "media_url": ledger_media_url,
-            "thumbnail_url": ledger_thumb_url,
-            "media_type": s["media_type"], "source_url": s["source_url"],
-            "hash": hashlib.sha256(payload.encode()).hexdigest(), "score": s["score"]
+            "timestamp":     timestamp,
+            "source":        s["source"],
+            "author":        s["author"],
+            "title":         s["title"],
+            "description":   s["description"][:800],
+            "media_url":     local_url,
+            "thumbnail_url": s["thumbnail_url"],
+            "media_type":    "video",
+            "source_url":    s["source_url"],
+            "hash":          hashlib.sha256(payload.encode()).hexdigest(),
+            "score":         s["score"],
+            "platform":      s.get("platform", "unknown")
         })
+        existing.add(s["source_url"])
         added += 1
 
-    if added > 0: save_ledger(ledger)
+    if added:
+        save_ledger(ledger)
+
     check_and_zip_if_full()
-    print(f"✅ Finished. {added} sightings added.")
+    print(f"\n✅  Done — {added} new video sightings archived.")
+
 
 if __name__ == "__main__":
     build_ledger()
