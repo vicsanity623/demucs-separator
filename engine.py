@@ -70,7 +70,7 @@ NEGATIVE_KEYWORDS = [
 
 HEADERS = {
     "User-Agent": (
-        "AxiomUAPArchivist/1.0 (https://github.com/your-username/your-repo-name); " # <--- IMPORTANT: CUSTOMIZE THIS
+        "AxiomUAPArchivist/1.0 (https://github.com/your-username/your-repo-name); " # <--- IMPORTANT: CUSTOMIZE THIS WITH YOUR REPO URL
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/124.0.0.0 Safari/537.36"
@@ -239,8 +239,9 @@ def _extract_reddit_videos(data: dict, label: str) -> List[Dict]:
 def fetch_all_sources() -> List[Dict]:
     results: List[Dict] = []
     session = requests.Session()
+    # The session User-Agent should be specific to your app, similar to the global HEADERS
     session.headers.update({
-        "User-Agent": "Mozilla/5.0 (Android 13; Mobile; rv:120.0) Gecko/120.0 Firefox/120.0"
+        "User-Agent": HEADERS["User-Agent"] # Use the same detailed User-Agent for the session
     })
 
     # ── Subreddits ──────────────────────────────────────────────────────────
@@ -259,6 +260,7 @@ def fetch_all_sources() -> List[Dict]:
                 results.extend(_extract_reddit_videos(r.json(), f"Reddit /r/{sub}"))
             else:
                 print(f"     skip: HTTP {r.status_code} or empty response. URL: {url} | Content: {r.text[:100]}...")
+                # Reddit often returns a 403 or HTML page when blocking, this helps to see it.
         except json.JSONDecodeError as jde:
             print(f"     skip: JSON decode error: {jde}. URL: {url} | Raw response: {r.text[:100]}...")
         except requests.exceptions.RequestException as re_exc:
@@ -302,27 +304,27 @@ def fetch_all_sources() -> List[Dict]:
         else:
             print(f"  ✗ 4chan catalog failed: HTTP {r.status_code} or empty response. URL: {catalog_url} | Content: {r.text[:100]}...")
             catalog = [] # Ensure catalog is empty to prevent further errors
-    
+
         random.shuffle(catalog)
         processed_threads = 0
         for page in catalog[:4]: # Limit to first 4 pages to avoid too many requests
             for thread in page.get("threads", []):
                 thread_no = thread.get("no")
                 if not thread_no: continue
-    
+
                 # Check for video extensions
                 if thread.get("ext") not in (".webm", ".mp4"):
                     # print(f"     skip 4ch thread {thread_no}: No .webm/.mp4 main file.") # Uncomment for verbose debugging
                     continue
-    
+
                 # Check minimum replies
                 if thread.get("replies", 0) < 5:
                     # print(f"     skip 4ch thread {thread_no}: Less than 5 replies.") # Uncomment for verbose debugging
                     continue
-    
+
                 comment  = re.sub(r"<[^>]+>", " ", thread.get("com", ""))
                 combined = (thread.get("sub", "") + " " + comment).lower()
-    
+
                 # Keyword filtering
                 if not any(kw in combined for kw in POSITIVE_KEYWORDS):
                     # print(f"     skip 4ch thread {thread_no}: No positive keywords.") # Uncomment for verbose debugging
@@ -330,7 +332,7 @@ def fetch_all_sources() -> List[Dict]:
                 if any(kw in combined for kw in NEGATIVE_KEYWORDS):
                     # print(f"     skip 4ch thread {thread_no}: Contains negative keywords.") # Uncomment for verbose debugging
                     continue
-    
+
                 tid, ext = thread["tim"], thread["ext"]
                 results.append({
                     "source":    "4chan /x/",
@@ -348,18 +350,19 @@ def fetch_all_sources() -> List[Dict]:
                 processed_threads += 1
                 # Add a small delay for each thread processed to avoid hammering 4chan's servers
                 time.sleep(0.1) # Small delay per thread
-    
+
         print(f"     Found {processed_threads} potential 4chan videos.")
-    
+
     except json.JSONDecodeError as jde:
         print(f"  ✗ 4chan catalog JSON decode error: {jde}. Raw response: {r.text[:100]}...")
     except requests.exceptions.RequestException as re_exc:
         print(f"  ✗ 4chan network/request error: {re_exc}. URL: {catalog_url}")
     except Exception as e:
         print(f"  ✗ Unexpected 4chan error: {e}")
-    
-        random.shuffle(results)
-        return results
+
+    # Ensure results is always returned, even if empty or if errors occurred
+    random.shuffle(results)
+    return results
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ARCHIVAL
@@ -390,10 +393,12 @@ def build_ledger():
     print("🛸  AXIOM UAP — Video Archivist\n")
     ledger   = load_ledger()
     existing = {b["source_url"] for b in ledger}
-    new_data = fetch_all_sources()
+    
+    # fetch_all_sources must always return a list, even if empty
+    new_data = fetch_all_sources() 
     added    = 0
 
-    for s in new_data:
+    for s in new_data: # This loop caused TypeError if new_data was None
         if s["source_url"] in existing:
             continue
 
