@@ -33,7 +33,7 @@ LEMMY_INSTANCES = ["https://lemmy.world", "https://lemmy.ml"]
 LEMMY_COMMUNITIES = ["ufos", "aliens", "uap", "strangeearth", "paranormal", "conspiracy"]
 FOURCHAN_BOARD = "x"
 
-POSITIVE_KEYWORDS = ["ufo", "uap", "orb", "saucer", "tic tac", "tic-tac", "triangle", "sighting", "craft", "phenomenon", "footage", "video", "nhi", "unidentified", "aerial", "anomalous", "encounter", "lights in the sky"]
+POSITIVE_KEYWORDS = ["ufo", "uap", "orb", "saucer", "tic tac", "tic-tac", "triangle", "sighting", "craft", "phenomenon", "footage", "video", "nhi", "unidentified", "aerial", "anomalous", "encounter", "lights in the sky", "alien"]
 NEGATIVE_KEYWORDS = ["furry", "meme", "cgi", "vfx", "blender", "movie", "game", "art", "drawing", "tattoo", "fiction", "joke", "animation", "render", "satire", "deepfake", "photoshop", "minecraft"]
 
 USER_AGENTS = [
@@ -67,7 +67,7 @@ def _passes_filter(title: str, body: str, score: int = MIN_SCORE) -> bool:
     return score >= MIN_SCORE
 
 # ─────────────────────────────────────────────────────────────────────────────
-# PLAYWRIGHT STEALTH REDDIT SCRAPER (Updated for 2026 shreddit-post)
+# PLAYWRIGHT STEALTH REDDIT SCRAPER
 # ─────────────────────────────────────────────────────────────────────────────
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
@@ -76,7 +76,7 @@ def fetch_reddit_sources_playwright() -> List[Dict]:
     results = []
     subs = REDDIT_SUBS.copy()
     random.shuffle(subs)
-    selected_subs = subs[:2]
+    selected_subs = subs[:2] # Change this number to scan more subreddits
 
     with Stealth().use_sync(sync_playwright()) as p:
         browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-blink-features=AutomationControlled"])
@@ -91,40 +91,39 @@ def fetch_reddit_sources_playwright() -> List[Dict]:
         for sub in selected_subs:
             print(f" 📡 Playwright Stealth → /r/{sub}")
             try:
-                sort = random.choice(["hot", "new", "rising"])
+                sort = random.choice(["hot", "new", "top"])
                 url = f"https://www.reddit.com/r/{sub}/{sort}/"
                 page.goto(url, wait_until="networkidle", timeout=60000)
 
-                time.sleep(random.uniform(2, 4))
-                page.evaluate("window.scrollBy(0, 1200)")
-                time.sleep(random.uniform(2, 4))
-                page.evaluate("window.scrollBy(0, 800)")
+                # Scroll down multiple times to load more posts
+                for _ in range(4):
+                    time.sleep(random.uniform(1.5, 3))
+                    page.evaluate("window.scrollBy(0, 1500)")
 
-                # Improved 2026 selector
+                # Vastly improved DOM extraction using Reddit's custom element attributes
                 posts = page.evaluate("""() => {
                     const posts = [];
                     document.querySelectorAll('shreddit-post').forEach(post => {
-                        const titleEl = post.querySelector('[slot="title"], h3');
-                        const scoreEl = post.querySelector('.score, [id^="vote-arrows"]');
-                        const link = post.querySelector('a');
-                        if (titleEl && link) {
-                            const title = titleEl.innerText.trim();
-                            let score = 0;
-                            if (scoreEl) {
-                                const txt = scoreEl.innerText.replace(/[^0-9k]/g, '').toLowerCase();
-                                score = txt.includes('k') ? parseFloat(txt) * 1000 : parseInt(txt) || 0;
-                            }
-                            const permalink = link.href;
-                            const isVideo = post.querySelector('video, .video') || 
-                                           permalink.includes('v.redd.it') || 
-                                           title.toLowerCase().includes('video') ||
-                                           title.toLowerCase().includes('footage');
-                            if (isVideo && score >= 10) {
-                                posts.push({title, score, permalink, url: permalink});
-                            }
+                        const title = post.getAttribute('post-title') || '';
+                        const permalink = post.getAttribute('permalink') || '';
+                        const score = parseInt(post.getAttribute('score')) || 0;
+                        const contentHref = post.getAttribute('content-href') || '';
+                        
+                        // Check if Reddit marked it as a video, or if the link is a video
+                        const isVideo = post.hasAttribute('is-video') || 
+                                        contentHref.includes('v.redd.it') || 
+                                        contentHref.includes('.mp4');
+                                        
+                        if (isVideo) {
+                            posts.push({
+                                title: title,
+                                score: score,
+                                permalink: 'https://www.reddit.com' + permalink,
+                                url: contentHref || ('https://www.reddit.com' + permalink)
+                            });
                         }
                     });
-                    return posts.slice(0, 8);
+                    return posts; // Return ALL found video posts, not just 8
                 }""")
 
                 for post in posts:
@@ -146,10 +145,10 @@ def fetch_reddit_sources_playwright() -> List[Dict]:
                         "score": post["score"],
                         "platform": "reddit_playwright"
                     })
-                print(f" ✅ Extracted {len(posts)} video candidates from /r/{sub}")
+                print(f" ✅ Extracted {len(results)} matching videos from /r/{sub}")
             except Exception as e:
                 print(f" ✗ Playwright error on /r/{sub}: {e}")
-            time.sleep(random.uniform(12, 25))
+            time.sleep(random.uniform(5, 10))
 
         browser.close()
     return results
@@ -157,7 +156,7 @@ def fetch_reddit_sources_playwright() -> List[Dict]:
 # ─────────────────────────────────────────────────────────────────────────────
 # HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
-import requests  # Global import for Lemmy/4chan
+import requests
 
 def _download(url: str, dest: str, max_bytes: int = MAX_FILE_BYTES) -> bool:
     headers = get_random_headers()
@@ -208,20 +207,30 @@ def merge_reddit_video(video_url: str, audio_url: str, final_path: str) -> bool:
                 try: os.remove(p)
                 except: pass
 
-# Lemmy & 4chan (now fully functional)
+# ─────────────────────────────────────────────────────────────────────────────
+# LEMMY & 4CHAN SCRAPERS
+# ─────────────────────────────────────────────────────────────────────────────
 def fetch_lemmy_sources() -> List[Dict]:
     results = []
     for community in LEMMY_COMMUNITIES:
-        success = False
         for instance in LEMMY_INSTANCES:
             print(f" 📡 Lemmy c/{community} via {instance}")
             headers = get_random_headers()
+            # CRITICAL FIX: Tell Lemmy we want JSON, not the HTML website!
+            headers["Accept"] = "application/json" 
+            
             try:
                 url = f"{instance}/api/v3/post/list?community_name={community}&sort=New&limit=20"
                 time.sleep(random.uniform(1.5, 4))
                 r = requests.get(url, headers=headers, timeout=18)
+                
                 if r.status_code == 200:
-                    data = r.json()
+                    try:
+                        data = r.json()
+                    except requests.exceptions.JSONDecodeError:
+                        print(f"   ↳ ✗ Server returned HTML instead of API data. Skipping.")
+                        continue
+                        
                     for item in data.get("posts", []):
                         post_data = item.get("post", {})
                         title = post_data.get("name", "")
@@ -254,10 +263,9 @@ def fetch_lemmy_sources() -> List[Dict]:
                             "score": max(0, score),
                             "platform": platform
                         })
-                    success = True
-                    break
+                    break # Break inner loop if successful to prevent redundant instance scraping
             except Exception as e:
-                print(f" Lemmy error: {e}")
+                print(f"   ↳ ✗ Network error: {e}")
             time.sleep(random.uniform(2, 5))
     return results
 
@@ -271,14 +279,21 @@ def fetch_4chan_sources() -> List[Dict]:
             return []
         catalog = r.json()
         target_threads = []
-        for page in catalog[:6]:
+        
+        # Look through all pages for UFO related threads
+        for page in catalog:
             for thread in page.get("threads", []):
                 comment = re.sub(r"<[^>]+>", " ", thread.get("com", ""))
                 title = thread.get("sub", "")
                 combined = (title + " " + comment).lower()
+                
+                # Broader 4chan match logic
                 if any(kw in combined for kw in POSITIVE_KEYWORDS) and not any(neg in combined for neg in NEGATIVE_KEYWORDS):
                     target_threads.append(thread.get("no"))
-        target_threads = list(set(target_threads))[:5]
+                    
+        target_threads = list(set(target_threads))[:8] # Check up to 8 threads
+        print(f"   ↳ Found {len(target_threads)} potential threads.")
+        
         processed = 0
         for thread_no in target_threads:
             try:
@@ -310,9 +325,9 @@ def fetch_4chan_sources() -> List[Dict]:
             except:
                 continue
             time.sleep(random.uniform(1.2, 3))
-        print(f" 4chan scan found {processed} videos")
+        print(f" ✅ 4chan scan extracted {processed} videos")
     except Exception as e:
-        print(f" 4chan error: {e}")
+        print(f" ✗ 4chan error: {e}")
     return results
 
 def fetch_all_sources() -> List[Dict]:
