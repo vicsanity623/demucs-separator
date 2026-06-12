@@ -293,74 +293,73 @@ def fetch_all_sources() -> List[Dict]:
         time.sleep(random.uniform(2.0, 4.0))
 
     # ── 4chan /x/ ────────────────────────────────────────────────────────────
-    # ── 4chan /x/ ────────────────────────────────────────────────────────────
-print(f"  🍀 4chan /x/")
-try:
-    catalog_url = f"https://a.4cdn.org/{FOURCHAN_BOARD}/catalog.json"
-    r = requests.get(catalog_url, timeout=10)
-    if r.status_code == 200 and r.text.strip():
-        catalog = r.json()
-    else:
-        print(f"  ✗ 4chan catalog failed: HTTP {r.status_code} or empty response. URL: {catalog_url} | Content: {r.text[:100]}...")
-        catalog = [] # Ensure catalog is empty to prevent further errors
-
-    random.shuffle(catalog)
-    processed_threads = 0
-    for page in catalog[:4]: # Limit to first 4 pages to avoid too many requests
-        for thread in page.get("threads", []):
-            thread_no = thread.get("no")
-            if not thread_no: continue
-
-            # Check for video extensions
-            if thread.get("ext") not in (".webm", ".mp4"):
-                # print(f"     skip 4ch thread {thread_no}: No .webm/.mp4 main file.") # Uncomment for verbose debugging
-                continue
-
-            # Check minimum replies
-            if thread.get("replies", 0) < 5:
-                # print(f"     skip 4ch thread {thread_no}: Less than 5 replies.") # Uncomment for verbose debugging
-                continue
-
-            comment  = re.sub(r"<[^>]+>", " ", thread.get("com", ""))
-            combined = (thread.get("sub", "") + " " + comment).lower()
-
-            # Keyword filtering
-            if not any(kw in combined for kw in POSITIVE_KEYWORDS):
-                # print(f"     skip 4ch thread {thread_no}: No positive keywords.") # Uncomment for verbose debugging
-                continue
-            if any(kw in combined for kw in NEGATIVE_KEYWORDS):
-                # print(f"     skip 4ch thread {thread_no}: Contains negative keywords.") # Uncomment for verbose debugging
-                continue
-
-            tid, ext = thread["tim"], thread["ext"]
-            results.append({
-                "source":    "4chan /x/",
-                "author":    thread.get("name", "Anonymous"),
-                "title":     thread.get("sub") or comment[:80] or f"UAP Thread {thread_no}",
-                "description": comment[:800],
-                "media_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tid}{ext}",
-                "thumbnail_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tid}s.jpg",
-                "media_type": "video",
-                "audio_url": "",
-                "source_url": f"https://boards.4channel.org/{FOURCHAN_BOARD}/thread/{thread_no}",
-                "score":     0, # 4chan doesn't have a direct 'score' like Reddit
-                "platform":  "4chan"
-            })
-            processed_threads += 1
-            # Add a small delay for each thread processed to avoid hammering 4chan's servers
-            time.sleep(0.1) # Small delay per thread
-
-    print(f"     Found {processed_threads} potential 4chan videos.")
-
-except json.JSONDecodeError as jde:
-    print(f"  ✗ 4chan catalog JSON decode error: {jde}. Raw response: {r.text[:100]}...")
-except requests.exceptions.RequestException as re_exc:
-    print(f"  ✗ 4chan network/request error: {re_exc}. URL: {catalog_url}")
-except Exception as e:
-    print(f"  ✗ Unexpected 4chan error: {e}")
-
-    random.shuffle(results)
-    return results
+    print(f"  🍀 4chan /x/")
+    try:
+        catalog_url = f"https://a.4cdn.org/{FOURCHAN_BOARD}/catalog.json"
+        r = requests.get(catalog_url, timeout=10)
+        if r.status_code == 200 and r.text.strip():
+            catalog = r.json()
+        else:
+            print(f"  ✗ 4chan catalog failed: HTTP {r.status_code} or empty response. URL: {catalog_url} | Content: {r.text[:100]}...")
+            catalog = [] # Ensure catalog is empty to prevent further errors
+    
+        random.shuffle(catalog)
+        processed_threads = 0
+        for page in catalog[:4]: # Limit to first 4 pages to avoid too many requests
+            for thread in page.get("threads", []):
+                thread_no = thread.get("no")
+                if not thread_no: continue
+    
+                # Check for video extensions
+                if thread.get("ext") not in (".webm", ".mp4"):
+                    # print(f"     skip 4ch thread {thread_no}: No .webm/.mp4 main file.") # Uncomment for verbose debugging
+                    continue
+    
+                # Check minimum replies
+                if thread.get("replies", 0) < 5:
+                    # print(f"     skip 4ch thread {thread_no}: Less than 5 replies.") # Uncomment for verbose debugging
+                    continue
+    
+                comment  = re.sub(r"<[^>]+>", " ", thread.get("com", ""))
+                combined = (thread.get("sub", "") + " " + comment).lower()
+    
+                # Keyword filtering
+                if not any(kw in combined for kw in POSITIVE_KEYWORDS):
+                    # print(f"     skip 4ch thread {thread_no}: No positive keywords.") # Uncomment for verbose debugging
+                    continue
+                if any(kw in combined for kw in NEGATIVE_KEYWORDS):
+                    # print(f"     skip 4ch thread {thread_no}: Contains negative keywords.") # Uncomment for verbose debugging
+                    continue
+    
+                tid, ext = thread["tim"], thread["ext"]
+                results.append({
+                    "source":    "4chan /x/",
+                    "author":    thread.get("name", "Anonymous"),
+                    "title":     thread.get("sub") or comment[:80] or f"UAP Thread {thread_no}",
+                    "description": comment[:800],
+                    "media_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tid}{ext}",
+                    "thumbnail_url": f"https://i.4cdn.org/{FOURCHAN_BOARD}/{tid}s.jpg",
+                    "media_type": "video",
+                    "audio_url": "",
+                    "source_url": f"https://boards.4channel.org/{FOURCHAN_BOARD}/thread/{thread_no}",
+                    "score":     0, # 4chan doesn't have a direct 'score' like Reddit
+                    "platform":  "4chan"
+                })
+                processed_threads += 1
+                # Add a small delay for each thread processed to avoid hammering 4chan's servers
+                time.sleep(0.1) # Small delay per thread
+    
+        print(f"     Found {processed_threads} potential 4chan videos.")
+    
+    except json.JSONDecodeError as jde:
+        print(f"  ✗ 4chan catalog JSON decode error: {jde}. Raw response: {r.text[:100]}...")
+    except requests.exceptions.RequestException as re_exc:
+        print(f"  ✗ 4chan network/request error: {re_exc}. URL: {catalog_url}")
+    except Exception as e:
+        print(f"  ✗ Unexpected 4chan error: {e}")
+    
+        random.shuffle(results)
+        return results
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ARCHIVAL
