@@ -1,0 +1,339 @@
+{
+  "id": "demucs-ultimate",
+  "name": "Demucs Ultimate Separator",
+  "description": "High-quality 4-stem audio separation using Demucs htdemucs. Upload any audio, separate vocals, drums, bass, and other instruments. Preview and download individual stems or as a zip.",
+  "version": "1.0.1",
+  "author": "vicsanity623",
+  "category": "Audio",
+  "icon": "https://raw.githubusercontent.com/vicsanity623/AdvancedAudioStemSeparator/main/icon.png",
+  "install": {
+    "method": "shell",
+    "steps": [
+      {
+        "type": "shell",
+        "command": "pip3 install torch torchvision torchaudio",
+        "description": "Installing PyTorch"
+      },
+      {
+        "type": "shell",
+        "command": "pip3 install soundfile pyarrow",
+        "description": "Installing audio libraries"
+      },
+      {
+        "type": "shell",
+        "command": "pip3 install --only-binary :all: llvmlite demucs flask flask-cors zipfile37 ffmpeg-python tqdm 2>/dev/null || pip3 install --no-deps demucs && pip3 install flask flask-cors zipfile37 ffmpeg-python tqdm",
+        "description": "Installing Demucs and dependencies using pre-built wheels (skips llvmlite build)"
+      }
+    ]
+  },
+  "ui": {
+    "type": "web",
+    "port": 7890,
+    "launch": true,
+    "target": "main",
+    "mode": "local"
+  },
+  "run": {
+    "method": "shell",
+    "steps": [
+      {
+        "type": "shell",
+        "command": "cd \"{{app_dir}}\" && python3 app.py",
+        "description": "Running Demucs separation"
+      }
+    ]
+  },
+  "templates": {
+    "main": {
+      "label": "Demucs Ultimate",
+      "icon": "music",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "row",
+          "children": [
+            {
+              "type": "upload",
+              "id": "audio_input",
+              "label": "Upload Audio File",
+              "accept": [
+                ".wav",
+                ".mp3",
+                ".flac",
+                ".aac",
+                ".ogg",
+                ".m4a"
+              ],
+              "required": true,
+              "placeholder": "Drop audio file here or click to browse"
+            },
+            {
+              "type": "select",
+              "id": "mode",
+              "label": "Separation Mode",
+              "default": "4stem",
+              "options": [
+                {
+                  "value": "4stem",
+                  "label": "4 Stem (Vocals, Drums, Bass, Other)"
+                },
+                {
+                  "value": "vocals",
+                  "label": "Vocals Only (Karaoke)"
+                },
+                {
+                  "value": "2stem",
+                  "label": "2 Stem (Vocals / No Vocals)"
+                },
+                {
+                  "value": "drums",
+                  "label": "Drums Only"
+                },
+                {
+                  "value": "bass",
+                  "label": "Bass Only"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "children": [
+            {
+              "type": "select",
+              "id": "model",
+              "label": "Model Quality",
+              "default": "htdemucs",
+              "options": [
+                {
+                  "value": "htdemucs",
+                  "label": "HTDemucs (Best Quality, 4 stem)"
+                },
+                {
+                  "value": "htdemucs_ft",
+                  "label": "HTDemucs Fine-Tuned (Higher Quality)"
+                },
+                {
+                  "value": "htdemucs_6s",
+                  "label": "HTDemucs 6 Stem (Extended)"
+                },
+                {
+                  "value": "hdemucs_mmi",
+                  "label": "HDemucs MMI (Faster, Good Quality)"
+                }
+              ]
+            },
+            {
+              "type": "number",
+              "id": "segment",
+              "label": "Segment Length (seconds)",
+              "default": 10,
+              "min": 1,
+              "max": 30,
+              "step": 1,
+              "description": "Lower = less memory, higher = better quality"
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "children": [
+            {
+              "type": "slider",
+              "id": "overlap",
+              "label": "Overlap (%)",
+              "default": 0.25,
+              "min": 0,
+              "max": 0.5,
+              "step": 0.05,
+              "description": "Smoother transitions between segments"
+            },
+            {
+              "type": "button",
+              "id": "separate",
+              "label": "🎧 Separate Audio",
+              "variant": "primary",
+              "icon": "play",
+              "action": {
+                "type": "call",
+                "method": "run_separation",
+                "params": {
+                  "audio": "{{audio_input}}",
+                  "mode": "{{mode}}",
+                  "model": "{{model}}",
+                  "segment": "{{segment}}",
+                  "overlap": "{{overlap}}"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "progress",
+          "id": "progress",
+          "label": "Processing...",
+          "hidden": true,
+          "variant": "striped",
+          "animated": true
+        },
+        {
+          "type": "divider",
+          "label": "Results"
+        },
+        {
+          "type": "row",
+          "id": "results_row",
+          "hidden": true,
+          "children": [
+            {
+              "type": "card",
+              "id": "vocals_card",
+              "label": "🎤 Vocals",
+              "hidden": true,
+              "children": [
+                {
+                  "type": "audio",
+                  "id": "vocals_preview",
+                  "label": "Preview"
+                },
+                {
+                  "type": "button",
+                  "id": "download_vocals",
+                  "label": "Download",
+                  "icon": "download",
+                  "action": {
+                    "type": "call",
+                    "method": "download_stem",
+                    "params": {
+                      "stem": "vocals",
+                      "session": "{{session_id}}"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "card",
+              "id": "drums_card",
+              "label": "🥁 Drums",
+              "hidden": true,
+              "children": [
+                {
+                  "type": "audio",
+                  "id": "drums_preview",
+                  "label": "Preview"
+                },
+                {
+                  "type": "button",
+                  "id": "download_drums",
+                  "label": "Download",
+                  "icon": "download",
+                  "action": {
+                    "type": "call",
+                    "method": "download_stem",
+                    "params": {
+                      "stem": "drums",
+                      "session": "{{session_id}}"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "card",
+              "id": "bass_card",
+              "label": "🎸 Bass",
+              "hidden": true,
+              "children": [
+                {
+                  "type": "audio",
+                  "id": "bass_preview",
+                  "label": "Preview"
+                },
+                {
+                  "type": "button",
+                  "id": "download_bass",
+                  "label": "Download",
+                  "icon": "download",
+                  "action": {
+                    "type": "call",
+                    "method": "download_stem",
+                    "params": {
+                      "stem": "bass",
+                      "session": "{{session_id}}"
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "card",
+              "id": "other_card",
+              "label": "🎵 Other",
+              "hidden": true,
+              "children": [
+                {
+                  "type": "audio",
+                  "id": "other_preview",
+                  "label": "Preview"
+                },
+                {
+                  "type": "button",
+                  "id": "download_other",
+                  "label": "Download",
+                  "icon": "download",
+                  "action": {
+                    "type": "call",
+                    "method": "download_stem",
+                    "params": {
+                      "stem": "other",
+                      "session": "{{session_id}}"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "row",
+          "id": "download_all_row",
+          "hidden": true,
+          "children": [
+            {
+              "type": "button",
+              "id": "download_all",
+              "label": "📦 Download All as ZIP",
+              "variant": "secondary",
+              "icon": "archive",
+              "action": {
+                "type": "call",
+                "method": "download_zip",
+                "params": {
+                  "session": "{{session_id}}"
+                }
+              }
+            },
+            {
+              "type": "button",
+              "id": "new_file",
+              "label": "🔄 New File",
+              "variant": "ghost",
+              "icon": "refresh",
+              "action": {
+                "type": "reset",
+                "target": [
+                  "audio_input",
+                  "results_row",
+                  "download_all_row",
+                  "progress"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
