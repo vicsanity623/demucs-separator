@@ -1,0 +1,7 @@
+flask
+flask-cors
+demucs
+soundfile
+zipfile37
+ffmpeg-python
+tqdm
