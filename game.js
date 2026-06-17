@@ -1,5 +1,4 @@
 // Game State
-// Game State
 let gameState = {
     id: 1, name: 'Bulbasaur', level: 5, xp: 0, maxXp: 100, 
     hearts: 2, attack: 10, defense: 10, maxHp: 50,
@@ -273,24 +272,10 @@ function playerAttack() {
     
     eHp -= damage;
     updateHealthBars();
-
-    const enemy = document.getElementById('enemy-sprite');
-    enemy.classList.add('animate-shake');
-
-    const slash = document.createElement('div');
-    slash.className = 'slash-effect';
-    document.getElementById('battle-screen').appendChild(slash);
-
-    const dmgText = document.createElement('div');
-    dmgText.className = 'floating-text';
-    dmgText.innerText = `-${damage}`;
-    document.getElementById('battle-screen').appendChild(dmgText);
-
-    setTimeout(() => {
-        enemy.classList.remove('animate-shake');
-        slash.remove();
-        dmgText.remove();
-    }, 500);
+    
+    // Anime attack effect
+    document.getElementById('enemy-sprite').style.transform = 'translate(40px) scale(1.1)';
+    setTimeout(() => document.getElementById('enemy-sprite').style.transform = 'translate(40px)', 100);
 
     if(eHp <= 0) endBattle(true);
 }
