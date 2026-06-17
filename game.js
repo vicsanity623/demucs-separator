@@ -100,6 +100,41 @@ function updateHub() {
     localStorage.setItem('pokeSave', JSON.stringify(gameState));
 }
 
+// Custom Native-feeling Modal & Vibration System
+function showModal(title, text, vibratePattern = [50]) {
+    document.getElementById('modal-title').innerText = title;
+    document.getElementById('modal-desc').innerText = text;
+    
+    const modal = document.getElementById('custom-modal');
+    const content = document.getElementById('modal-content');
+    
+    modal.classList.remove('hidden');
+    // Tiny delay to allow CSS to animate
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+        content.classList.add('scale-100');
+    }, 10);
+
+    // Trigger iPhone haptics if supported
+    if (navigator.vibrate) {
+        navigator.vibrate(vibratePattern);
+    }
+}
+
+function closeModal() {
+    const modal = document.getElementById('custom-modal');
+    const content = document.getElementById('modal-content');
+    
+    modal.classList.add('opacity-0');
+    content.classList.remove('scale-100');
+    content.classList.add('scale-95');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
 // --- PETTING SWIRL MECHANIC ---
 let touchTimer;
 let isSwirling = false;
@@ -151,10 +186,10 @@ function feedBerry() {
             gameState.berries--;
             gainHeart();
         } else {
-            alert(`${gameState.name} is completely full and happy!`);
+            showModal(`${gameState.name} is completely full and happy!`);
         }
     } else {
-        alert("You don't have any berries left! Win battles to find more.");
+        showModal("You don't have any berries left! Win battles to find more.");
     }
 }
 
@@ -167,7 +202,7 @@ function addXP(baseXp) {
     else multiplier = 3; 
 
     if (multiplier === 0) {
-        alert(`${gameState.name} is in a bad mood and refuses! Pet it or feed it.`);
+        showModal(`${gameState.name} is in a bad mood and refuses! Pet it or feed it.`);
         updateHub();
         return;
     }
@@ -214,7 +249,7 @@ function levelUp(leftoverXp = 0) {
         if (gameState.level > 10 && Math.random() > 0.5 && gameState.id === 1) {
             triggerEvolution(2, 'Ivysaur');
         } else {
-            alert(`${gameState.name} grew to Level ${gameState.level}!`);
+            showModal(`${gameState.name} grew to Level ${gameState.level}!`);
         }
     }, 50);
 }
@@ -226,10 +261,10 @@ let pHp = gameState.maxHp;
 
 function enterBattle() {
     if(gameState.hearts <= 1) {
-        alert(`${gameState.name} is too sad to battle!`); return;
+        showModal(`${gameState.name} is too sad to battle!`); return;
     }
     if(gameState.hearts <= 3 && Math.random() > 0.5) {
-        alert(`${gameState.name} refused to battle!`); return;
+        showModal(`${gameState.name} refused to battle!`); return;
     }
 
     showScreen('battle-screen');
@@ -294,13 +329,13 @@ function endBattle(won) {
             gameState.berries += foundBerries;
             lootMsg += ` And found ${foundBerries} 🍓 Berry!`;
         }
-        alert(lootMsg);
+        showModal(lootMsg);
         
         // Switch to hub FIRST, then trigger the XP animation
         showScreen('hub-screen');
         setTimeout(() => addXP(50), 300); // Small delay to let screen transition finish
     } else {
-        alert("You blacked out...");
+        showModal("You blacked out...");
         gameState.hearts = Math.max(0, gameState.hearts - 2); 
         updateHub();
         showScreen('hub-screen');
@@ -322,7 +357,7 @@ function triggerEvolution(newId, newName) {
         document.getElementById('evo-sprite').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${newId}.gif`;
         
         setTimeout(() => {
-            alert(`Your Pokemon evolved into ${newName}!`);
+            showModal(`Your Pokemon evolved into ${newName}!`);
             updateHub();
             showScreen('hub-screen');
         }, 2000);
