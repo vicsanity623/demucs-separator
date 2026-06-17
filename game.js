@@ -2,7 +2,15 @@
 let gameState = {
     id: 1, name: 'Bulbasaur', level: 5, xp: 0, maxXp: 100, 
     hearts: 2, attack: 10, defense: 10, maxHp: 50,
-    berries: 5, lastInteraction: Date.now()
+    berries: 5, lastInteraction: Date.now(),
+    type: 'Grass', moves: [{name: 'Tackle', type: 'Normal', power: 10}]
+};
+
+const TYPE_CHART = {
+    'Fire': { 'Grass': 2, 'Water': 0.5, 'Normal': 1 },
+    'Water': { 'Fire': 2, 'Grass': 0.5, 'Normal': 1 },
+    'Grass': { 'Water': 2, 'Fire': 0.5, 'Normal': 1 },
+    'Normal': { 'Fire': 1, 'Water': 1, 'Grass': 1 }
 };
 
 // Heart Depletion Interval (Loses 1 heart every 60 seconds)
