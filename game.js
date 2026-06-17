@@ -1,32 +1,10 @@
 // Game State
+// Game State
 let gameState = {
     id: 1, name: 'Bulbasaur', level: 5, xp: 0, maxXp: 100, 
     hearts: 2, attack: 10, defense: 10, maxHp: 50,
-    berries: 5, lastInteraction: Date.now(),
-    type: 'grass',
-    moves: ['tackle', 'vineWhip'] // Starting moves
+    berries: 5, lastInteraction: Date.now()
 };
-
-// Move Database
-const moveDB = {
-    tackle: { name: 'Tackle', type: 'normal', power: 10, color: 'bg-gray-500' },
-    vineWhip: { name: 'Vine Whip', type: 'grass', power: 15, color: 'bg-green-600' },
-    ember: { name: 'Ember', type: 'fire', power: 15, color: 'bg-red-500' },
-    waterGun: { name: 'Water Gun', type: 'water', power: 15, color: 'bg-blue-500' }
-};
-
-// Type Effectiveness chart
-function getTypeMultiplier(attackType, defendType) {
-    if (attackType === 'fire' && defendType === 'grass') return 2;
-    if (attackType === 'water' && defendType === 'fire') return 2;
-    if (attackType === 'grass' && defendType === 'water') return 2;
-    if (attackType === 'grass' && defendType === 'fire') return 0.5;
-    if (attackType === 'fire' && defendType === 'water') return 0.5;
-    if (attackType === 'water' && defendType === 'grass') return 0.5;
-    return 1; // Normal damage
-}
-
-let enemyCurrentType = 'normal'; // Default fallback
 
 // Heart Depletion Interval (Loses 1 heart every 60 seconds)
 setInterval(() => {
@@ -123,41 +101,6 @@ function updateHub() {
     localStorage.setItem('pokeSave', JSON.stringify(gameState));
 }
 
-// Custom Native-feeling Modal & Vibration System
-function showModal(title, text, vibratePattern = [50]) {
-    document.getElementById('modal-title').innerText = title;
-    document.getElementById('modal-desc').innerText = text;
-    
-    const modal = document.getElementById('custom-modal');
-    const content = document.getElementById('modal-content');
-    
-    modal.classList.remove('hidden');
-    // Tiny delay to allow CSS to animate
-    setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        content.classList.remove('scale-95');
-        content.classList.add('scale-100');
-    }, 10);
-
-    // Trigger iPhone haptics if supported
-    if (navigator.vibrate) {
-        navigator.vibrate(vibratePattern);
-    }
-}
-
-function closeModal() {
-    const modal = document.getElementById('custom-modal');
-    const content = document.getElementById('modal-content');
-    
-    modal.classList.add('opacity-0');
-    content.classList.remove('scale-100');
-    content.classList.add('scale-95');
-    
-    setTimeout(() => {
-        modal.classList.add('hidden');
-    }, 300);
-}
-
 // --- PETTING SWIRL MECHANIC ---
 let touchTimer;
 let isSwirling = false;
@@ -209,10 +152,10 @@ function feedBerry() {
             gameState.berries--;
             gainHeart();
         } else {
-            showModal(`${gameState.name} is completely full and happy!`);
+            alert(`${gameState.name} is completely full and happy!`);
         }
     } else {
-        showModal("You don't have any berries left! Win battles to find more.");
+        alert("You don't have any berries left! Win battles to find more.");
     }
 }
 
@@ -225,7 +168,7 @@ function addXP(baseXp) {
     else multiplier = 3; 
 
     if (multiplier === 0) {
-        showModal(`${gameState.name} is in a bad mood and refuses! Pet it or feed it.`);
+        alert(`${gameState.name} is in a bad mood and refuses! Pet it or feed it.`);
         updateHub();
         return;
     }
@@ -272,7 +215,7 @@ function levelUp(leftoverXp = 0) {
         if (gameState.level > 10 && Math.random() > 0.5 && gameState.id === 1) {
             triggerEvolution(2, 'Ivysaur');
         } else {
-            showModal(`${gameState.name} grew to Level ${gameState.level}!`);
+            alert(`${gameState.name} grew to Level ${gameState.level}!`);
         }
     }, 50);
 }
@@ -284,10 +227,10 @@ let pHp = gameState.maxHp;
 
 function enterBattle() {
     if(gameState.hearts <= 1) {
-        showModal(`${gameState.name} is too sad to battle!`); return;
+        alert(`${gameState.name} is too sad to battle!`); return;
     }
     if(gameState.hearts <= 3 && Math.random() > 0.5) {
-        showModal(`${gameState.name} refused to battle!`); return;
+        alert(`${gameState.name} refused to battle!`); return;
     }
 
     showScreen('battle-screen');
@@ -302,23 +245,14 @@ function enterBattle() {
     
     // Fetch Correct Name Dynamically
     document.getElementById('enemy-name').innerText = "Wild Pokemon"; // Temp fallback
-    enemyCurrentType = 'normal'; 
     fetch(`https://pokeapi.co/api/v2/pokemon/${wildId}`)
         .then(res => res.json())
         .then(data => {
             let capitalized = data.name.charAt(0).toUpperCase() + data.name.slice(1);
             document.getElementById('enemy-name').innerText = "Wild " + capitalized;
-            if(data.types.length > 0) enemyCurrentType = data.types[0].type.name;
         })
         .catch(err => console.log(err));
-
-    // Generate Move Buttons based on what the Player knows
-    let movesHtml = '';
-    gameState.moves.forEach(moveId => {
-        let move = moveDB[moveId];
-        movesHtml += `<button onclick="playerAttack('${moveId}')" class="${move.color} rounded-xl font-bold text-xl text-white shadow-lg active:scale-95 transition-transform border-2 border-white/20 hover:brightness-110">${move.name}</button>`;
-    });
-    document.getElementById('battle-moves-ui').innerHTML = movesHtml;
+    
     document.getElementById('battle-player-sprite').src = document.getElementById('hub-sprite').src;
     document.getElementById('battle-player-name').innerText = gameState.name;
     
@@ -332,46 +266,19 @@ function enterBattle() {
     }, 1200);
 }
 
-function playerAttack(moveId) {
-    let move = moveDB[moveId];
-    let baseDmg = move.power + Math.floor(gameState.attack / 2);
-    let multiplier = getTypeMultiplier(move.type, enemyCurrentType);
+function playerAttack() {
+    let damage = gameState.attack;
+    // Great mood 1-hit KO chance
+    if(gameState.hearts >= 5 && Math.random() < 0.1) damage = 999;
     
-    let totalDmg = Math.floor(baseDmg * multiplier);
-
-    if(gameState.hearts >= 5 && Math.random() < 0.05) totalDmg = 999;
-    
-    eHp -= totalDmg;
+    eHp -= damage;
     updateHealthBars();
     
-    const pSprite = document.getElementById('battle-player-sprite');
-    const eSprite = document.getElementById('enemy-sprite');
+    // Anime attack effect
+    document.getElementById('enemy-sprite').style.transform = 'translate(40px) scale(1.1)';
+    setTimeout(() => document.getElementById('enemy-sprite').style.transform = 'translate(40px)', 100);
 
-    pSprite.classList.remove('anim-lunge');
-    void pSprite.offsetWidth;
-    pSprite.classList.add('anim-lunge');
-
-    setTimeout(() => {
-        eSprite.classList.remove('anim-shake', 'flash-white');
-        void eSprite.offsetWidth;
-        eSprite.classList.add('anim-shake', 'flash-white');
-        if (navigator.vibrate) navigator.vibrate([50, 50]);
-
-        let fct = document.createElement('div');
-        fct.className = 'floating-text';
-        fct.innerText = totalDmg >= 999 ? "KO!" : `-${totalDmg}`;
-        
-        if (multiplier > 1) { fct.innerText += "\nSuper!"; fct.classList.add('text-super'); }
-        if (multiplier < 1) { fct.innerText += "\nWeak"; fct.classList.add('text-weak'); }
-        
-        document.getElementById('battle-screen').appendChild(fct);
-
-        setTimeout(() => {
-            fct.remove();
-            eSprite.classList.remove('flash-white');
-            if(eHp <= 0) endBattle(true);
-        }, 1000);
-    }, 150);
+    if(eHp <= 0) endBattle(true);
 }
 
 function updateHealthBars() {
@@ -388,13 +295,13 @@ function endBattle(won) {
             gameState.berries += foundBerries;
             lootMsg += ` And found ${foundBerries} 🍓 Berry!`;
         }
-        showModal(lootMsg);
+        alert(lootMsg);
         
         // Switch to hub FIRST, then trigger the XP animation
         showScreen('hub-screen');
         setTimeout(() => addXP(50), 300); // Small delay to let screen transition finish
     } else {
-        showModal("You blacked out...");
+        alert("You blacked out...");
         gameState.hearts = Math.max(0, gameState.hearts - 2); 
         updateHub();
         showScreen('hub-screen');
@@ -416,7 +323,7 @@ function triggerEvolution(newId, newName) {
         document.getElementById('evo-sprite').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${newId}.gif`;
         
         setTimeout(() => {
-            showModal(`Your Pokemon evolved into ${newName}!`);
+            alert(`Your Pokemon evolved into ${newName}!`);
             updateHub();
             showScreen('hub-screen');
         }, 2000);
