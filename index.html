@@ -52,7 +52,7 @@
                 <h2 id="hub-name" class="text-2xl font-black uppercase">Bulbasaur</h2>
                 <p class="text-sm text-gray-300">Level <span id="hub-level">5</span></p>
             </div>
-            <div class="flex gap-1" id="heart-container">
+            <div class="flex gap-1 flex-wrap justify-end max-w-[50%]" id="heart-container">
                 <!-- Hearts injected here -->
             </div>
         </div>
@@ -60,7 +60,7 @@
         <!-- Pokemon Sprite Area -->
         <div id="sprite-container" class="flex-1 flex items-center justify-center relative touch-area">
             <div id="swirl-effect" class="absolute w-48 h-48 rounded-full border-4 border-pink-500 hidden opacity-0"></div>
-            <img id="hub-sprite" src="" class="w-64 h-64 object-contain filter drop-shadow-2xl transition-transform duration-300 transform scale-100">
+            <img id="hub-sprite" src="" class="w-64 h-64 object-contain filter drop-shadow-2xl transition-transform duration-300 transform scale-100 pixel-perfect">
         </div>
 
         <!-- XP Bar & Controls -->
@@ -90,7 +90,7 @@
                 <h3 id="enemy-name" class="font-bold">Wild Pidgey</h3>
                 <div class="w-full h-2 bg-gray-700 rounded-full mt-2"><div id="enemy-hp" class="h-full bg-green-500 w-full transition-all"></div></div>
             </div>
-            <img id="enemy-sprite" src="" class="w-40 h-40 object-contain translate-x-10">
+            <img id="enemy-sprite" src="" class="w-40 h-40 object-contain translate-x-10 pixel-perfect">
         </div>
         
         <!-- Player Area -->
@@ -99,7 +99,7 @@
                 <h3 id="battle-player-name" class="font-bold">Bulbasaur</h3>
                 <div class="w-full h-2 bg-gray-700 rounded-full mt-2"><div id="player-hp" class="h-full bg-green-500 w-full transition-all"></div></div>
             </div>
-            <img id="battle-player-sprite" src="" class="w-48 h-48 object-contain -translate-x-10">
+            <img id="battle-player-sprite" src="" class="w-48 h-48 object-contain -translate-x-10 pixel-perfect">
         </div>
 
         <!-- Moves UI -->
@@ -114,6 +114,15 @@
         <div class="text-center">
             <h1 class="text-black text-3xl font-black mb-10">What? <span id="evo-old-name">Bulbasaur</span> is evolving!</h1>
             <img id="evo-sprite" src="" class="w-64 h-64 object-contain mx-auto mix-blend-multiply animate-pulse filter contrast-200 brightness-0">
+        </div>
+    </div>
+
+    <!-- CUSTOM ALERT MODAL -->
+    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm">
+        <div class="bg-gray-800 border border-gray-600 p-6 rounded-2xl w-10/12 max-w-sm text-center shadow-2xl transform scale-95 transition-transform duration-300" id="modal-content">
+            <h3 id="modal-title" class="text-2xl font-black text-white mb-2">Notification</h3>
+            <p id="modal-desc" class="text-gray-300 mb-6 text-lg">Message goes here</p>
+            <button onclick="closeModal()" class="w-full py-3 bg-blue-600 rounded-xl font-bold text-white shadow-lg active:scale-95 transition-transform">Awesome!</button>
         </div>
     </div>
 
