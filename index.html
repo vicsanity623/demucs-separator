@@ -118,6 +118,13 @@
     </div>
 
     <script src="game.js"></script>
-  <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+    <!-- Move Learning Modal -->
+    <div id="move-modal" class="hidden absolute inset-0 bg-black/80 z-[100] flex items-center justify-center p-6">
+        <div class="bg-gray-800 p-6 rounded-2xl w-full max-w-sm border border-gray-600">
+            <h2 id="modal-title" class="text-xl font-bold mb-4">Learn Move?</h2>
+            <div id="move-options" class="flex flex-col gap-2"></div>
+        </div>
+    </div>
+    <script>if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
 </body>
 </html>
