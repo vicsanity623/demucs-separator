@@ -27,7 +27,6 @@
     100% { transform: scale(1.5) rotate(360deg); opacity: 0; }
 }
 .animate-swirl {
-    display: block !important;
     animation: swirlAnim 1s ease-out forwards;
 }
 
