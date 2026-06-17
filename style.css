@@ -36,3 +36,22 @@
 }
 
 .screen { transition: opacity 0.3s ease; }
+
+/* Effectiveness Indicator */
+.effectiveness-badge {
+    position: absolute;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    pointer-events: none;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.super-effective { background: #ef4444; color: white; }
+.not-very-effective { background: #3b82f6; color: white; }
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
