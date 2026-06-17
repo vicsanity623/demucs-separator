@@ -1,16 +1,9 @@
 // Game State
+// Game State
 let gameState = {
     id: 1, name: 'Bulbasaur', level: 5, xp: 0, maxXp: 100, 
     hearts: 2, attack: 10, defense: 10, maxHp: 50,
-    berries: 5, lastInteraction: Date.now(),
-    type: 'Grass', moves: [{name: 'Tackle', type: 'Normal', power: 10}]
-};
-
-const TYPE_CHART = {
-    'Fire': { 'Grass': 2, 'Water': 0.5, 'Normal': 1 },
-    'Water': { 'Fire': 2, 'Grass': 0.5, 'Normal': 1 },
-    'Grass': { 'Water': 2, 'Fire': 0.5, 'Normal': 1 },
-    'Normal': { 'Fire': 1, 'Water': 1, 'Grass': 1 }
+    berries: 5, lastInteraction: Date.now()
 };
 
 // Heart Depletion Interval (Loses 1 heart every 60 seconds)
@@ -108,41 +101,6 @@ function updateHub() {
     localStorage.setItem('pokeSave', JSON.stringify(gameState));
 }
 
-// Custom Native-feeling Modal & Vibration System
-function showModal(title, text, vibratePattern = [50]) {
-    document.getElementById('modal-title').innerText = title;
-    document.getElementById('modal-desc').innerText = text;
-    
-    const modal = document.getElementById('custom-modal');
-    const content = document.getElementById('modal-content');
-    
-    modal.classList.remove('hidden');
-    // Tiny delay to allow CSS to animate
-    setTimeout(() => {
-        modal.classList.remove('opacity-0');
-        content.classList.remove('scale-95');
-        content.classList.add('scale-100');
-    }, 10);
-
-    // Trigger iPhone haptics if supported
-    if (navigator.vibrate) {
-        navigator.vibrate(vibratePattern);
-    }
-}
-
-function closeModal() {
-    const modal = document.getElementById('custom-modal');
-    const content = document.getElementById('modal-content');
-    
-    modal.classList.add('opacity-0');
-    content.classList.remove('scale-100');
-    content.classList.add('scale-95');
-    
-    setTimeout(() => {
-        modal.classList.add('hidden');
-    }, 300);
-}
-
 // --- PETTING SWIRL MECHANIC ---
 let touchTimer;
 let isSwirling = false;
@@ -194,10 +152,10 @@ function feedBerry() {
             gameState.berries--;
             gainHeart();
         } else {
-            showModal(`${gameState.name} is completely full and happy!`);
+            alert(`${gameState.name} is completely full and happy!`);
         }
     } else {
-        showModal("You don't have any berries left! Win battles to find more.");
+        alert("You don't have any berries left! Win battles to find more.");
     }
 }
 
@@ -210,7 +168,7 @@ function addXP(baseXp) {
     else multiplier = 3; 
 
     if (multiplier === 0) {
-        showModal(`${gameState.name} is in a bad mood and refuses! Pet it or feed it.`);
+        alert(`${gameState.name} is in a bad mood and refuses! Pet it or feed it.`);
         updateHub();
         return;
     }
@@ -257,7 +215,7 @@ function levelUp(leftoverXp = 0) {
         if (gameState.level > 10 && Math.random() > 0.5 && gameState.id === 1) {
             triggerEvolution(2, 'Ivysaur');
         } else {
-            showModal(`${gameState.name} grew to Level ${gameState.level}!`);
+            alert(`${gameState.name} grew to Level ${gameState.level}!`);
         }
     }, 50);
 }
@@ -269,10 +227,10 @@ let pHp = gameState.maxHp;
 
 function enterBattle() {
     if(gameState.hearts <= 1) {
-        showModal(`${gameState.name} is too sad to battle!`); return;
+        alert(`${gameState.name} is too sad to battle!`); return;
     }
     if(gameState.hearts <= 3 && Math.random() > 0.5) {
-        showModal(`${gameState.name} refused to battle!`); return;
+        alert(`${gameState.name} refused to battle!`); return;
     }
 
     showScreen('battle-screen');
@@ -308,12 +266,11 @@ function enterBattle() {
     }, 1200);
 }
 
-function playerAttack(moveIndex = 0, enemyType = 'Normal') {
-    const move = gameState.moves[moveIndex];
-    const multiplier = TYPE_CHART[move.type][enemyType] || 1;
-    let damage = Math.floor(gameState.attack * (move.power / 10) * multiplier);
-
+function playerAttack() {
+    let damage = gameState.attack;
+    // Great mood 1-hit KO chance
     if(gameState.hearts >= 5 && Math.random() < 0.1) damage = 999;
+    
     eHp -= damage;
     updateHealthBars();
     
@@ -338,13 +295,13 @@ function endBattle(won) {
             gameState.berries += foundBerries;
             lootMsg += ` And found ${foundBerries} 🍓 Berry!`;
         }
-        showModal(lootMsg);
+        alert(lootMsg);
         
         // Switch to hub FIRST, then trigger the XP animation
         showScreen('hub-screen');
         setTimeout(() => addXP(50), 300); // Small delay to let screen transition finish
     } else {
-        showModal("You blacked out...");
+        alert("You blacked out...");
         gameState.hearts = Math.max(0, gameState.hearts - 2); 
         updateHub();
         showScreen('hub-screen');
@@ -366,7 +323,7 @@ function triggerEvolution(newId, newName) {
         document.getElementById('evo-sprite').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${newId}.gif`;
         
         setTimeout(() => {
-            showModal(`Your Pokemon evolved into ${newName}!`);
+            alert(`Your Pokemon evolved into ${newName}!`);
             updateHub();
             showScreen('hub-screen');
         }, 2000);
