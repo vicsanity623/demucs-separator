@@ -95,8 +95,7 @@ function updateHub() {
     if(document.getElementById('berry-count')) {
         document.getElementById('berry-count').innerText = gameState.berries;
     }
-    
-    gameState.lastInteraction = Date.now();
+
     localStorage.setItem('pokeSave', JSON.stringify(gameState));
 }
 
