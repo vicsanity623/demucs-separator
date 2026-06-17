@@ -1,0 +1,46 @@
+/* Glassmorphism panel for 2026 UI */
+.glass-panel {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Shiny gradient for XP Bar */
+.shiny-gradient {
+    background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #3b82f6);
+    background-size: 200% 200%;
+    animation: gradientShine 2s ease infinite;
+}
+
+@keyframes gradientShine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Swirl Interaction Animation */
+@keyframes swirlAnim {
+    0% { transform: scale(0.5) rotate(0deg); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: scale(1.5) rotate(360deg); opacity: 0; }
+}
+.animate-swirl {
+    display: block !important;
+    animation: swirlAnim 1s ease-out forwards;
+}
+
+.flash-white {
+    filter: brightness(2) contrast(1.5);
+}
+
+.screen { transition: opacity 0.3s ease; }
+
+/* Add to style.css */
+.pixel-perfect {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
