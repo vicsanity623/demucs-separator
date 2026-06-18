@@ -23,6 +23,9 @@ function showScreen(id) {
 
 // Boot Sequence
 window.onload = () => {
+    document.getElementById('hub-sprite').onerror = function() {
+        this.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${gameState.id}.gif`;
+    };
     setTimeout(() => {
         document.getElementById('loading-bar').style.width = '100%';
         setTimeout(() => {
@@ -77,12 +80,7 @@ function updateHub() {
     document.getElementById('hub-name').innerText = gameState.name;
     document.getElementById('hub-level').innerText = gameState.level;
     document.getElementById('xp-bar').style.width = `${(gameState.xp / gameState.maxXp) * 100}%`;
-    document.getElementById('hub-sprite').src = `assets/sprites/${gameState.id}_animated.gif`;
-    
-    // Fallback if script wasn't run or running on GH pages without assets downloaded:
-    document.getElementById('hub-sprite').onerror = function() {
-        this.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${gameState.id}.gif`;
-    };
+    document.getElementById('hub-sprite').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${gameState.id}.gif`;
 
     // Draw Hearts
     let heartsHtml = '';
@@ -95,8 +93,7 @@ function updateHub() {
     if(document.getElementById('berry-count')) {
         document.getElementById('berry-count').innerText = gameState.berries;
     }
-    
-    gameState.lastInteraction = Date.now();
+
     localStorage.setItem('pokeSave', JSON.stringify(gameState));
 }
 
