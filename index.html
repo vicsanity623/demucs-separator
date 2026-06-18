@@ -46,6 +46,7 @@
 
     <!-- 4. MAIN HUB (CARE SYSTEM) -->
     <div id="hub-screen" class="screen flex flex-col h-full bg-gradient-to-b from-green-900 to-gray-900 w-full absolute hidden relative">
+        <div id="time-overlay" class="absolute inset-0 pointer-events-none z-20 transition-colors duration-1000"></div>
         <!-- Stats Top Bar -->
         <div class="flex justify-between items-center p-6 glass-panel m-4 rounded-2xl">
             <div>
@@ -128,8 +129,23 @@
     </div>
 
     <script src="game.js"></script>
-  <script>
-      if ('serviceWorker' in navigator) {
+    <script>
+        function updateEnvironment() {
+            const hour = new Date().getHours();
+            const overlay = document.getElementById('time-overlay');
+            if (!overlay) return;
+            if (hour >= 6 && hour < 18) {
+                overlay.className = 'absolute inset-0 pointer-events-none z-20 transition-colors duration-1000 time-day';
+            } else if (hour >= 18 && hour < 20) {
+                overlay.className = 'absolute inset-0 pointer-events-none z-20 transition-colors duration-1000 time-evening';
+            } else {
+                overlay.className = 'absolute inset-0 pointer-events-none z-20 transition-colors duration-1000 time-night';
+            }
+        }
+        updateEnvironment();
+        setInterval(updateEnvironment, 60000);
+
+        if ('serviceWorker' in navigator) {
           navigator.serviceWorker.register('sw.js').catch(() => console.warn('Service Worker registration failed.'));
       }
   </script>
